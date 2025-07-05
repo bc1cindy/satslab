@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/app/components/auth/AuthProvider'
 import { Button } from '@/app/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Badge } from '@/app/components/ui/badge'
@@ -10,96 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/ta
 import { Alert, AlertDescription } from '@/app/components/ui/alert'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
+import { VideoIntro } from '@/app/components/modules/VideoIntro'
+import { HintSystem } from '@/app/components/modules/HintSystem'
+import { transactionValidator } from '@/app/lib/bitcoin/transaction-validator'
+import { progressService } from '@/app/lib/supabase/progress-service'
+import { module1Data, module1Questions, module1Tasks, module1Badge } from '@/app/modules/1/data'
 import { 
-  ChevronLeft, ChevronRight, Bitcoin, Trophy, Clock, CheckCircle, Circle,
-  HelpCircle, ExternalLink, BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users
+  ChevronLeft, ChevronRight, Trophy, Clock, CheckCircle, Circle,
+  HelpCircle, ExternalLink, Loader2, AlertCircle
 } from 'lucide-react'
-
-// Dados dos módulos (mesmo array da página principal)
-const modules = [
-  {
-    id: 1,
-    title: "Introdução ao Bitcoin e à Signet",
-    description: "Conceitos básicos e exploração da blockchain",
-    icon: BookOpen,
-    difficulty: "Iniciante",
-    duration: "15 min",
-    requiresLogin: false,
-    badge: "Explorador Iniciante",
-    color: "bg-blue-500",
-    theory: [
-      {
-        id: 1,
-        question: "O que é uma blockchain?",
-        options: ["a) Um banco de dados centralizado", "b) Uma rede social", "c) Um livro-razão distribuído", "d) Um tipo de moeda"],
-        correct: 2,
-        explanation: "A blockchain é um livro-razão distribuído que mantém um registro crescente de transações."
-      },
-      {
-        id: 2,
-        question: "Qual é a diferença entre mainnet e Signet?",
-        options: ["a) Não há diferença", "b) Mainnet usa moedas reais; Signet é para testes", "c) Signet é mais rápida", "d) Mainnet é gratuita"],
-        correct: 1,
-        explanation: "A mainnet usa Bitcoin real, enquanto a Signet é uma rede de teste para desenvolvimento."
-      },
-      {
-        id: 3,
-        question: "O que é um faucet na Signet?",
-        options: ["a) Uma torneira real", "b) Um tipo de carteira", "c) Um serviço que distribui moedas de teste", "d) Um minerador"],
-        correct: 2,
-        explanation: "Um faucet é um serviço que distribui pequenas quantidades de moedas de teste gratuitamente."
-      }
-    ],
-    practice: [
-      {
-        id: 1,
-        title: "Explore mempool.space/signet",
-        description: "Encontre o hash de uma transação recente no explorador da Signet",
-        instructions: "1. Acesse mempool.space/signet\n2. Navegue pelas transações recentes\n3. Copie o hash de uma transação\n4. Cole o hash no campo abaixo",
-        validation: "txhash",
-        link: "https://mempool.space/signet"
-      },
-      {
-        id: 2,
-        title: "Leia uma transação",
-        description: "Identifique o valor transferido em uma transação",
-        instructions: "1. Use o hash da tarefa anterior\n2. Examine os inputs e outputs\n3. Identifique o valor total transferido em sBTC\n4. Insira o valor (em sBTC, ex: 0.001)",
-        validation: "amount"
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "Segurança e Carteiras no Bitcoin",
-    description: "Chaves privadas, carteiras e segurança",
-    icon: Shield,
-    difficulty: "Iniciante",
-    duration: "20 min",
-    requiresLogin: true,
-    badge: "Guardião da Chave",
-    color: "bg-green-500",
-    theory: [
-      {
-        id: 1,
-        question: "Qual é a função de uma chave privada?",
-        options: ["a) Receber pagamentos", "b) Assinar transações", "c) Minerar blocos", "d) Validar transações"],
-        correct: 1,
-        explanation: "A chave privada é usada para assinar transações e provar a propriedade dos fundos."
-      }
-    ],
-    practice: [
-      {
-        id: 1,
-        title: "Crie uma carteira Signet",
-        description: "Gere uma nova carteira e obtenha fundos de teste",
-        instructions: "1. Use o botão abaixo para gerar uma carteira\n2. Acesse o faucet da Signet\n3. Solicite 0.01 sBTC\n4. Confirme o recebimento",
-        validation: "address",
-        link: "https://signetfaucet.com"
-      }
-    ]
-  }
-  // Outros módulos teriam estruturas similares...
-]
 
 interface ModulePageProps {
   params: {
@@ -109,40 +29,236 @@ interface ModulePageProps {
 
 export default function ModulePage({ params }: ModulePageProps) {
   const moduleId = parseInt(params.id)
-  const module = modules.find(m => m.id === moduleId)
+  const { session } = useAuth()
+  
+  // State management
   const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({})
   const [taskInputs, setTaskInputs] = useState<{[key: number]: string}>({})
-  const [completedTheory, setCompletedTheory] = useState<number[]>([])
-  const [completedPractice, setCompletedPractice] = useState<number[]>([])
+  const [completedQuestions, setCompletedQuestions] = useState<number[]>([])
+  const [completedTasks, setCompletedTasks] = useState<number[]>([])
+  const [hintsUsed, setHintsUsed] = useState<number[]>([])
+  const [taskAttempts, setTaskAttempts] = useState<{[key: number]: number}>({})
+  const [timeSpent, setTimeSpent] = useState(0)
+  const [startTime] = useState(Date.now())
+  const [videoCompleted, setVideoCompleted] = useState(false)
+  const [loading, setLoading] = useState<{[key: string]: boolean}>({})
+  const [validationResults, setValidationResults] = useState<{[key: number]: any}>({})
+  const [badgeEarned, setBadgeEarned] = useState(false)
 
-  if (!module) {
-    return <div>Módulo não encontrado</div>
+  // Module data - for now, just Module 1
+  const moduleData = moduleId === 1 ? module1Data : null
+  const questions = moduleId === 1 ? module1Questions : []
+  const tasks = moduleId === 1 ? module1Tasks : []
+  const badge = moduleId === 1 ? module1Badge : null
+
+  if (!moduleData) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Módulo não encontrado</h1>
+          <Link href="/modules">
+            <Button>Voltar aos Módulos</Button>
+          </Link>
+        </div>
+      </div>
+    )
   }
 
-  const IconComponent = module.icon
-  const theoryProgress = (completedTheory.length / (module.theory?.length || 1)) * 100
-  const practiceProgress = (completedPractice.length / (module.practice?.length || 1)) * 100
-  const overallProgress = (theoryProgress + practiceProgress) / 2
+  // Timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeSpent(Math.floor((Date.now() - startTime) / 1000))
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [startTime])
+
+  // Load progress on mount
+  useEffect(() => {
+    if (session?.user?.publicKey) {
+      loadProgress()
+      checkBadgeStatus()
+    }
+  }, [session])
+
+  const loadProgress = async () => {
+    if (!session?.user?.publicKey) return
+
+    try {
+      const progress = await progressService.getModuleProgress(session.user.publicKey, moduleId)
+      if (progress) {
+        setCompletedQuestions(progress.completed_questions || [])
+        setCompletedTasks(progress.completed_tasks || [])
+        setHintsUsed(progress.hints_used || [])
+        setTimeSpent(progress.time_spent || 0)
+      }
+    } catch (error) {
+      console.error('Error loading progress:', error)
+    }
+  }
+
+  const checkBadgeStatus = async () => {
+    if (!session?.user?.publicKey) return
+
+    try {
+      const earned = await progressService.checkBadgeEarned(session.user.publicKey, moduleId)
+      setBadgeEarned(earned)
+    } catch (error) {
+      console.error('Error checking badge status:', error)
+    }
+  }
+
+  const saveProgress = async () => {
+    if (!session?.user?.publicKey) return
+
+    try {
+      const isCompleted = completedQuestions.length === questions.length && 
+                         completedTasks.length === tasks.length
+
+      await progressService.saveModuleProgress({
+        user_id: session.user.publicKey,
+        module_id: moduleId,
+        completed_questions: completedQuestions,
+        completed_tasks: completedTasks,
+        hints_used: hintsUsed,
+        time_spent: timeSpent,
+        attempts: Object.values(taskAttempts).reduce((sum, att) => sum + att, 0),
+        completed_at: isCompleted ? new Date().toISOString() : undefined,
+        badge_earned: badgeEarned
+      })
+    } catch (error) {
+      console.error('Error saving progress:', error)
+    }
+  }
+
+  // Save progress when state changes
+  useEffect(() => {
+    if (session?.user?.publicKey) {
+      saveProgress()
+    }
+  }, [completedQuestions, completedTasks, hintsUsed, timeSpent, session])
 
   const handleAnswerSelect = (questionId: number, answerIndex: number) => {
     setSelectedAnswers({...selectedAnswers, [questionId]: answerIndex})
-    const question = module.theory?.find(q => q.id === questionId)
-    if (question && answerIndex === question.correct) {
-      if (!completedTheory.includes(questionId)) {
-        setCompletedTheory([...completedTheory, questionId])
+    
+    const question = questions.find(q => q.id === questionId)
+    if (question && answerIndex === question.correctAnswer) {
+      if (!completedQuestions.includes(questionId)) {
+        setCompletedQuestions([...completedQuestions, questionId])
       }
+    } else {
+      // Remove from completed if wrong answer is selected
+      setCompletedQuestions(completedQuestions.filter(id => id !== questionId))
     }
   }
 
-  const handleTaskInput = (taskId: number, value: string) => {
-    setTaskInputs({...taskInputs, [taskId]: value})
-    // Aqui seria implementada a validação real
-    if (value.length > 10) { // Validação simples
-      if (!completedPractice.includes(taskId)) {
-        setCompletedPractice([...completedPractice, taskId])
+  const handleTaskValidation = async (taskId: number) => {
+    const task = tasks.find(t => t.id === taskId)
+    const input = taskInputs[taskId]?.trim()
+    
+    if (!task || !input) return
+
+    setLoading({...loading, [`task_${taskId}`]: true})
+    
+    // Increment attempts
+    setTaskAttempts({
+      ...taskAttempts, 
+      [taskId]: (taskAttempts[taskId] || 0) + 1
+    })
+
+    try {
+      let result
+
+      if (task.validation.type === 'hash') {
+        result = await transactionValidator.validateTransactionHash(input)
+      } else if (task.validation.type === 'amount') {
+        const amount = parseFloat(input)
+        if (isNaN(amount)) {
+          result = {
+            isValid: false,
+            message: 'Por favor, insira um número válido.'
+          }
+        } else {
+          // For amount validation, we need a transaction hash from previous task
+          const previousHash = taskInputs[1] // Assuming task 1 has the hash
+          if (!previousHash) {
+            result = {
+              isValid: false,
+              message: 'Complete a tarefa anterior primeiro para obter um hash de transação.'
+            }
+          } else {
+            result = await transactionValidator.validateTransactionAmount(previousHash, amount)
+          }
+        }
+      } else {
+        result = {
+          isValid: false,
+          message: 'Tipo de validação não suportado.'
+        }
       }
+
+      setValidationResults({...validationResults, [taskId]: result})
+
+      if (result.isValid && !completedTasks.includes(taskId)) {
+        setCompletedTasks([...completedTasks, taskId])
+      }
+
+    } catch (error) {
+      setValidationResults({
+        ...validationResults, 
+        [taskId]: {
+          isValid: false,
+          message: 'Erro ao validar. Tente novamente.'
+        }
+      })
+    } finally {
+      setLoading({...loading, [`task_${taskId}`]: false})
     }
   }
+
+  const handleHintUsed = (taskId: number, hintIndex: number) => {
+    const hintId = taskId * 100 + hintIndex // Create unique hint ID
+    if (!hintsUsed.includes(hintId)) {
+      setHintsUsed([...hintsUsed, hintId])
+    }
+  }
+
+  const handleBadgeClaim = async () => {
+    if (!session?.user?.publicKey || !badge) return
+
+    try {
+      setLoading({...loading, badge: true})
+      
+      const result = await progressService.awardBadge({
+        user_id: session.user.publicKey,
+        module_id: moduleId,
+        badge_name: badge.name,
+        badge_type: badge.type,
+        metadata: {
+          description: badge.description,
+          time_spent: timeSpent,
+          hints_used: hintsUsed.length
+        }
+      })
+
+      if (result.success) {
+        setBadgeEarned(true)
+      }
+    } catch (error) {
+      console.error('Error claiming badge:', error)
+    } finally {
+      setLoading({...loading, badge: false})
+    }
+  }
+
+  // Calculate progress
+  const questionsProgress = questions.length > 0 ? (completedQuestions.length / questions.length) * 100 : 0
+  const tasksProgress = tasks.length > 0 ? (completedTasks.length / tasks.length) * 100 : 0
+  const overallProgress = (questionsProgress + tasksProgress) / 2
+
+  const allCompleted = completedQuestions.length === questions.length && 
+                      completedTasks.length === tasks.length
+  const canClaimBadge = allCompleted && !badgeEarned && session?.user
 
   return (
     <div className="min-h-screen bg-black">
@@ -150,14 +266,16 @@ export default function ModulePage({ params }: ModulePageProps) {
       <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 text-gray-400 hover:text-white">
+            <Link href="/modules" className="flex items-center space-x-2 text-gray-400 hover:text-white">
               <ChevronLeft className="h-5 w-5" />
-              <span>Voltar ao Curso</span>
+              <span>Voltar aos Módulos</span>
             </Link>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-400">{module.duration}</span>
+                <span className="text-sm text-gray-400">
+                  {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, '0')}
+                </span>
               </div>
               <Badge variant="outline" className="border-gray-700 text-gray-300">
                 Módulo {moduleId}
@@ -171,12 +289,12 @@ export default function ModulePage({ params }: ModulePageProps) {
         {/* Module Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4">
-            <div className={`p-3 rounded-xl ${module.color} bg-opacity-10`}>
-              <IconComponent className="h-8 w-8" style={{ color: module.color.replace("bg-", "").replace("-500", "") }} />
+            <div className="p-3 rounded-xl bg-blue-500/10">
+              <div className="h-8 w-8 text-blue-400">📚</div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">{module.title}</h1>
-              <p className="text-gray-400 mt-1">{module.description}</p>
+              <h1 className="text-3xl font-bold text-white">{moduleData.title}</h1>
+              <p className="text-gray-400 mt-1">{moduleData.description}</p>
             </div>
           </div>
 
@@ -190,32 +308,62 @@ export default function ModulePage({ params }: ModulePageProps) {
                 </span>
               </div>
               <Progress value={overallProgress} className="h-2" />
+              
+              <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Perguntas:</span>
+                  <span className="text-gray-300">{completedQuestions.length}/{questions.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Tarefas:</span>
+                  <span className="text-gray-300">{completedTasks.length}/{tasks.length}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Video Introduction */}
+        <VideoIntro
+          title="Introdução: O que é Bitcoin?"
+          description="Uma explicação amigável sobre Bitcoin, blockchain e como tudo funciona"
+          duration="2:30"
+          onComplete={() => setVideoCompleted(true)}
+          isCompleted={videoCompleted}
+        />
+
         {/* Content Tabs */}
         <Tabs defaultValue="theory" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="theory">Perguntas Teóricas</TabsTrigger>
-            <TabsTrigger value="practice">Tarefas Práticas</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-gray-900 border border-gray-800">
+            <TabsTrigger value="theory" className="data-[state=active]:bg-gray-800">
+              Perguntas Teóricas ({completedQuestions.length}/{questions.length})
+            </TabsTrigger>
+            <TabsTrigger value="practice" className="data-[state=active]:bg-gray-800">
+              Tarefas Práticas ({completedTasks.length}/{tasks.length})
+            </TabsTrigger>
           </TabsList>
 
           {/* Theory Tab */}
           <TabsContent value="theory" className="space-y-6">
-            {module.theory?.map((question, index) => {
+            {questions.map((question, index) => {
               const isAnswered = selectedAnswers[question.id] !== undefined
-              const isCorrect = selectedAnswers[question.id] === question.correct
-              const isCompleted = completedTheory.includes(question.id)
+              const isCorrect = selectedAnswers[question.id] === question.correctAnswer
+              const isCompleted = completedQuestions.includes(question.id)
 
               return (
-                <Card key={index} className="bg-gray-900 border-gray-800">
+                <Card key={question.id} className="bg-gray-900 border-gray-800">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-white">
-                      <Circle className="h-5 w-5 text-gray-400" />
+                      {isCompleted ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-400" />
+                      )}
                       <span>Pergunta {index + 1}</span>
                     </CardTitle>
-                    <CardDescription className="text-lg font-medium text-white">{question.question}</CardDescription>
+                    <CardDescription className="text-lg font-medium text-white">
+                      {question.question}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
@@ -223,7 +371,13 @@ export default function ModulePage({ params }: ModulePageProps) {
                         <Button
                           key={optionIndex}
                           variant="outline"
-                          className="w-full justify-start text-left h-auto p-4 bg-transparent text-white border-gray-700 hover:bg-gray-800"
+                          className={`w-full justify-start text-left h-auto p-4 transition-colors ${
+                            selectedAnswers[question.id] === optionIndex
+                              ? isCorrect
+                                ? 'bg-green-900/50 border-green-500 text-green-200'
+                                : 'bg-red-900/50 border-red-500 text-red-200'
+                              : 'bg-transparent text-white border-gray-700 hover:bg-gray-800'
+                          }`}
                           onClick={() => handleAnswerSelect(question.id, optionIndex)}
                         >
                           {option}
@@ -231,12 +385,15 @@ export default function ModulePage({ params }: ModulePageProps) {
                       ))}
                     </div>
 
-                    <Alert>
-                      <HelpCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Dica:</strong> {question.explanation}
-                      </AlertDescription>
-                    </Alert>
+                    {isAnswered && (
+                      <Alert className={isCorrect ? 'bg-green-900/30 border-green-500/50' : 'bg-red-900/30 border-red-500/50'}>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className={isCorrect ? 'text-green-200' : 'text-red-200'}>
+                          {isCorrect ? '✅ Correto! ' : '❌ Incorreto. '}
+                          {question.explanation}
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </CardContent>
                 </Card>
               )
@@ -245,130 +402,169 @@ export default function ModulePage({ params }: ModulePageProps) {
 
           {/* Practice Tab */}
           <TabsContent value="practice" className="space-y-6">
-            {module.practice?.map((task, index) => (
-              <Card key={index} className="bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2 text-white">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>{task.title}</span>
-                  </CardTitle>
-                  <CardDescription className="text-gray-300">{task.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="bg-gray-800 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2 text-white">Instruções:</h4>
-                    <pre className="text-sm text-gray-300 whitespace-pre-wrap">{task.instructions}</pre>
-                  </div>
+            {tasks.map((task, index) => {
+              const isCompleted = completedTasks.includes(task.id)
+              const attempts = taskAttempts[task.id] || 0
+              const validationResult = validationResults[task.id]
 
-                  {task.validation === "txhash" && (
-                    <div className="space-y-4">
+              return (
+                <Card key={task.id} className="bg-gray-900 border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-white">
+                      {isCompleted ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-400" />
+                      )}
+                      <span>{task.title}</span>
+                    </CardTitle>
+                    <CardDescription className="text-gray-300">
+                      {task.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Instructions */}
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2 text-white">Instruções:</h4>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        {task.instructions.map((instruction, idx) => (
+                          <li key={idx}>{instruction}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* External Link */}
+                    {task.type === 'explorer' && (
                       <Button variant="outline" className="w-full bg-transparent" asChild>
-                        <a href={task.link} target="_blank" rel="noopener noreferrer">
+                        <a href="https://mempool.space/signet" target="_blank" rel="noopener noreferrer">
                           Abrir Mempool Signet
                           <ExternalLink className="ml-2 h-4 w-4" />
                         </a>
                       </Button>
+                    )}
 
-                      <div className="space-y-2">
-                        <Label htmlFor="transaction-hash" className="text-white">
-                          Hash da Transação
-                        </Label>
-                        <Input
-                          id="transaction-hash"
-                          placeholder="Cole o hash da transação aqui..."
-                          className="font-mono text-sm"
-                          value={taskInputs[task.id] || ''}
-                          onChange={(e) => handleTaskInput(task.id, e.target.value)}
-                        />
-                      </div>
-
-                      <Button className="w-full">Validar Resposta</Button>
+                    {/* Input Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor={`task-${task.id}`} className="text-white">
+                        {task.validation.type === 'hash' ? 'Hash da Transação' : 'Valor (sBTC)'}
+                      </Label>
+                      <Input
+                        id={`task-${task.id}`}
+                        placeholder={task.validation.placeholder}
+                        className="font-mono text-sm bg-gray-800 border-gray-600 text-white"
+                        value={taskInputs[task.id] || ''}
+                        onChange={(e) => setTaskInputs({...taskInputs, [task.id]: e.target.value})}
+                        type={task.validation.type === 'amount' ? 'number' : 'text'}
+                        step={task.validation.type === 'amount' ? '0.00000001' : undefined}
+                      />
                     </div>
-                  )}
 
-                  {task.validation === "amount" && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="transaction-amount" className="text-white">
-                          Valor Transferido (sBTC)
-                        </Label>
-                        <Input
-                          id="transaction-amount"
-                          placeholder="Ex: 0.001"
-                          type="number"
-                          step="0.00000001"
-                          value={taskInputs[task.id] || ''}
-                          onChange={(e) => handleTaskInput(task.id, e.target.value)}
-                        />
-                      </div>
+                    {/* Validation Button */}
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleTaskValidation(task.id)}
+                      disabled={!taskInputs[task.id]?.trim() || loading[`task_${task.id}`]}
+                    >
+                      {loading[`task_${task.id}`] ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Validando...
+                        </>
+                      ) : (
+                        'Validar Resposta'
+                      )}
+                    </Button>
 
-                      <Button className="w-full">Validar Resposta</Button>
-                    </div>
-                  )}
+                    {/* Validation Result */}
+                    {validationResult && (
+                      <Alert className={validationResult.isValid ? 'bg-green-900/30 border-green-500/50' : 'bg-red-900/30 border-red-500/50'}>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className={validationResult.isValid ? 'text-green-200' : 'text-red-200'}>
+                          {validationResult.message}
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                  {task.validation === "address" && (
-                    <div className="space-y-4">
-                      <Button variant="outline" className="w-full bg-transparent" asChild>
-                        <a href={task.link} target="_blank" rel="noopener noreferrer">
-                          Abrir Faucet Signet
-                          <ExternalLink className="ml-2 h-4 w-4" />
-                        </a>
-                      </Button>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="wallet-address" className="text-white">
-                          Endereço da Carteira
-                        </Label>
-                        <Input
-                          id="wallet-address"
-                          placeholder="Endereço da sua carteira Signet..."
-                          className="font-mono text-sm"
-                          value={taskInputs[task.id] || ''}
-                          onChange={(e) => handleTaskInput(task.id, e.target.value)}
-                        />
-                      </div>
-
-                      <Button className="w-full">Validar Resposta</Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                    {/* Hints System */}
+                    <HintSystem
+                      hints={task.hints || []}
+                      taskId={`task_${task.id}`}
+                      attempts={attempts}
+                      timeSpent={timeSpent}
+                      onHintUsed={(hintIndex) => handleHintUsed(task.id, hintIndex)}
+                    />
+                  </CardContent>
+                </Card>
+              )
+            })}
           </TabsContent>
         </Tabs>
 
         {/* Badge Reward */}
-        <Card className="mt-8 border-2 border-dashed border-orange-500/50 bg-gray-900">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <Trophy className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Recompensa do Módulo</h3>
-              <p className="text-gray-400 mb-4">Complete todas as tarefas para conquistar o badge:</p>
-              <Badge
-                variant="secondary"
-                className="text-lg px-4 py-2 bg-orange-500/20 text-orange-400 border-orange-500/50"
-              >
-                🏆 {module.badge}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+        {badge && (
+          <Card className="mt-8 border-2 border-dashed border-orange-500/50 bg-gray-900">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Trophy className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Recompensa do Módulo</h3>
+                <p className="text-gray-400 mb-4">{badge.description}</p>
+                
+                <Badge
+                  variant="secondary"
+                  className="text-lg px-4 py-2 bg-orange-500/20 text-orange-400 border-orange-500/50 mb-4"
+                >
+                  🏆 {badge.name}
+                </Badge>
+
+                {badgeEarned ? (
+                  <Alert className="bg-green-900/30 border-green-500/50 max-w-md mx-auto">
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription className="text-green-200">
+                      <strong>Badge Conquistado!</strong> Parabéns por completar o módulo.
+                    </AlertDescription>
+                  </Alert>
+                ) : canClaimBadge ? (
+                  <Button 
+                    onClick={handleBadgeClaim}
+                    disabled={loading.badge}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    {loading.badge ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Resgatando...
+                      </>
+                    ) : (
+                      'Resgatar Badge'
+                    )}
+                  </Button>
+                ) : (
+                  <p className="text-gray-500 text-sm">
+                    Complete todas as perguntas e tarefas para resgatar o badge
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Navigation */}
         <div className="flex justify-between mt-8">
           <Button variant="outline" asChild>
-            <Link href="/">
+            <Link href="/modules">
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Voltar ao Curso
+              Voltar aos Módulos
             </Link>
           </Button>
 
-          <Button asChild>
-            <Link href={`/modules/${moduleId + 1}`}>
-              Próximo Módulo
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          {moduleId < 7 && (
+            <Button asChild disabled={!allCompleted}>
+              <Link href={`/modules/${moduleId + 1}`}>
+                Próximo Módulo
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>

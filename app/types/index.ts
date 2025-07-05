@@ -64,9 +64,9 @@ export interface BadgeTemplate {
 }
 
 export interface ValidationConfig {
-  type: 'api' | 'hash' | 'address' | 'amount' | 'fee'
-  endpoint?: string
-  expectedValue?: string | number
+  type: 'hash' | 'address' | 'amount' | 'fee' | 'seed' | 'word' | 'inscription'
+  placeholder?: string
+  expectedLength?: number
   tolerance?: number
 }
 
@@ -99,4 +99,60 @@ export interface TransactionOutput {
   value: number
   scriptPubKey: string
   address?: string
+}
+
+// Advanced Bitcoin Types for Modules 6-7
+
+export interface TaprootAddress {
+  address: string
+  privateKey: string
+  publicKey: string
+  internalKey: string
+  network: string
+}
+
+export interface MultisigWallet {
+  address: string
+  redeemScript: string
+  publicKeys: string[]
+  m: number
+  n: number
+  type: 'p2sh' | 'p2wsh' | 'p2tr'
+}
+
+export interface HDWallet {
+  mnemonic: string
+  masterKey: any
+  network: string
+  fingerprint: string
+}
+
+export interface DerivedAddress {
+  address: string
+  privateKey: string
+  publicKey: string
+  path: string
+  index: number
+}
+
+export interface OrdinalInscription {
+  inscriptionId: string
+  content: string
+  contentType: string
+  owner: string
+  fee: number
+  txId: string
+  vout: number
+}
+
+export interface BadgeNFT {
+  badge: string
+  user_id: string
+  timestamp: number
+  network: string
+  description?: string
+  rarity?: 'common' | 'rare' | 'legendary'
+  requirements?: string[]
+  icon?: string
+  color?: string
 }

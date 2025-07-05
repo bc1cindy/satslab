@@ -15,13 +15,15 @@ CREATE TABLE users (
 -- Module progress table
 CREATE TABLE module_progress (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL, -- Using public key directly
     module_id INTEGER NOT NULL,
-    completed BOOLEAN DEFAULT FALSE,
-    current_task INTEGER DEFAULT 1,
+    completed_questions INTEGER[] DEFAULT '{}',
     completed_tasks INTEGER[] DEFAULT '{}',
-    score INTEGER DEFAULT 0,
+    hints_used INTEGER[] DEFAULT '{}',
+    time_spent INTEGER DEFAULT 0,
+    attempts INTEGER DEFAULT 0,
     completed_at TIMESTAMP WITH TIME ZONE,
+    badge_earned BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id, module_id)
@@ -30,13 +32,11 @@ CREATE TABLE module_progress (
 -- Badges table
 CREATE TABLE badges (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL,
+    user_id TEXT NOT NULL, -- Using public key directly
+    badge_name TEXT NOT NULL,
+    badge_type badge_type NOT NULL,
     module_id INTEGER NOT NULL,
-    type badge_type NOT NULL,
-    image_url TEXT,
-    ordinal_id TEXT,
+    metadata JSONB,
     earned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -82,13 +82,13 @@ CREATE POLICY "Users can insert own profile" ON users FOR INSERT WITH CHECK (pub
 CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (public_key = current_setting('app.current_user_public_key', true));
 
 -- Module progress policies
-CREATE POLICY "Users can view own progress" ON module_progress FOR SELECT USING (user_id IN (SELECT id FROM users WHERE public_key = current_setting('app.current_user_public_key', true)));
-CREATE POLICY "Users can insert own progress" ON module_progress FOR INSERT WITH CHECK (user_id IN (SELECT id FROM users WHERE public_key = current_setting('app.current_user_public_key', true)));
-CREATE POLICY "Users can update own progress" ON module_progress FOR UPDATE USING (user_id IN (SELECT id FROM users WHERE public_key = current_setting('app.current_user_public_key', true)));
+CREATE POLICY "Users can view own progress" ON module_progress FOR SELECT USING (user_id = current_setting('app.current_user_public_key', true));
+CREATE POLICY "Users can insert own progress" ON module_progress FOR INSERT WITH CHECK (user_id = current_setting('app.current_user_public_key', true));
+CREATE POLICY "Users can update own progress" ON module_progress FOR UPDATE USING (user_id = current_setting('app.current_user_public_key', true));
 
 -- Badges policies
-CREATE POLICY "Users can view own badges" ON badges FOR SELECT USING (user_id IN (SELECT id FROM users WHERE public_key = current_setting('app.current_user_public_key', true)));
-CREATE POLICY "Users can insert own badges" ON badges FOR INSERT WITH CHECK (user_id IN (SELECT id FROM users WHERE public_key = current_setting('app.current_user_public_key', true)));
+CREATE POLICY "Users can view own badges" ON badges FOR SELECT USING (user_id = current_setting('app.current_user_public_key', true));
+CREATE POLICY "Users can insert own badges" ON badges FOR INSERT WITH CHECK (user_id = current_setting('app.current_user_public_key', true));
 
 -- Wallets policies
 CREATE POLICY "Users can view own wallets" ON wallets FOR SELECT USING (user_id IN (SELECT id FROM users WHERE public_key = current_setting('app.current_user_public_key', true)));
