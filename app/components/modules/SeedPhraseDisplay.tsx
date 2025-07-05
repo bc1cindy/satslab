@@ -58,7 +58,7 @@ export default function SeedPhraseDisplay({
     setSeedPhrase(newSeed)
     
     // Seleciona 3 palavras aleatórias para confirmação
-    const randomPositions = []
+    const randomPositions: number[] = []
     while (randomPositions.length < 3) {
       const pos = Math.floor(Math.random() * 12)
       if (!randomPositions.includes(pos)) {

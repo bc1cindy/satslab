@@ -6,18 +6,13 @@ import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
-import { Progress } from '@/app/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs'
 import { 
   ArrowRight, 
-  ArrowLeft, 
   Zap, 
-  Users, 
   Lock, 
   Unlock, 
-  DollarSign, 
   Clock,
-  Route,
   Play,
   Pause,
   RotateCcw
@@ -47,8 +42,7 @@ interface LightningChannelDiagramProps {
 }
 
 export default function LightningChannelDiagram({ 
-  onChannelStateChange, 
-  onPaymentRouted 
+  onChannelStateChange
 }: LightningChannelDiagramProps) {
   const [activeTab, setActiveTab] = useState('channel')
   const [isAnimating, setIsAnimating] = useState(false)
@@ -323,7 +317,7 @@ export default function LightningChannelDiagram({
                   <select 
                     id="direction"
                     value={paymentDirection}
-                    onChange={(e) => setPaymentDirection(e.target.value as any)}
+                    onChange={(e) => setPaymentDirection(e.target.value as 'alice-to-bob' | 'bob-to-alice')}
                     disabled={isAnimating || channel.status !== 'open'}
                     className="w-full p-2 border rounded"
                   >

@@ -85,7 +85,7 @@ export default function HashVisualizer({ onHashGenerated }: HashVisualizerProps)
   }
 
   const calculateEntropy = (str: string): number => {
-    const freq = {}
+    const freq: Record<string, number> = {}
     for (const char of str) {
       freq[char] = (freq[char] || 0) + 1
     }
@@ -93,7 +93,7 @@ export default function HashVisualizer({ onHashGenerated }: HashVisualizerProps)
     let entropy = 0
     const len = str.length
     for (const count of Object.values(freq)) {
-      const p = count / len
+      const p = (count as number) / len
       entropy -= p * Math.log2(p)
     }
     
@@ -102,7 +102,7 @@ export default function HashVisualizer({ onHashGenerated }: HashVisualizerProps)
 
   const getCharDistribution = (hash: string) => {
     const chars = '0123456789abcdef'
-    const distribution = {}
+    const distribution: Record<string, number> = {}
     
     for (const char of chars) {
       distribution[char] = (hash.match(new RegExp(char, 'g')) || []).length
@@ -112,7 +112,7 @@ export default function HashVisualizer({ onHashGenerated }: HashVisualizerProps)
   }
 
   const hashAnalysis = analyzeHash(hash)
-  const maxCount = Math.max(...Object.values(hashAnalysis.distribution))
+  const maxCount = Math.max(...Object.values(hashAnalysis.distribution) as number[])
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -249,7 +249,7 @@ export default function HashVisualizer({ onHashGenerated }: HashVisualizerProps)
         <div className="space-y-4">
           <h3 className="font-semibold">Distribuição de Caracteres</h3>
           <div className="grid grid-cols-8 gap-2">
-            {Object.entries(hashAnalysis.distribution).map(([char, count]) => (
+            {Object.entries(hashAnalysis.distribution).map(([char, count]: [string, number]) => (
               <div key={char} className="text-center">
                 <div className="text-sm font-mono font-bold">{char}</div>
                 <div 

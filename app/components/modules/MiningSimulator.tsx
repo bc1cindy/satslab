@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/ca
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
-import { Play, Pause, RotateCcw, Hash, Zap } from 'lucide-react'
+import { Play, Pause, RotateCcw, Hash } from 'lucide-react'
 
 interface MiningStats {
   nonce: number
@@ -135,7 +135,7 @@ export default function MiningSimulator({
     }
 
     miningLoop()
-  }, [isRunning, stats.nonce, stats.attempts, stats.targetPattern, createBlockHeader, simpleSHA256, isValidHash, onHashFound])
+  }, [isRunning, stats.nonce, stats.attempts, createBlockHeader, simpleSHA256, isValidHash, onHashFound])
 
   useEffect(() => {
     if (isRunning) {

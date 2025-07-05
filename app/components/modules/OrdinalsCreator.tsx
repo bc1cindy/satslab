@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
@@ -26,10 +26,10 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
   const [isCreating, setIsCreating] = useState(false)
   const [estimatedFee, setEstimatedFee] = useState(0)
   const [lastInscriptionId, setLastInscriptionId] = useState('')
-  const [previewData, setPreviewData] = useState<any>(null)
+  const [previewData, setPreviewData] = useState<{json: object, image: string, badge?: string, user_id?: string, network?: string} | null>(null)
   
   const { toast } = useToast()
-  const ordinalsService = new OrdinalsService(SIGNET_NETWORK)
+  const ordinalsService = useMemo(() => new OrdinalsService(SIGNET_NETWORK), [])
 
   // Calcula taxa estimada quando o conteúdo muda
   const calculateEstimatedFee = useCallback(() => {

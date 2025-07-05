@@ -17,6 +17,9 @@ interface QuestionCardProps {
   question: Question
   onAnswer: (isCorrect: boolean) => void
   showResult?: boolean
+  questionIndex?: number
+  totalQuestions?: number
+  userAnswer?: number
 }
 
 export function QuestionCard({ question, onAnswer, showResult = false }: QuestionCardProps) {

@@ -13,7 +13,7 @@ interface Task {
   instructions: string[]
   type: 'explorer' | 'transaction' | 'wallet' | 'mining' | 'lightning' | 'ordinal'
   validation?: {
-    type: 'hash' | 'address' | 'amount' | 'api'
+    type: 'hash' | 'address' | 'amount' | 'api' | 'fee' | 'seed' | 'word' | 'inscription'
     placeholder?: string
     expectedLength?: number
   }
@@ -24,6 +24,10 @@ interface TaskCardProps {
   task: Task
   onComplete: (result: string) => void
   isCompleted?: boolean
+  taskIndex?: number
+  totalTasks?: number
+  result?: string
+  customContent?: React.ReactElement
 }
 
 export function TaskCard({ task, onComplete, isCompleted = false }: TaskCardProps) {

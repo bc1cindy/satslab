@@ -51,35 +51,35 @@ export default function ModulePage({ params }: ModulePageProps) {
   const tasks = moduleId === 1 ? module1Tasks : []
   const badge = moduleId === 1 ? module1Badge : null
 
-  if (!moduleData) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Módulo não encontrado</h1>
-          <Link href="/modules">
-            <Button>Voltar aos Módulos</Button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   // Timer effect
   useEffect(() => {
+    if (!moduleData) return
+
     const interval = setInterval(() => {
       setTimeSpent(Math.floor((Date.now() - startTime) / 1000))
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [startTime])
+  }, [startTime, moduleData])
 
   // Load progress on mount
   useEffect(() => {
+    if (!moduleData) return
+    
     if (session?.user?.publicKey) {
       loadProgress()
       checkBadgeStatus()
     }
-  }, [session])
+  }, [session, moduleData])
+
+  // Save progress when state changes
+  useEffect(() => {
+    if (!moduleData) return
+    
+    if (session?.user?.publicKey) {
+      saveProgress()
+    }
+  }, [completedQuestions, completedTasks, hintsUsed, timeSpent, session, moduleData])
 
   const loadProgress = async () => {
     if (!session?.user?.publicKey) return
@@ -130,13 +130,6 @@ export default function ModulePage({ params }: ModulePageProps) {
       console.error('Error saving progress:', error)
     }
   }
-
-  // Save progress when state changes
-  useEffect(() => {
-    if (session?.user?.publicKey) {
-      saveProgress()
-    }
-  }, [completedQuestions, completedTasks, hintsUsed, timeSpent, session])
 
   const handleAnswerSelect = (questionId: number, answerIndex: number) => {
     setSelectedAnswers({...selectedAnswers, [questionId]: answerIndex})
@@ -259,6 +252,19 @@ export default function ModulePage({ params }: ModulePageProps) {
   const allCompleted = completedQuestions.length === questions.length && 
                       completedTasks.length === tasks.length
   const canClaimBadge = allCompleted && !badgeEarned && session?.user
+
+  if (!moduleData) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Módulo não encontrado</h1>
+          <Link href="/modules">
+            <Button>Voltar aos Módulos</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-black">

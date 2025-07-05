@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
-import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Alert, AlertDescription } from '@/app/components/ui/alert'
 import { Badge } from '@/app/components/ui/badge'
@@ -213,7 +212,7 @@ export default function FeeSelector({
                   </div>
                   <Slider
                     value={[customFee]}
-                    onValueChange={(value) => setCustomFee(value[0])}
+                    onValueChange={(value: number[]) => setCustomFee(value[0])}
                     max={20}
                     min={1}
                     step={0.5}
@@ -288,7 +287,7 @@ export default function FeeSelector({
       <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
         <AlertTriangle className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-amber-800 dark:text-amber-200">
-          <strong>Dica:</strong> Em períodos de alta demanda, mesmo taxas "altas" podem demorar. 
+          <strong>Dica:</strong> Em períodos de alta demanda, mesmo taxas &quot;altas&quot; podem demorar. 
           Sempre verifique as condições atuais da rede antes de definir a taxa.
         </AlertDescription>
       </Alert>

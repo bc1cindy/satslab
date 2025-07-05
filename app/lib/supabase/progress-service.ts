@@ -1,4 +1,6 @@
-import { supabase } from './client'
+import { createClient } from './client'
+
+const supabase = createClient()
 
 export interface ModuleProgress {
   user_id: string
@@ -156,15 +158,15 @@ class ProgressService {
       if (error) throw error
 
       const totalUsers = data.length
-      const completedUsers = data.filter(p => p.completed_at).length
+      const completedUsers = data.filter((p: any) => p.completed_at).length
       const completionRate = totalUsers > 0 ? (completedUsers / totalUsers) * 100 : 0
       
       const averageTime = data.length > 0 
-        ? data.reduce((sum, p) => sum + p.time_spent, 0) / data.length 
+        ? data.reduce((sum: number, p: any) => sum + p.time_spent, 0) / data.length 
         : 0
       
       const averageAttempts = data.length > 0 
-        ? data.reduce((sum, p) => sum + p.attempts, 0) / data.length 
+        ? data.reduce((sum: number, p: any) => sum + p.attempts, 0) / data.length 
         : 0
 
       return {

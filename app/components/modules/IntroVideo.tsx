@@ -37,7 +37,7 @@ export function IntroVideo({ title, description, duration, onComplete }: IntroVi
             <li>• O que é Bitcoin e por que foi criado</li>
             <li>• Como funciona a tecnologia blockchain</li>
             <li>• Diferenças entre redes de teste e produção</li>
-            <li>• Por que o Bitcoin é considerado "dinheiro digital"</li>
+            <li>• Por que o Bitcoin é considerado &quot;dinheiro digital&quot;</li>
           </ul>
         </div>
 

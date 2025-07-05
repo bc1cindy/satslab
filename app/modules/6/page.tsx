@@ -18,7 +18,7 @@ import { useToast } from '@/app/hooks/use-toast'
 
 export default function Module6Page() {
   const auth = useAuth()
-  const user = auth?.user
+  const user = auth?.session?.user
   const { toast } = useToast()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0)
@@ -161,7 +161,15 @@ export default function Module6Page() {
                 question={currentQuestion}
                 questionIndex={currentQuestionIndex}
                 totalQuestions={module6Questions.length}
-                onAnswer={(answerIndex: number) => handleQuestionAnswer(currentQuestionIndex, answerIndex)}
+                onAnswer={(isCorrect: boolean) => {
+                  if (isCorrect) {
+                    handleQuestionAnswer(currentQuestionIndex, currentQuestion.correctAnswer)
+                  } else {
+                    // Find the incorrect answer that was likely selected
+                    const incorrectAnswers = currentQuestion.options.map((_, index) => index).filter(i => i !== currentQuestion.correctAnswer)
+                    handleQuestionAnswer(currentQuestionIndex, incorrectAnswers[0] || 0)
+                  }
+                }}
                 userAnswer={userAnswers[currentQuestionIndex]}
               />
             ) : (

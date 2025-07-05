@@ -64,7 +64,7 @@ export interface BadgeTemplate {
 }
 
 export interface ValidationConfig {
-  type: 'hash' | 'address' | 'amount' | 'fee' | 'seed' | 'word' | 'inscription'
+  type: 'hash' | 'address' | 'amount' | 'api' | 'fee' | 'seed' | 'word' | 'inscription'
   placeholder?: string
   expectedLength?: number
   tolerance?: number

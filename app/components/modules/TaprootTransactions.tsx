@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
@@ -25,10 +25,10 @@ export default function TaprootTransactions({ onTransactionCreated }: TaprootTra
   const [isCreating, setIsCreating] = useState(false)
   const [lastTransaction, setLastTransaction] = useState<TaprootTransaction | null>(null)
   const [privateKeyInput, setPrivateKeyInput] = useState('')
-  const [addressComparison, setAddressComparison] = useState<any>(null)
+  const [addressComparison, setAddressComparison] = useState<{legacy: string, segwit: string, taproot: string} | null>(null)
   
   const { toast } = useToast()
-  const taprootService = new TaprootService(SIGNET_NETWORK)
+  const taprootService = useMemo(() => new TaprootService(SIGNET_NETWORK), [])
 
   const generateTaprootAddress = useCallback(() => {
     try {

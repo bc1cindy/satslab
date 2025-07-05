@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
-import { Progress } from '@/app/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs'
-import { TrendingUp, Clock, Zap, Target, BarChart3, Calculator } from 'lucide-react'
+import { Clock, Zap, Target, BarChart3, Calculator } from 'lucide-react'
 
 interface DifficultyData {
   blockHeight: number
@@ -22,8 +21,7 @@ interface DifficultyExplainerProps {
 }
 
 export default function DifficultyExplainer({ 
-  currentDifficulty = 50000000000000,
-  onDifficultyChange 
+  currentDifficulty = 50000000000000
 }: DifficultyExplainerProps) {
   const [activeTab, setActiveTab] = useState('overview')
   const [simulationDifficulty, setSimulationDifficulty] = useState(4)

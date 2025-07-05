@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
@@ -27,10 +27,10 @@ export default function HDWalletManager({ onWalletCreated, onAddressGenerated }:
   const [addressType, setAddressType] = useState<'p2wpkh' | 'p2sh' | 'p2tr'>('p2wpkh')
   const [showPrivateKeys, setShowPrivateKeys] = useState(false)
   const [exportedXPub, setExportedXPub] = useState('')
-  const [walletInfo, setWalletInfo] = useState<any>(null)
+  const [walletInfo, setWalletInfo] = useState<{fingerprint: string, publicKey: string, chainCode: string, depth: number, index: number} | null>(null)
   
   const { toast } = useToast()
-  const hdWalletService = new HDWalletService(SIGNET_NETWORK)
+  const hdWalletService = useMemo(() => new HDWalletService(SIGNET_NETWORK), [])
 
   const generateHDWallet = useCallback(() => {
     try {

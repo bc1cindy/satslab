@@ -5,16 +5,24 @@ import { Badge } from '@/app/components/ui/badge'
 import { Button } from '@/app/components/ui/button'
 
 interface BadgeRewardProps {
-  name: string
-  description: string
-  type: 'virtual' | 'ordinal'
-  moduleId: number
+  badge?: {
+    name: string
+    description: string
+    type: 'virtual' | 'ordinal'
+    moduleId: number
+    imageUrl?: string
+  }
+  name?: string
+  description?: string
+  type?: 'virtual' | 'ordinal'
+  moduleId?: number
   isEarned?: boolean
   onClaim?: () => void
   isLoading?: boolean
 }
 
 export function BadgeReward({ 
+  badge,
   name, 
   description, 
   type, 
@@ -23,26 +31,31 @@ export function BadgeReward({
   onClaim,
   isLoading = false 
 }: BadgeRewardProps) {
+  // Use badge prop if provided, otherwise use individual props
+  const badgeName = badge?.name || name || ''
+  const badgeDescription = badge?.description || description || ''
+  const badgeType = badge?.type || type || 'virtual'
+  const badgeModuleId = badge?.moduleId || moduleId || 0
   return (
     <Card className={`w-full ${isEarned ? 'border-green-500 bg-green-50' : 'border-orange-500 bg-orange-50'}`}>
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle className="text-xl flex items-center gap-2">
             <span className="text-2xl">🏆</span>
-            {name}
+            {badgeName}
           </CardTitle>
           <div className="flex gap-2">
-            <Badge variant={type === 'ordinal' ? 'default' : 'secondary'}>
-              {type === 'ordinal' ? 'Ordinal NFT' : 'Badge Virtual'}
+            <Badge variant={badgeType === 'ordinal' ? 'default' : 'secondary'}>
+              {badgeType === 'ordinal' ? 'Ordinal NFT' : 'Badge Virtual'}
             </Badge>
-            <Badge variant="outline">Módulo {moduleId}</Badge>
+            <Badge variant="outline">Módulo {badgeModuleId}</Badge>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-gray-700">{description}</p>
+        <p className="text-gray-700">{badgeDescription}</p>
         
-        {type === 'ordinal' && (
+        {badgeType === 'ordinal' && (
           <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
             <h4 className="font-semibold text-purple-900 mb-2">🎨 Ordinal NFT</h4>
             <p className="text-sm text-purple-800">

@@ -49,12 +49,12 @@ export class HDWalletService {
     }
 
     const seed = bip39.mnemonicToSeedSync(mnemonicPhrase)
-    const masterKey = BIP32.fromSeed(Buffer.from(seed), this.network)
-    const fingerprint = masterKey.fingerprint.toString('hex')
+    const masterKey = BIP32.fromSeed(seed, this.network)
+    const fingerprint = Buffer.from(masterKey.fingerprint).toString('hex')
 
     return {
       mnemonic: mnemonicPhrase,
-      seed,
+      seed: Buffer.from(seed),
       masterKey,
       network: this.network,
       fingerprint,
@@ -80,7 +80,7 @@ export class HDWalletService {
     switch (addressType) {
       case 'p2wpkh':
         const p2wpkh = bitcoin.payments.p2wpkh({
-          pubkey: derivedKey.publicKey,
+          pubkey: Buffer.from(derivedKey.publicKey),
           network: this.network,
         })
         if (!p2wpkh.address) {
@@ -92,7 +92,7 @@ export class HDWalletService {
       case 'p2sh':
         const p2sh = bitcoin.payments.p2sh({
           redeem: bitcoin.payments.p2wpkh({
-            pubkey: derivedKey.publicKey,
+            pubkey: Buffer.from(derivedKey.publicKey),
             network: this.network,
           }),
           network: this.network,
@@ -104,7 +104,7 @@ export class HDWalletService {
         break
         
       case 'p2tr':
-        const internalKey = derivedKey.publicKey.slice(1)
+        const internalKey = Buffer.from(derivedKey.publicKey).slice(1)
         const p2tr = bitcoin.payments.p2tr({
           internalPubkey: internalKey,
           network: this.network,
@@ -126,7 +126,7 @@ export class HDWalletService {
     return {
       address,
       privateKey: derivedKey.toWIF(),
-      publicKey: derivedKey.publicKey.toString('hex'),
+      publicKey: Buffer.from(derivedKey.publicKey).toString('hex'),
       path,
       index,
     }
@@ -235,8 +235,8 @@ export class HDWalletService {
   } {
     return {
       fingerprint: wallet.fingerprint,
-      publicKey: wallet.masterKey.publicKey.toString('hex'),
-      chainCode: wallet.masterKey.chainCode.toString('hex'),
+      publicKey: Buffer.from(wallet.masterKey.publicKey).toString('hex'),
+      chainCode: Buffer.from(wallet.masterKey.chainCode).toString('hex'),
       depth: wallet.masterKey.depth,
       index: wallet.masterKey.index,
     }

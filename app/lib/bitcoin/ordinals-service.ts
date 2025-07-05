@@ -22,6 +22,11 @@ export interface BadgeNFT {
   user_id: string
   timestamp: number
   network: string
+  description?: string
+  rarity?: 'common' | 'rare' | 'legendary'
+  requirements?: string[]
+  icon?: string
+  color?: string
 }
 
 export interface OrdinalUTXO {

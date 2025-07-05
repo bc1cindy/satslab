@@ -351,8 +351,8 @@ export class FaucetService {
   static cleanupOldRequests(olderThanHours: number = 168): void { // Default 7 days
     const cutoff = Date.now() - (olderThanHours * 60 * 60 * 1000)
     
-    for (const [address, requests] of this.faucetRequests.entries()) {
-      const filtered = requests.filter(req => req.timestamp > cutoff)
+    for (const [address, requests] of Array.from(this.faucetRequests.entries())) {
+      const filtered = requests.filter((req: any) => req.timestamp > cutoff)
       
       if (filtered.length === 0) {
         this.faucetRequests.delete(address)

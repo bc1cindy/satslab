@@ -76,7 +76,7 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: Badge
   const [previewMode, setPreviewMode] = useState<'template' | 'custom'>('template')
   
   const { toast } = useToast()
-  const ordinalsService = new OrdinalsService(SIGNET_NETWORK)
+  const ordinalsService = useMemo(() => new OrdinalsService(SIGNET_NETWORK), [])
 
   const currentBadgeData = useMemo(() => {
     if (!userPublicKey) return null
@@ -110,7 +110,7 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: Badge
     return null
   }, [userPublicKey, previewMode, selectedTemplate, customBadgeName, customDescription])
 
-  const generateBadgeArt = useCallback((badgeData: any) => {
+  const generateBadgeArt = useCallback((badgeData: BadgeNFT) => {
     // Gera arte SVG simples para o badge
     const svg = `
       <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -148,8 +148,8 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: Badge
     setIsMinting(true)
 
     try {
-      // Cria metadata completa do badge
-      const completeMetadata = {
+      // Cria metadata do badge
+      const badgeMetadata = {
         ...currentBadgeData,
         image: generateBadgeArt(currentBadgeData),
         attributes: [
@@ -172,7 +172,7 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: Badge
       }]
 
       const inscription = await ordinalsService.mintBadgeNFT(
-        currentBadgeData,
+        badgeMetadata,
         privateKey,
         utxos,
         1

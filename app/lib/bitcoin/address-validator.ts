@@ -1,5 +1,9 @@
 import * as bitcoin from 'bitcoinjs-lib'
+import { ECPairFactory } from 'ecpair'
+import * as ecc from '@bitcoinerlab/secp256k1'
 import { SIGNET_NETWORK } from './wallet-service'
+
+const ECPair = ECPairFactory(ecc)
 
 export type AddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2wsh' | 'p2tr' | 'unknown'
 
@@ -120,7 +124,7 @@ export class AddressValidator {
       // Check if it's a valid WIF format
       if (privateKey.length >= 51 && privateKey.length <= 52) {
         try {
-          bitcoin.ECPair.fromWIF(privateKey, SIGNET_NETWORK)
+          ECPair.fromWIF(privateKey, SIGNET_NETWORK)
           return true
         } catch (error) {
           return false

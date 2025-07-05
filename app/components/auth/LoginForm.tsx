@@ -31,6 +31,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         setError('Falha na autenticação. Verifique sua chave privada.')
       }
     } catch (err) {
+      console.error('Authentication error:', err)
       setError('Erro durante a autenticação. Tente novamente.')
     } finally {
       setIsLoading(false)

@@ -21,7 +21,7 @@ interface HintSystemProps {
   onHintUsed: (hintIndex: number) => void
 }
 
-export function HintSystem({ hints, taskId, attempts, timeSpent, onHintUsed }: HintSystemProps) {
+export function HintSystem({ hints, attempts, timeSpent, onHintUsed }: HintSystemProps) {
   const [availableHints, setAvailableHints] = useState<number[]>([])
   const [usedHints, setUsedHints] = useState<number[]>([])
   const [showHints, setShowHints] = useState(false)
