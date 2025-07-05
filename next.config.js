@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    // Enable WebAssembly support
-    asyncWebAssembly: true,
-  },
   webpack: (config, { isServer }) => {
     // Handle WebAssembly modules
     config.experiments = {
