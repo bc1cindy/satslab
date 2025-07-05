@@ -1,0 +1,16 @@
+/**
+ * Simplified Next.js Middleware for Development
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  // Just pass through - minimal middleware for development
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+}
