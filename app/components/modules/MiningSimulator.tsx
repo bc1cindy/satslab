@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
-import { Progress } from '@/app/components/ui/progress'
-import { Play, Pause, RotateCcw, Hash } from 'lucide-react'
+import { Play, Pause, RotateCcw, Cpu, Zap, Clock, Target, Hash } from 'lucide-react'
 
 interface MiningStats {
   nonce: number
@@ -13,19 +12,16 @@ interface MiningStats {
   attempts: number
   timeElapsed: number
   currentHash: string
-  difficulty: number
-  targetPattern: string
+  isValid: boolean
 }
 
 interface MiningSimulatorProps {
   onHashFound?: (hash: string, nonce: number) => void
-  difficulty?: number
   targetZeros?: number
 }
 
 export default function MiningSimulator({ 
   onHashFound, 
-  difficulty = 4, 
   targetZeros = 4 
 }: MiningSimulatorProps) {
   const [isRunning, setIsRunning] = useState(false)
@@ -35,134 +31,113 @@ export default function MiningSimulator({
     attempts: 0,
     timeElapsed: 0,
     currentHash: '',
-    difficulty: targetZeros,
-    targetPattern: '0'.repeat(targetZeros)
+    isValid: false
   })
   const [foundHash, setFoundHash] = useState<string | null>(null)
-  const [blockData, setBlockData] = useState({
-    version: 1,
-    prevHash: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
-    merkleRoot: '9876543210fedcba0987654321fedcba0987654321fedcba0987654321fedcba',
-    timestamp: Date.now(),
-    bits: difficulty
-  })
+  const [startTime, setStartTime] = useState<number>(0)
+  
+  const targetPattern = '0'.repeat(targetZeros)
 
-  // Função SHA-256 simplificada para demonstração
-  const simpleSHA256 = useCallback((input: string): string => {
-    let hash = 0
-    for (let i = 0; i < input.length; i++) {
-      const char = input.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash = hash & hash // Convert to 32-bit integer
+  // Gera hash realista para demonstração
+  const generateRealisticHash = useCallback((nonce: number): string => {
+    // Cria hash baseado no nonce com probabilidade controlada
+    let hash = ''
+    
+    // Primeira parte - controla se teremos zeros iniciais
+    // Probabilidade muito baixa para tornar mais realista
+    const probability = targetZeros === 4 ? 1/50000 : 1/5000
+    const shouldBeValid = Math.random() < probability && nonce > 5000
+    
+    if (shouldBeValid) {
+      hash = targetPattern
+    } else {
+      // Gera alguns zeros aleatórios (mas não o suficiente)
+      const randomZeros = Math.floor(Math.random() * (targetZeros - 1))
+      hash = '0'.repeat(randomZeros)
     }
     
-    // Simula randomização baseada no input
-    const str = Math.abs(hash).toString(16)
-    const random = Math.random().toString(16).slice(2, 10)
-    const combined = str + random + input.slice(-8)
+    // Completa o hash com caracteres hex aleatórios
+    const remaining = 64 - hash.length
+    for (let i = 0; i < remaining; i++) {
+      hash += Math.floor(Math.random() * 16).toString(16)
+    }
     
-    // Pad to 64 characters
-    return combined.padEnd(64, '0').slice(0, 64)
-  }, [])
-
-  const createBlockHeader = useCallback((nonce: number): string => {
-    return `${blockData.version}${blockData.prevHash}${blockData.merkleRoot}${blockData.timestamp}${blockData.bits}${nonce}`
-  }, [blockData])
-
-  const isValidHash = useCallback((hash: string): boolean => {
-    return hash.startsWith(stats.targetPattern)
-  }, [stats.targetPattern])
+    return hash
+  }, [targetPattern, targetZeros])
 
   const mineBlock = useCallback(() => {
     if (!isRunning) return
 
-    const startTime = Date.now()
     let currentNonce = stats.nonce
     let attempts = stats.attempts
-    let hashesThisSecond = 0
 
     const miningLoop = () => {
       if (!isRunning) return
 
-      for (let i = 0; i < 100; i++) { // Process 100 hashes per loop
-        const blockHeader = createBlockHeader(currentNonce)
-        const hash = simpleSHA256(blockHeader)
-        
+      // Simula processamento mais realista com menos iterações por loop
+      for (let i = 0; i < 20; i++) {
+        const hash = generateRealisticHash(currentNonce)
         currentNonce++
         attempts++
-        hashesThisSecond++
 
-        if (isValidHash(hash)) {
+        const isValid = hash.startsWith(targetPattern)
+        
+        // Atualiza stats a cada iteração
+        const timeElapsed = Date.now() - startTime
+        const hashrate = timeElapsed > 0 ? Math.floor((attempts / timeElapsed) * 1000) : 0
+
+        setStats({
+          nonce: currentNonce,
+          hashrate,
+          attempts,
+          timeElapsed,
+          currentHash: hash,
+          isValid
+        })
+
+        if (isValid) {
           setFoundHash(hash)
-          setStats(prev => ({
-            ...prev,
-            nonce: currentNonce,
-            attempts,
-            currentHash: hash,
-            timeElapsed: Date.now() - startTime + prev.timeElapsed
-          }))
           setIsRunning(false)
           onHashFound?.(hash, currentNonce)
           return
         }
-
-        // Update current hash display
-        if (i % 10 === 0) {
-          setStats(prev => ({
-            ...prev,
-            nonce: currentNonce,
-            attempts,
-            currentHash: hash,
-            timeElapsed: Date.now() - startTime + prev.timeElapsed
-          }))
-        }
       }
 
-      // Calculate hashrate
-      const elapsed = (Date.now() - startTime) / 1000
-      const hashrate = elapsed > 0 ? Math.round(hashesThisSecond / elapsed) : 0
-
-      setStats(prev => ({
-        ...prev,
-        nonce: currentNonce,
-        attempts,
-        hashrate,
-        timeElapsed: Date.now() - startTime + prev.timeElapsed
-      }))
-
-      // Continue mining
-      setTimeout(miningLoop, 10)
+      // Continue mining com delay maior para ser mais realista
+      setTimeout(miningLoop, 200)
     }
 
     miningLoop()
-  }, [isRunning, stats.nonce, stats.attempts, createBlockHeader, simpleSHA256, isValidHash, onHashFound])
+  }, [isRunning, stats.nonce, stats.attempts, startTime, generateRealisticHash, targetPattern, onHashFound])
 
   useEffect(() => {
     if (isRunning) {
+      if (startTime === 0) {
+        setStartTime(Date.now())
+      }
       mineBlock()
     }
-  }, [isRunning, mineBlock])
+  }, [isRunning, mineBlock, startTime])
 
   const toggleMining = () => {
+    if (!isRunning && startTime === 0) {
+      setStartTime(Date.now())
+    }
     setIsRunning(!isRunning)
   }
 
   const resetMining = () => {
     setIsRunning(false)
+    setStartTime(0)
     setStats({
       nonce: 0,
       hashrate: 0,
       attempts: 0,
       timeElapsed: 0,
       currentHash: '',
-      difficulty: targetZeros,
-      targetPattern: '0'.repeat(targetZeros)
+      isValid: false
     })
     setFoundHash(null)
-    setBlockData(prev => ({
-      ...prev,
-      timestamp: Date.now()
-    }))
   }
 
   const formatTime = (ms: number) => {
@@ -171,134 +146,161 @@ export default function MiningSimulator({
     return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
   }
 
-  const formatHash = (hash: string) => {
-    if (!hash) return 'Aguardando...'
-    return `${hash.slice(0, 8)}...${hash.slice(-8)}`
-  }
-
-  const getHashColor = (hash: string) => {
-    if (!hash) return 'text-gray-400'
-    return isValidHash(hash) ? 'text-green-600' : 'text-red-600'
-  }
-
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="bg-gray-900 border-gray-800">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Hash className="w-6 h-6" />
-          Simulador de Mineração Bitcoin
+        <CardTitle className="flex items-center gap-3 text-white">
+          <Cpu className="w-6 h-6 text-orange-500" />
+          Simulador de Mineração
         </CardTitle>
-        <p className="text-sm text-gray-600">
-          Simule o processo de proof-of-work encontrando um hash que comece com {stats.targetPattern}
+        <p className="text-gray-400">
+          Encontre um hash que comece com <span className="text-orange-400 font-mono">{targetPattern}</span>
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Status e Controles */}
+        {/* Controles */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Badge variant={foundHash ? "default" : isRunning ? "secondary" : "outline"}>
-              {foundHash ? "Hash Encontrado!" : isRunning ? "Minerando..." : "Parado"}
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant={foundHash ? "default" : isRunning ? "secondary" : "outline"}
+              className={
+                foundHash ? "bg-green-500/20 text-green-400 border-green-500/50" :
+                isRunning ? "bg-orange-500/20 text-orange-400 border-orange-500/50" :
+                "bg-gray-700 text-gray-300 border-gray-600"
+              }
+            >
+              {foundHash ? "✅ Sucesso" : isRunning ? "⛏️ Minerando" : "⏸️ Parado"}
             </Badge>
-            <Badge variant="outline">
-              Dificuldade: {stats.difficulty} zeros
+            <Badge variant="outline" className="bg-gray-800 text-gray-300 border-gray-600">
+              <Target className="w-3 h-3 mr-1" />
+              {targetZeros} zeros
             </Badge>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={toggleMining} disabled={!!foundHash}>
+          <div className="flex gap-3">
+            <Button 
+              onClick={toggleMining} 
+              disabled={!!foundHash}
+              className={`${
+                isRunning 
+                  ? "bg-red-500 hover:bg-red-600" 
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
+            >
               {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {isRunning ? 'Pausar' : 'Iniciar'}
+              {isRunning ? 'Parar' : 'Iniciar'}
             </Button>
-            <Button variant="outline" onClick={resetMining}>
+            <Button 
+              variant="outline" 
+              onClick={resetMining}
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
               <RotateCcw className="w-4 h-4" />
-              Resetar
             </Button>
           </div>
         </div>
 
-        {/* Progresso Visual */}
-        {isRunning && !foundHash && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Minerando...</span>
-              <span>{stats.hashrate} H/s</span>
-            </div>
-            <Progress value={Math.min((stats.attempts / 10000) * 100, 100)} className="h-2" />
-          </div>
-        )}
-
-        {/* Métricas */}
+        {/* Métricas Principais */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{stats.nonce.toLocaleString()}</div>
-            <div className="text-sm text-gray-600">Nonce</div>
+          <div className="bg-gray-800 rounded-lg p-4 text-center border border-gray-700">
+            <div className="text-2xl font-bold text-blue-400 mb-1">
+              {stats.nonce.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-400 flex items-center justify-center">
+              <Hash className="w-3 h-3 mr-1" />
+              Nonce
+            </div>
           </div>
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{stats.hashrate.toLocaleString()}</div>
-            <div className="text-sm text-gray-600">Hash/s</div>
+          
+          <div className="bg-gray-800 rounded-lg p-4 text-center border border-gray-700">
+            <div className="text-2xl font-bold text-green-400 mb-1">
+              {stats.hashrate.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-400 flex items-center justify-center">
+              <Zap className="w-3 h-3 mr-1" />
+              H/s
+            </div>
           </div>
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">{stats.attempts.toLocaleString()}</div>
-            <div className="text-sm text-gray-600">Tentativas</div>
+          
+          <div className="bg-gray-800 rounded-lg p-4 text-center border border-gray-700">
+            <div className="text-2xl font-bold text-purple-400 mb-1">
+              {stats.attempts.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-400 flex items-center justify-center">
+              <Target className="w-3 h-3 mr-1" />
+              Tentativas
+            </div>
           </div>
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-orange-600">{formatTime(stats.timeElapsed)}</div>
-            <div className="text-sm text-gray-600">Tempo</div>
-          </div>
-        </div>
-
-        {/* Dados do Bloco */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">Cabeçalho do Bloco</h3>
-          <div className="bg-gray-50 p-4 rounded-lg font-mono text-sm space-y-2">
-            <div><strong>Versão:</strong> {blockData.version}</div>
-            <div><strong>Hash Anterior:</strong> {formatHash(blockData.prevHash)}</div>
-            <div><strong>Merkle Root:</strong> {formatHash(blockData.merkleRoot)}</div>
-            <div><strong>Timestamp:</strong> {new Date(blockData.timestamp).toLocaleString()}</div>
-            <div><strong>Dificuldade:</strong> {blockData.bits}</div>
-            <div><strong>Nonce:</strong> {stats.nonce}</div>
+          
+          <div className="bg-gray-800 rounded-lg p-4 text-center border border-gray-700">
+            <div className="text-2xl font-bold text-orange-400 mb-1">
+              {formatTime(stats.timeElapsed)}
+            </div>
+            <div className="text-sm text-gray-400 flex items-center justify-center">
+              <Clock className="w-3 h-3 mr-1" />
+              Tempo
+            </div>
           </div>
         </div>
 
         {/* Hash Atual */}
-        <div className="space-y-2">
-          <h3 className="font-semibold">Hash Atual</h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className={`font-mono text-sm break-all ${getHashColor(stats.currentHash)}`}>
-              {stats.currentHash || 'Aguardando início da mineração...'}
-            </div>
-            {stats.currentHash && (
-              <div className="mt-2 text-xs text-gray-600">
-                {isValidHash(stats.currentHash) ? 
-                  `✅ Hash válido encontrado! Começa com ${stats.targetPattern}` : 
-                  `❌ Hash inválido. Precisa começar com ${stats.targetPattern}`
-                }
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-white">Hash Atual</h3>
+          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            {stats.currentHash ? (
+              <>
+                <div className={`font-mono text-sm break-all mb-2 ${
+                  stats.isValid ? 'text-green-400' : 'text-gray-300'
+                }`}>
+                  {stats.currentHash}
+                </div>
+                <div className={`text-xs flex items-center ${
+                  stats.isValid ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {stats.isValid ? '✅ Hash válido encontrado!' : '❌ Hash inválido'}
+                </div>
+              </>
+            ) : (
+              <div className="text-gray-500 text-sm">
+                Aguardando início da mineração...
               </div>
             )}
           </div>
         </div>
 
-        {/* Resultado */}
+        {/* Resultado Final */}
         {foundHash && (
-          <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-            <h3 className="font-semibold text-green-800 mb-2">🎉 Bloco Minerado com Sucesso!</h3>
-            <div className="space-y-2 text-sm">
-              <div><strong>Hash Encontrado:</strong> <span className="font-mono">{foundHash}</span></div>
-              <div><strong>Nonce Final:</strong> {stats.nonce.toLocaleString()}</div>
-              <div><strong>Tentativas:</strong> {stats.attempts.toLocaleString()}</div>
-              <div><strong>Tempo Total:</strong> {formatTime(stats.timeElapsed)}</div>
-              <div><strong>Hashrate Médio:</strong> {Math.round(stats.attempts / (stats.timeElapsed / 1000)).toLocaleString()} H/s</div>
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-green-400 mb-3 flex items-center">
+              🎉 Bloco Minerado com Sucesso!
+            </h3>
+            <div className="space-y-2 text-sm text-gray-300">
+              <div className="flex justify-between">
+                <span>Hash Final:</span>
+                <span className="font-mono text-green-400">{foundHash.slice(0, 16)}...</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Nonce Vencedor:</span>
+                <span className="text-blue-400">{stats.nonce.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Total de Tentativas:</span>
+                <span className="text-purple-400">{stats.attempts.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tempo Decorrido:</span>
+                <span className="text-orange-400">{formatTime(stats.timeElapsed)}</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Explicação Educacional */}
-        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-          <h3 className="font-semibold text-blue-800 mb-2">💡 Como Funciona</h3>
-          <div className="text-sm text-blue-700 space-y-1">
-            <p>• <strong>Nonce:</strong> Número que incrementa a cada tentativa</p>
-            <p>• <strong>Hash:</strong> Resultado da função SHA-256 aplicada ao cabeçalho</p>
-            <p>• <strong>Dificuldade:</strong> Número de zeros necessários no início do hash</p>
-            <p>• <strong>Proof-of-Work:</strong> Prova de que trabalho computacional foi realizado</p>
+        {/* Explicação */}
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+          <h4 className="font-semibold text-blue-400 mb-2">💡 Como Funciona</h4>
+          <div className="text-sm text-gray-300 space-y-1">
+            <p>• <strong>Nonce:</strong> Número incrementado a cada tentativa</p>
+            <p>• <strong>Hash:</strong> Resultado SHA-256 do cabeçalho do bloco</p>
+            <p>• <strong>Proof-of-Work:</strong> Encontrar hash com zeros específicos</p>
           </div>
         </div>
       </CardContent>
