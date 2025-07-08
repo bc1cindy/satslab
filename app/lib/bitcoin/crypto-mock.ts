@@ -16,23 +16,37 @@ export function generateKeyPair(network?: any): BitcoinKeyPair {
 }
 
 export function keyPairFromWIF(wif: string, network?: any): BitcoinKeyPair {
+  // Generate consistent public key from private key
+  const hash = simpleHash(wif)
   return {
     privateKey: wif,
-    publicKey: 'mock_public_key_from_wif',
-    address: 'tb1qmockaddressfromwif',
+    publicKey: 'mock_public_key_' + hash,
+    address: 'tb1q' + hash,
     network: network || 'signet'
   }
 }
 
-export function validatePrivateKey(privateKey: string, network?: any): boolean {
-  return privateKey.length > 10 // Basic validation
+// Simple hash function for consistent key generation
+function simpleHash(input: string): string {
+  let hash = 0
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36).substring(0, 8)
 }
 
-export function signMessage(message: string, privateKey: string, network?: any): string {
+export function validatePrivateKey(privateKey: string, network?: any): boolean {
+  // Accept any string with reasonable length (minimum 8 characters)
+  return !!(privateKey && privateKey.length >= 8)
+}
+
+export function signMessage(_message: string, _privateKey: string, _network?: any): string {
   return 'mock_signature_' + Math.random().toString(36)
 }
 
-export function verifySignature(message: string, signature: string, publicKey: string): boolean {
+export function verifySignature(_message: string, signature: string, _publicKey: string): boolean {
   return signature.startsWith('mock_signature_')
 }
 

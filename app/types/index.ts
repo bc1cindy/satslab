@@ -46,6 +46,10 @@ export interface Task {
   type: 'explorer' | 'transaction' | 'wallet' | 'mining' | 'lightning' | 'ordinal'
   validation: ValidationConfig
   hints?: string[]
+  externalLinks?: Array<{
+    label: string
+    url: string
+  }>
 }
 
 export interface Question {

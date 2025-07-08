@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Configurações do servidor
+  // Forçar o servidor a escutar em todas as interfaces
+  devIndicators: {
+    buildActivity: true,
+    buildActivityPosition: 'bottom-right',
+  },
   webpack: (config, { isServer }) => {
     // Handle WebAssembly modules
     config.experiments = {

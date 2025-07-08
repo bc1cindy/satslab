@@ -7,6 +7,8 @@ export interface AuthSession {
     publicKey: string
   }
   isAuthenticated: boolean
+  loginTime: number
+  ipAddress?: string
 }
 
 export class BitcoinAuth {
@@ -16,6 +18,7 @@ export class BitcoinAuth {
     try {
       // Validate private key format
       if (!validatePrivateKey(privateKey, SIGNET_NETWORK)) {
+        console.error('Invalid private key format:', privateKey)
         throw new Error('Invalid private key format')
       }
       
@@ -29,11 +32,21 @@ export class BitcoinAuth {
       if (!isValidSignature) {
         throw new Error('Signature verification failed')
       }
+
+      // Get user IP address
+      let ipAddress: string | undefined
+      try {
+        const response = await fetch('https://api.ipify.org?format=json')
+        const data = await response.json()
+        ipAddress = data.ip
+      } catch (error) {
+        console.warn('Could not fetch IP address:', error)
+      }
       
       // Check if user exists, create if not
       let user = await getUserByPublicKey(keyPair.publicKey)
       if (!user) {
-        user = await createUser(keyPair.publicKey)
+        user = await createUser(keyPair.publicKey, ipAddress)
         if (!user) {
           throw new Error('Failed to create user')
         }
@@ -44,12 +57,19 @@ export class BitcoinAuth {
           id: user.id,
           publicKey: user.publicKey
         },
-        isAuthenticated: true
+        isAuthenticated: true,
+        loginTime: Date.now(),
+        ipAddress
       }
       
-      // Store session in localStorage
+      // Store session in localStorage with extended expiry
       if (typeof window !== 'undefined') {
         localStorage.setItem(this.SESSION_KEY, JSON.stringify(session))
+        // Also store in a more persistent way
+        localStorage.setItem(`${this.SESSION_KEY}_backup`, JSON.stringify({
+          ...session,
+          timestamp: Date.now()
+        }))
       }
       
       return session
@@ -63,7 +83,21 @@ export class BitcoinAuth {
     if (typeof window === 'undefined') return null
     
     try {
-      const sessionData = localStorage.getItem(this.SESSION_KEY)
+      let sessionData = localStorage.getItem(this.SESSION_KEY)
+      
+      // If no session, try backup
+      if (!sessionData) {
+        const backupData = localStorage.getItem(`${this.SESSION_KEY}_backup`)
+        if (backupData) {
+          const backup = JSON.parse(backupData)
+          // Restore session if backup is less than 30 days old
+          if (backup.timestamp && (Date.now() - backup.timestamp) < 30 * 24 * 60 * 60 * 1000) {
+            sessionData = JSON.stringify(backup)
+            localStorage.setItem(this.SESSION_KEY, sessionData)
+          }
+        }
+      }
+      
       if (!sessionData) return null
       
       const session: AuthSession = JSON.parse(sessionData)

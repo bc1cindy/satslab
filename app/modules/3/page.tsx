@@ -5,16 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
-import { ArrowLeft, Shield, Trophy, BookOpen, Award, Lock } from 'lucide-react'
+import { ArrowLeft, Send, Trophy, BookOpen, Award, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
-import { module2Questions, module2Tasks, module2Badge } from './data'
+import { module3Questions, module3Tasks, module3Badge } from './data'
 
 
 // Use imported data - converting format
-const moduleQuestions = module2Questions.map(q => ({
+const moduleQuestions = module3Questions.map(q => ({
   id: q.id.toString(),
   question: q.question,
   options: q.options,
@@ -23,7 +23,7 @@ const moduleQuestions = module2Questions.map(q => ({
   hint: '' // Add default hint as it's not in the imported data
 }))
 
-const moduleTasks = module2Tasks.map(t => ({
+const moduleTasks = module3Tasks.map(t => ({
   id: t.id.toString(),
   title: t.title,
   description: t.description,
@@ -39,10 +39,10 @@ const moduleTasks = module2Tasks.map(t => ({
   externalLinks: t.externalLinks || []
 }))
 
-export default function Module2() {
-  const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(2, {
-    ...module2Badge,
-    moduleId: 2
+export default function Module3() {
+  const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(3, {
+    ...module3Badge,
+    moduleId: 3
   })
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
 
@@ -87,7 +87,7 @@ export default function Module2() {
                 Tempo: {Math.floor(progress.timeSpent / 60)}m {progress.timeSpent % 60}s
               </div>
               <Badge variant="secondary" className="bg-orange-500/20 text-orange-400">
-                Módulo 2
+                Módulo 3
               </Badge>
             </div>
           </div>
@@ -98,10 +98,10 @@ export default function Module2() {
         {/* Module Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Shield className="h-12 w-12 text-orange-500 mr-4" />
+            <Send className="h-12 w-12 text-orange-500 mr-4" />
             <div>
-              <h1 className="text-3xl font-bold">Segurança e Carteiras</h1>
-              <p className="text-gray-400 mt-2">Chaves privadas, seed phrases e proteção de bitcoins</p>
+              <h1 className="text-3xl font-bold">Transações Bitcoin</h1>
+              <p className="text-gray-400 mt-2">Aprenda sobre taxas, confirmações e dados personalizados</p>
             </div>
           </div>
           
@@ -121,31 +121,30 @@ export default function Module2() {
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center text-xl">
-                  <Shield className="h-6 w-6 text-orange-500 mr-3" />
-                  Segurança é Fundamental!
+                  <Send className="h-6 w-6 text-orange-500 mr-3" />
+                  Domine as Transações Bitcoin!
                 </CardTitle>
                 <CardDescription>
-                  Aprenda a proteger seus bitcoins com as melhores práticas de segurança
+                  Aprenda a enviar Bitcoin, otimizar taxas e gravar dados na blockchain
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-2">O que você vai aprender:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
-                    <li>Como funcionam as chaves privadas e públicas</li>
-                    <li>O que são seed phrases e como protegê-las</li>
-                    <li>Como gerar uma carteira Bitcoin segura</li>
-                    <li>Boas práticas de segurança para proteger seus fundos</li>
-                    <li>Diferença entre hot wallets e cold wallets</li>
+                    <li>Como funcionam as taxas de transação e sua relação com velocidade</li>
+                    <li>Estratégias para otimizar custos vs. tempo de confirmação</li>
+                    <li>Como enviar transações na rede Signet de forma prática</li>
+                    <li>O que é OP_RETURN e como gravar dados na blockchain</li>
+                    <li>Aplicações práticas de timestamps e mensagens imutáveis</li>
                   </ul>
                 </div>
                 
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-                  <h3 className="font-semibold text-orange-400 mb-2">🔒 Atenção:</h3>
-                  <p className="text-orange-300 text-sm">
-                    Este módulo contém informações críticas sobre segurança. 
-                    Para salvar seu progresso e suas práticas com segurança, recomendamos fazer login.
-                    Você ainda pode continuar como visitante para aprender os conceitos.
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-400 mb-2">📊 Pré-requisitos:</h3>
+                  <p className="text-blue-300 text-sm">
+                    Você precisará da carteira Signet criada no Módulo 2 e alguns sBTC do faucet 
+                    para praticar o envio de transações.
                   </p>
                 </div>
                 
@@ -155,7 +154,7 @@ export default function Module2() {
                     className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-3"
                   >
                     Começar Aprendizado
-                    <Shield className="h-5 w-5 ml-2" />
+                    <TrendingUp className="h-5 w-5 ml-2" />
                   </Button>
                 </div>
               </CardContent>
@@ -170,7 +169,7 @@ export default function Module2() {
               <CardHeader>
                 <CardTitle className="text-xl text-center">📚 Perguntas Teóricas</CardTitle>
                 <CardDescription className="text-center">
-                  Teste seus conhecimentos sobre segurança em Bitcoin
+                  Teste seus conhecimentos sobre transações Bitcoin
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -178,7 +177,7 @@ export default function Module2() {
             <QuestionSystem 
               questions={moduleQuestions}
               onComplete={handleQuestionsCompleteWithAdvance}
-              moduleId={2}
+              moduleId={3}
             />
           </div>
         )}
@@ -190,7 +189,7 @@ export default function Module2() {
               <CardHeader>
                 <CardTitle className="text-xl text-center">🎯 Tarefas Práticas</CardTitle>
                 <CardDescription className="text-center">
-                  Pratique a criação e segurança de carteiras Bitcoin
+                  Pratique enviando transações e gravando dados na blockchain
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -198,7 +197,7 @@ export default function Module2() {
             <TaskSystem 
               tasks={moduleTasks}
               onComplete={handleTasksCompleteWithAdvance}
-              moduleId={2}
+              moduleId={3}
             />
           </div>
         )}
@@ -212,7 +211,7 @@ export default function Module2() {
                 Parabéns! Módulo Concluído
               </CardTitle>
               <CardDescription>
-                Você completou com sucesso o Módulo 2
+                Você completou com sucesso o Módulo 3
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -222,10 +221,10 @@ export default function Module2() {
                   <h3 className="text-xl font-semibold text-green-400 mb-2">Badge Conquistado!</h3>
                   <Badge className="bg-orange-500/20 text-orange-400 text-lg px-4 py-2">
                     <Award className="h-5 w-5 mr-2" />
-                    {module2Badge.name}
+                    {module3Badge.name}
                   </Badge>
                   <p className="text-sm text-gray-400 mt-2">
-                    Você domina os conceitos de segurança Bitcoin e sabe proteger suas chaves privadas
+                    Você domina o envio de transações e sabe gravar dados na blockchain Bitcoin
                   </p>
                 </div>
               )}
@@ -250,24 +249,24 @@ export default function Module2() {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-semibold text-white mb-3">🎓 O que você aprendeu:</h3>
                 <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm text-left">
-                  <li>Chaves privadas controlam seus bitcoins - nunca as compartilhe</li>
-                  <li>Seed phrases são backups das chaves - guarde em local seguro</li>
-                  <li>Endereços Bitcoin são derivados de chaves públicas</li>
-                  <li>Hot wallets são convenientes mas menos seguras que cold wallets</li>
+                  <li>Taxas de transação incentivam mineradores e afetam velocidade</li>
+                  <li>Taxas altas = confirmação rápida, taxas baixas = espera mais longa</li>
+                  <li>OP_RETURN permite gravar dados permanentes na blockchain</li>
+                  <li>Transações são imutáveis e verificáveis publicamente</li>
                 </ul>
               </div>
 
               {/* Next Steps */}
               <div className="space-y-4">
                 <p className="text-gray-300">
-                  Excelente! Agora que você entende segurança Bitcoin, 
-                  está pronto para aprender sobre transações.
+                  Excelente! Agora que você domina transações, 
+                  está pronto para aprender sobre tecnologias avançadas do Bitcoin.
                 </p>
                 
                 <div className="flex space-x-4">
-                  <Link href="/modules/3" className="flex-1">
+                  <Link href="/modules/4" className="flex-1">
                     <Button className="w-full bg-green-500 hover:bg-green-600">
-                      Próximo Módulo: Transações Bitcoin
+                      Próximo Módulo: Tecnologias Avançadas
                     </Button>
                   </Link>
                   <Link href="/">
@@ -278,7 +277,7 @@ export default function Module2() {
                 </div>
                 
                 <p className="text-sm text-gray-400">
-                  💡 Dica: Pratique gerando carteiras offline para maior segurança!
+                  💡 Dica: Experimente diferentes níveis de taxa para ver a diferença na velocidade!
                 </p>
               </div>
             </CardContent>

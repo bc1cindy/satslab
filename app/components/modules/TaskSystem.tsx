@@ -6,6 +6,28 @@ import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Badge } from '@/app/components/ui/badge'
 import { CheckCircle, XCircle, ExternalLink, Lightbulb, Clock, Copy, AlertCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+// Dynamic import to avoid SSR issues with crypto libraries
+const WalletGeneratorEducational = dynamic(
+  () => import('./WalletGeneratorEducational'),
+  { ssr: false }
+)
+
+const SignetFaucet = dynamic(
+  () => import('./SignetFaucet'),
+  { ssr: false }
+)
+
+const TransactionSimulator = dynamic(
+  () => import('./TransactionSimulator'),
+  { ssr: false }
+)
+
+const OPReturnSimulator = dynamic(
+  () => import('./OPReturnSimulator'),
+  { ssr: false }
+)
 
 interface Task {
   id: string
@@ -78,22 +100,26 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
         }
       }
 
-      const response = await fetch(`https://mempool.space/signet/api/tx/${cleanTxid}`)
-      if (!response.ok) {
-        if (response.status === 404) {
+      // Para fins educacionais, aceitamos TXIDs válidos mesmo que não existam na rede
+      try {
+        const response = await fetch(`https://mempool.space/signet/api/tx/${cleanTxid}`)
+        if (response.ok) {
+          const txData = await response.json()
           return {
-            success: false,
-            message: 'Transação não encontrada. Verifique se o hash está correto e se é da rede Signet.'
+            success: true,
+            message: `Transação encontrada na rede! Valor: ${(txData.vout?.reduce((sum: number, out: any) => sum + out.value, 0) || 0) / 100000000} sBTC`,
+            data: txData
           }
         }
-        throw new Error(`HTTP ${response.status}`)
+      } catch {
+        // Se falhar a verificação online, ainda aceitamos TXIDs educacionais válidos
       }
 
-      const txData = await response.json()
+      // Se chegou aqui, o formato está correto mas não foi encontrado na rede real
+      // Para fins educacionais, isso é aceitável
       return {
         success: true,
-        message: `Transação encontrada! Valor total: ${(txData.fee || 0) / 100000000} sBTC`,
-        data: txData
+        message: 'TXID válido! Transação processada pelo SatsLab. 🎯'
       }
     } catch (error) {
       return {
@@ -115,18 +141,45 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
         }
       }
 
-      const response = await fetch(`https://mempool.space/signet/api/address/${cleanAddress}`)
-      if (!response.ok) {
-        return {
-          success: false,
-          message: 'Endereço não encontrado ou inválido.'
+      // Validação de formato para endereços bech32 (tb1)
+      if (cleanAddress.startsWith('tb1')) {
+        // Verificação básica de comprimento e caracteres
+        if (cleanAddress.length < 42 || cleanAddress.length > 90) {
+          return {
+            success: false,
+            message: 'Endereço tb1 com comprimento inválido.'
+          }
+        }
+        
+        // Verifica se contém apenas caracteres válidos para bech32
+        const validChars = /^tb1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+$/
+        if (!validChars.test(cleanAddress)) {
+          return {
+            success: false,
+            message: 'Endereço contém caracteres inválidos.'
+          }
         }
       }
 
-      const addressData = await response.json()
+      // Para fins educacionais, aceitamos endereços válidos mesmo que ainda não tenham transações
+      // Tentamos verificar no mempool, mas se não encontrar, ainda consideramos válido
+      try {
+        const response = await fetch(`https://mempool.space/signet/api/address/${cleanAddress}`)
+        if (response.ok) {
+          const addressData = await response.json()
+          return {
+            success: true,
+            message: `Endereço válido!`
+          }
+        }
+      } catch {
+        // Se falhar a verificação online, ainda aceitamos se o formato estiver correto
+      }
+
+      // Se chegou aqui, o formato está correto mas não foi possível verificar online
       return {
         success: true,
-        message: `Endereço válido! Transações: ${addressData.txid_count || 0}`
+        message: 'Endereço válido! Pronto para receber sBTC do faucet.'
       }
     } catch (error) {
       return {
@@ -264,6 +317,40 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
                   </Button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Wallet Generator for specific tasks */}
+          {!isCompleted && task.title.toLowerCase().includes('gerar carteira') && (
+            <div className="mb-6">
+              <WalletGeneratorEducational />
+            </div>
+          )}
+
+          {/* Faucet for transaction verification tasks */}
+          {!isCompleted && task.title.toLowerCase().includes('verificar transação') && (
+            <div className="mb-6">
+              <SignetFaucet onTransactionGenerated={(txid: string) => {
+                setUserInputs(prev => ({ ...prev, [currentTask]: txid }))
+              }} />
+            </div>
+          )}
+
+          {/* Transaction Simulator for sending transaction tasks */}
+          {!isCompleted && task.title.toLowerCase().includes('enviar transação') && (
+            <div className="mb-6">
+              <TransactionSimulator onTransactionSent={(txid: string) => {
+                setUserInputs(prev => ({ ...prev, [currentTask]: txid }))
+              }} />
+            </div>
+          )}
+
+          {/* OP_RETURN Simulator for creating OP_RETURN transaction tasks */}
+          {!isCompleted && task.title.toLowerCase().includes('op_return') && (
+            <div className="mb-6">
+              <OPReturnSimulator onTransactionSent={(txid: string) => {
+                setUserInputs(prev => ({ ...prev, [currentTask]: txid }))
+              }} />
             </div>
           )}
 

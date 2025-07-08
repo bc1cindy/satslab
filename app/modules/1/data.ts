@@ -93,23 +93,24 @@ export const module1Tasks = [
   {
     id: 2,
     title: "Interpretar uma Transação",
-    description: "Analise uma transação no explorador e identifique o valor transferido.",
+    description: "Escolha QUALQUER transação nova no explorador e aprenda a identificar valores transferidos.",
     instructions: [
-      "Abra uma transação no mempool.space/signet",
-      "Observe a seção 'Outputs' (saídas)",
-      "Identifique o maior valor em sBTC",
-      "Digite o valor sem a unidade (ex: para 0.05000000 sBTC, digite 0.05)"
+      "Acesse mempool.space/signet e escolha uma transação DIFERENTE da anterior",
+      "Na página da transação, localize a seção 'Outputs' (saídas)",
+      "Some TODOS os valores listados nos outputs",
+      "Digite a SOMA TOTAL de todos os outputs (ex: se há 3 outputs de 0.01, 0.02 e 0.03, digite 0.06)"
     ],
     type: "explorer" as const,
     validation: {
       type: "amount" as const,
-      placeholder: "Valor em sBTC (ex: 0.05)"
+      placeholder: "Soma total dos outputs em sBTC (ex: 0.06)"
     },
     hints: [
-      "Olhe na seção 'Transaction Details' → 'Outputs'",
-      "O valor está em sBTC (Signet Bitcoin)",
-      "Use ponto decimal (não vírgula) para casas decimais",
-      "Ignore valores muito pequenos que podem ser troco"
+      "Esta é uma transação DIFERENTE da primeira tarefa - escolha qualquer uma nova",
+      "Some TODOS os valores na seção 'Outputs', não apenas o maior",
+      "O total dos outputs = input menos taxa de rede (fee)",
+      "Exemplo: Output 1 (0.01) + Output 2 (0.02) = Total (0.03)",
+      "Use ponto decimal, não vírgula (0.05 não 0,05)"
     ]
   }
 ]

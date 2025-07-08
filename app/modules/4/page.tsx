@@ -1,363 +1,449 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ModuleLayout } from '@/app/components/layout/ModuleLayout'
-import { ModuleHeader } from '@/app/components/modules/ModuleHeader'
-import { QuestionCard } from '@/app/components/modules/QuestionCard'
-import { TaskCard } from '@/app/components/modules/TaskCard'
-import { BadgeReward } from '@/app/components/modules/BadgeReward'
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
-import { useAuth } from '@/app/components/auth/AuthProvider'
-import { IntroVideo } from '@/app/components/modules/IntroVideo'
+import { Badge } from '@/app/components/ui/badge'
+import { Progress } from '@/app/components/ui/progress'
+import { ArrowLeft, Trophy, BookOpen, Award, Zap } from 'lucide-react'
+import Link from 'next/link'
+import { useModuleProgress } from '@/app/hooks/useModuleProgress'
+import QuestionSystem from '@/app/components/modules/QuestionSystem'
+import TaskSystem from '@/app/components/modules/TaskSystem'
 import MiningSimulator from '@/app/components/modules/MiningSimulator'
 import PoolMiningSimulator from '@/app/components/modules/PoolMiningSimulator'
-import HashVisualizer from '@/app/components/modules/HashVisualizer'
-import DifficultyExplainer from '@/app/components/modules/DifficultyExplainer'
-import { module4Data, module4Questions, module4Tasks, module4Badge } from './data'
+import { module4Questions, module4Tasks, module4Badge } from './data'
 
-interface ModuleProgress {
-  questionsAnswered: number[]
-  tasksCompleted: number[]
-  score: number
-  completed: boolean
-  miningResults: {
-    hashFound?: string
-    poolRewards?: number
-  }
+// Types
+interface MiningResults {
+  hashFound?: string
+  poolRewards?: number
 }
 
-export default function Module4Page() {
-  const { session } = useAuth()
-  const [progress, setProgress] = useState<ModuleProgress>({
-    questionsAnswered: [],
-    tasksCompleted: [],
-    score: 0,
-    completed: false,
-    miningResults: {}
+// Convert data format for components
+const moduleQuestions = module4Questions.map(q => ({
+  id: q.id.toString(),
+  question: q.question,
+  options: q.options,
+  correct: q.correctAnswer, // Already 0-based index
+  explanation: q.explanation,
+  hint: ''
+}))
+
+const moduleTasks = module4Tasks.map(t => ({
+  id: t.id.toString(),
+  title: t.title,
+  description: t.description,
+  instructions: t.instructions,
+  inputLabel: t.validation.type === 'hash' ? 'Hash Encontrado' : 'Recompensa Total (BTC)',
+  inputPlaceholder: t.validation.placeholder || '',
+  validationType: (t.validation.type === 'hash' ? 'transaction' : 'amount') as 'transaction' | 'amount',
+  hints: t.hints || [],
+  component: t.id === 1 ? 'mining' : 'poolMining'
+}))
+
+export default function Module4() {
+  const { progress, handleQuestionsComplete, handleTasksComplete, isAuthenticated } = useModuleProgress(4, {
+    ...module4Badge,
+    moduleId: 4
   })
-  const [currentStep, setCurrentStep] = useState<'intro' | 'theory' | 'questions' | 'mining' | 'pooling' | 'reward'>('intro')
-  const [isLoading, setIsLoading] = useState(false)
+  
+  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
+  const [miningResults, setMiningResults] = useState<MiningResults>({})
 
-  const totalItems = module4Questions.length + module4Tasks.length
-  const completedItems = progress.questionsAnswered.length + progress.tasksCompleted.length
-  const progressPercentage = (completedItems / totalItems) * 100
 
-  useEffect(() => {
-    // Load progress from localStorage for guest users
-    const savedProgress = localStorage.getItem('module4_progress')
-    if (savedProgress) {
-      setProgress(JSON.parse(savedProgress))
-    }
-  }, [])
-
-  const saveProgress = (newProgress: ModuleProgress) => {
-    setProgress(newProgress)
-    localStorage.setItem('module4_progress', JSON.stringify(newProgress))
+  const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
+    await handleQuestionsComplete(score, total)
+    // Auto advance to tasks after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('tasks')
+    }, 2000)
   }
 
-  const handleQuestionAnswer = (questionId: number, isCorrect: boolean) => {
-    if (progress.questionsAnswered.includes(questionId)) return
-
-    const newProgress = {
-      ...progress,
-      questionsAnswered: [...progress.questionsAnswered, questionId],
-      score: progress.score + (isCorrect ? 10 : 0)
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
+    
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
+      setTimeout(() => {
+        setCurrentSection('completed')
+      }, 2000)
     }
-
-    saveProgress(newProgress)
   }
 
-  const handleMiningComplete = (hash: string, nonce: number) => {
-    if (progress.tasksCompleted.includes(1)) return
-
-    const newProgress = {
-      ...progress,
-      tasksCompleted: [...progress.tasksCompleted, 1],
-      score: progress.score + 20,
-      miningResults: {
-        ...progress.miningResults,
-        hashFound: hash
-      }
-    }
-
-    // Check if module is completed
-    if (newProgress.questionsAnswered.length === module4Questions.length && 
-        newProgress.tasksCompleted.length === module4Tasks.length) {
-      newProgress.completed = true
-    }
-
-    saveProgress(newProgress)
+  const handleMiningComplete = (hash: string) => {
+    setMiningResults(prev => ({
+      ...prev,
+      hashFound: hash
+    }))
   }
 
   const handlePoolMiningComplete = (rewards: number) => {
-    if (progress.tasksCompleted.includes(2)) return
-
-    const newProgress = {
-      ...progress,
-      tasksCompleted: [...progress.tasksCompleted, 2],
-      score: progress.score + 20,
-      miningResults: {
-        ...progress.miningResults,
-        poolRewards: rewards
-      }
-    }
-
-    // Check if module is completed
-    if (newProgress.questionsAnswered.length === module4Questions.length && 
-        newProgress.tasksCompleted.length === module4Tasks.length) {
-      newProgress.completed = true
-    }
-
-    saveProgress(newProgress)
+    setMiningResults(prev => ({
+      ...prev,
+      poolRewards: rewards
+    }))
   }
 
-  const handleBadgeClaim = () => {
-    alert('🎉 Badge "Minerador Aprendiz" conquistado! Para salvar permanentemente, faça login.')
-  }
 
-  const renderIntro = () => (
-    <div className="space-y-6">
-      <IntroVideo
-        title="Mineração Bitcoin: Proof-of-Work"
-        description="Entenda como funciona a mineração e a segurança do Bitcoin"
-        duration="3 minutos"
-        onComplete={() => setCurrentStep('theory')}
-      />
-    </div>
+  // Calculate overall progress
+  const overallProgress = (
+    (progress.questionsCompleted ? 40 : 0) +
+    (progress.tasksCompleted ? 40 : 0) +
+    (progress.badgeEarned ? 20 : 0)
   )
 
-  const renderTheory = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">🔍 Teoria da Mineração</h2>
-        <p className="text-gray-600">Explore as bases teóricas do proof-of-work</p>
-      </div>
-
-      <HashVisualizer onHashGenerated={(hash) => console.log('Hash generated:', hash)} />
-      
-      <DifficultyExplainer />
-
-      <div className="text-center">
-        <Button onClick={() => setCurrentStep('questions')} size="lg">
-          ✅ Continuar para Perguntas
-        </Button>
-      </div>
-    </div>
-  )
-
-  const renderQuestions = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">📝 Perguntas Teóricas</h2>
-        <p className="text-gray-600">Teste seus conhecimentos sobre mineração Bitcoin</p>
-      </div>
-
-      {module4Questions.map((question) => (
-        <QuestionCard
-          key={question.id}
-          question={question}
-          onAnswer={(isCorrect) => handleQuestionAnswer(question.id, isCorrect)}
-          showResult={progress.questionsAnswered.includes(question.id)}
-        />
-      ))}
-
-      {progress.questionsAnswered.length === module4Questions.length && (
-        <div className="text-center">
-          <Button onClick={() => setCurrentStep('mining')} size="lg">
-            ⛏️ Começar Simulação de Mineração
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-
-  const renderMining = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">⛏️ Simulação de Mineração</h2>
-        <p className="text-gray-600">Execute o algoritmo de proof-of-work</p>
-      </div>
-
-      <MiningSimulator 
-        onHashFound={(hash, nonce) => handleMiningComplete(hash, nonce)}
-        targetZeros={4}
-      />
-
-      {progress.tasksCompleted.includes(1) && (
-        <div className="text-center">
-          <Button onClick={() => setCurrentStep('pooling')} size="lg">
-            👥 Continuar para Pool Mining
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-
-  const renderPooling = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">👥 Pool Mining</h2>
-        <p className="text-gray-600">Simule participação em pool de mineração</p>
-      </div>
-
-      <PoolMiningSimulator 
-        onRewardEarned={(reward) => handlePoolMiningComplete(reward)}
-        targetTime={300} // 5 minutes
-      />
-
-      {progress.tasksCompleted.includes(2) && (
-        <div className="text-center">
-          <Button onClick={() => setCurrentStep('reward')} size="lg">
-            🏆 Resgatar Recompensa
-          </Button>
-        </div>
-      )}
-    </div>
-  )
-
-  const renderReward = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">🎉 Parabéns!</h2>
-        <p className="text-gray-600">Você completou o Módulo 4 com sucesso</p>
-      </div>
-
-      <BadgeReward
-        {...module4Badge}
-        isEarned={progress.completed}
-        onClaim={session ? undefined : handleBadgeClaim}
-        isLoading={isLoading}
-      />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>📊 Seu Desempenho</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{progress.score}</div>
-              <div className="text-sm text-gray-600">Pontos</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{progress.questionsAnswered.length}/{module4Questions.length}</div>
-              <div className="text-sm text-gray-600">Perguntas</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{progress.tasksCompleted.length}/{module4Tasks.length}</div>
-              <div className="text-sm text-gray-600">Tarefas</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">
-                {progress.miningResults.poolRewards ? progress.miningResults.poolRewards.toFixed(6) : '0.000000'}
-              </div>
-              <div className="text-sm text-gray-600">BTC Minerado</div>
-            </div>
+  // Login required screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4">
+            <Link href="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+              <span>Voltar</span>
+            </Link>
           </div>
-        </CardContent>
-      </Card>
+        </header>
 
-      {progress.miningResults.hashFound && (
-        <Card>
-          <CardHeader>
-            <CardTitle>⛏️ Resultados da Mineração</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <span className="font-medium">Hash Encontrado:</span>
-                <div className="font-mono text-sm bg-gray-50 p-2 rounded mt-1 break-all">
-                  {progress.miningResults.hashFound}
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          <Card className="bg-gray-900 border-gray-800 text-center">
+            <CardHeader>
+              <CardTitle className="text-2xl text-orange-400 flex items-center justify-center">
+                <Zap className="h-8 w-8 mr-3" />
+                Mineração no Bitcoin
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Aprenda sobre proof-of-work e simule o processo de mineração
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-orange-400 mb-4">🔒 Login Necessário</h3>
+                <p className="text-gray-300 mb-4">
+                  Este módulo requer login para acessar as simulações de mineração e salvar seu progresso.
+                </p>
+                <div className="space-y-2 text-sm text-gray-400">
+                  <p>🎯 <strong>Objetivos:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Entender o conceito de prova de trabalho (proof-of-work)</li>
+                    <li>Compreender o papel dos mineradores na segurança da rede</li>
+                    <li>Simular o processo de mineração com algoritmo SHA-256</li>
+                    <li>Explorar pools de mineração e recompensas</li>
+                  </ul>
                 </div>
               </div>
-              {progress.miningResults.poolRewards && (
-                <div>
-                  <span className="font-medium">Recompensas de Pool:</span>
-                  <div className="text-lg font-bold text-green-600">
-                    {progress.miningResults.poolRewards.toFixed(6)} BTC
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-lg text-center">
-        <h3 className="text-xl font-bold mb-2">🚀 Próximos Passos</h3>
-        <p className="mb-4">
-          {session 
-            ? "Continue para o Módulo 5 e aprenda sobre Lightning Network!"
-            : "Faça login para salvar seu progresso e acessar todos os módulos!"}
-        </p>
-        <div className="flex gap-4 justify-center">
-          {session ? (
-            <Button variant="secondary" size="lg">
-              ⚡ Módulo 5: Lightning Network
-            </Button>
-          ) : (
-            <Button variant="secondary" size="lg">
-              🔐 Fazer Login
-            </Button>
-          )}
-        </div>
+              <div className="space-y-4">
+                <Link href="/auth/login">
+                  <Button className="w-full bg-orange-500 hover:bg-orange-600 text-lg px-8 py-3">
+                    Fazer Login para Continuar
+                  </Button>
+                </Link>
+                <Link href="/auth/register">
+                  <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                    Criar Conta Gratuita
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
       </div>
-    </div>
-  )
-
-  const stepComponents = {
-    intro: renderIntro,
-    theory: renderTheory,
-    questions: renderQuestions,
-    mining: renderMining,
-    pooling: renderPooling,
-    reward: renderReward
+    )
   }
 
   return (
-    <ModuleLayout>
-      <div className="max-w-4xl mx-auto">
-        <ModuleHeader
-          moduleId={module4Data.id}
-          title={module4Data.title}
-          description={module4Data.description}
-          objectives={module4Data.objectives}
-          requiresLogin={module4Data.requiresLogin}
-          progress={progressPercentage}
-          isAuthenticated={!!session}
-        />
-
-        {/* Step Navigation */}
-        <div className="flex justify-center mb-8 overflow-x-auto">
-          <div className="flex items-center gap-2 md:gap-4 px-4">
-            {[
-              { key: 'intro', label: 'Vídeo', icon: '🎬' },
-              { key: 'theory', label: 'Teoria', icon: '🧠' },
-              { key: 'questions', label: 'Perguntas', icon: '❓' },
-              { key: 'mining', label: 'Mineração', icon: '⛏️' },
-              { key: 'pooling', label: 'Pool', icon: '👥' },
-              { key: 'reward', label: 'Recompensa', icon: '🏆' }
-            ].map((step, index) => (
-              <div key={step.key} className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${
-                  currentStep === step.key 
-                    ? 'bg-orange-600 text-white' 
-                    : completedItems > index * (totalItems / 5)
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                }`}>
-                  {completedItems > index * (totalItems / 5) ? '✓' : step.icon}
-                </div>
-                <span className="text-sm font-medium hidden sm:inline whitespace-nowrap">{step.label}</span>
-                {index < 5 && <div className="w-4 md:w-8 h-0.5 bg-gray-200 shrink-0"></div>}
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+              <span>Voltar</span>
+            </Link>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-400">
+                Tempo: {Math.floor(progress.timeSpent / 60)}m {progress.timeSpent % 60}s
               </div>
-            ))}
+              <Badge variant="secondary" className="bg-orange-500/20 text-orange-400">
+                Módulo 4
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Module Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <Zap className="h-12 w-12 text-orange-500 mr-4" />
+            <div>
+              <h1 className="text-3xl font-bold">Mineração no Bitcoin</h1>
+              <p className="text-gray-400 mt-2">Aprenda sobre proof-of-work e simule o processo de mineração</p>
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="max-w-md mx-auto">
+            <div className="flex justify-between text-sm text-gray-400 mb-2">
+              <span>Progresso Geral</span>
+              <span>{overallProgress}%</span>
+            </div>
+            <Progress value={overallProgress} className="h-3" />
           </div>
         </div>
 
-        {stepComponents[currentStep]()}
-      </div>
-    </ModuleLayout>
+        {/* Introduction Section */}
+        {currentSection === 'intro' && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center text-xl">
+                  <Zap className="h-6 w-6 text-orange-500 mr-3" />
+                  Mineração Bitcoin: Proof-of-Work
+                </CardTitle>
+                <CardDescription>
+                  Descubra como funciona a mineração e a segurança do Bitcoin
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <h3 className="font-semibold text-white mb-2">O que você vai aprender:</h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                    <li>O conceito de prova de trabalho (proof-of-work)</li>
+                    <li>Como os mineradores protegem a rede Bitcoin</li>
+                    <li>Simulação prática do processo de mineração</li>
+                    <li>Como funcionam os pools de mineração</li>
+                    <li>Relação entre dificuldade e tempo de bloco</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                  <h3 className="font-semibold text-orange-400 mb-2">⚡ Experiência Prática:</h3>
+                  <p className="text-orange-300 text-sm">
+                    Você vai usar simuladores reais para entender como funciona a mineração Bitcoin, 
+                    experimentando com diferentes níveis de dificuldade e pools de mineração.
+                  </p>
+                </div>
+                
+                <div className="text-center pt-4">
+                  <Button 
+                    onClick={() => setCurrentSection('questions')}
+                    className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-3"
+                  >
+                    Começar Aprendizado
+                    <BookOpen className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Questions Section */}
+        {currentSection === 'questions' && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">📚 Perguntas Teóricas</CardTitle>
+                <CardDescription className="text-center">
+                  Teste seus conhecimentos sobre mineração Bitcoin
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <QuestionSystem 
+              questions={moduleQuestions}
+              onComplete={handleQuestionsCompleteWithAdvance}
+              moduleId={4}
+            />
+          </div>
+        )}
+
+        {/* Tasks Section */}
+        {currentSection === 'tasks' && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">🎯 Simulações Práticas</CardTitle>
+                <CardDescription className="text-center">
+                  Experimente a mineração Bitcoin com simuladores interativos
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            {/* Mining Simulator */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-lg">⛏️ Tarefa 1: Simulador de Mineração</CardTitle>
+                <CardDescription>
+                  Use o simulador para encontrar um hash válido com 4 zeros iniciais
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MiningSimulator 
+                  onHashFound={handleMiningComplete}
+                  targetZeros={4}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Pool Mining Simulator */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-lg">👥 Tarefa 2: Simulação de Pool Mining</CardTitle>
+                <CardDescription>
+                  Participe de um pool de mineração por 5 minutos e observe as recompensas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PoolMiningSimulator 
+                  onRewardEarned={handlePoolMiningComplete}
+                  targetTime={300}
+                />
+              </CardContent>
+            </Card>
+            
+            <TaskSystem 
+              tasks={moduleTasks}
+              onComplete={handleTasksCompleteWithAdvance}
+              moduleId={4}
+            />
+          </div>
+        )}
+
+        {/* Completion Screen */}
+        {currentSection === 'completed' && (
+          <Card className="bg-gray-900 border-gray-800 text-center">
+            <CardHeader>
+              <CardTitle className="text-2xl text-green-400 flex items-center justify-center">
+                <Trophy className="h-8 w-8 mr-3" />
+                Parabéns! Módulo Concluído
+              </CardTitle>
+              <CardDescription>
+                Você completou com sucesso o Módulo 4 - Mineração no Bitcoin
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {progress.badgeEarned && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-6">
+                  <div className="text-4xl mb-2">🏆</div>
+                  <h3 className="text-xl font-semibold text-green-400 mb-2">Badge Conquistado!</h3>
+                  <Badge className="bg-orange-500/20 text-orange-400 text-lg px-4 py-2">
+                    <Award className="h-5 w-5 mr-2" />
+                    {module4Badge.name}
+                  </Badge>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Você dominou os conceitos de mineração Bitcoin e experimentou o processo de proof-of-work
+                  </p>
+                </div>
+              )}
+
+              {/* Summary */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-orange-400">{progress.questionsScore}/2</div>
+                  <div className="text-sm text-gray-400">Perguntas Corretas</div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-400">{progress.tasksScore}/2</div>
+                  <div className="text-sm text-gray-400">Tarefas Concluídas</div>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <div className="text-2xl font-bold text-purple-400">{Math.floor(progress.timeSpent / 60)}m</div>
+                  <div className="text-sm text-gray-400">Tempo Total</div>
+                </div>
+              </div>
+
+              {/* Mining Results */}
+              {(miningResults.hashFound || miningResults.poolRewards) && (
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <h3 className="font-semibold text-white mb-3">⛏️ Seus Resultados de Mineração:</h3>
+                  <div className="space-y-2 text-sm text-gray-300">
+                    {miningResults.hashFound && (
+                      <div>
+                        <span className="font-medium">Hash Encontrado:</span>
+                        <div className="font-mono text-xs bg-gray-700 p-2 rounded mt-1 break-all">
+                          {miningResults.hashFound}
+                        </div>
+                      </div>
+                    )}
+                    {miningResults.poolRewards && (
+                      <div>
+                        <span className="font-medium">Recompensas do Pool:</span>
+                        <div className="text-lg font-bold text-green-400">
+                          {miningResults.poolRewards.toFixed(6)} BTC
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Learning Summary */}
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h3 className="font-semibold text-white mb-3">🎓 O que você aprendeu:</h3>
+                <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm text-left">
+                  <li>Proof-of-work é um mecanismo de consenso que garante segurança</li>
+                  <li>Mineradores competem para encontrar hashes válidos</li>
+                  <li>A dificuldade ajusta automaticamente o tempo entre blocos</li>
+                  <li>Pools de mineração permitem cooperação entre mineradores</li>
+                  <li>Taxas de transação incentivam a inclusão de transações</li>
+                </ul>
+              </div>
+
+              {/* Next Steps */}
+              <div className="space-y-4">
+                <p className="text-gray-300">
+                  Excelente! Agora você compreende como funciona a mineração Bitcoin. 
+                  Continue sua jornada explorando a Lightning Network.
+                </p>
+                
+                <div className="flex space-x-4">
+                  <Link href="/modules/5" className="flex-1">
+                    <Button className="w-full bg-orange-500 hover:bg-orange-600">
+                      Próximo Módulo: Lightning Network
+                    </Button>
+                  </Link>
+                  <Link href="/">
+                    <Button variant="outline" className="border-gray-600 text-gray-300">
+                      Voltar ao Início
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Navigation Buttons */}
+        {currentSection !== 'intro' && currentSection !== 'completed' && (
+          <div className="flex justify-between mt-8">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                if (currentSection === 'tasks') setCurrentSection('questions')
+                if (currentSection === 'questions') setCurrentSection('intro')
+              }}
+              className="border-gray-600 text-gray-300"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+            
+            {currentSection === 'questions' && progress.questionsCompleted && (
+              <Button 
+                onClick={() => setCurrentSection('tasks')}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Ir para Simulações Práticas
+              </Button>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
   )
 }

@@ -8,7 +8,7 @@ export const module2Data = {
     "Entender a importância das chaves privadas",
     "Aprender a proteger frases-semente (seed phrases)",
     "Gerar sua primeira carteira Bitcoin na Signet",
-    "Compreender como funciona o sistema de login do SatsLab",
+    "Conhecer a diferença entre hot wallets e cold wallets",
     "Praticar boas práticas de segurança"
   ],
   requiresLogin: true,
@@ -43,15 +43,15 @@ export const module2Questions: Question[] = [
   },
   {
     id: 3,
-    question: "Como sua chave privada de login protege seu progresso no SatsLab?",
+    question: "Qual é a diferença entre hot wallet e cold wallet?",
     options: [
-      "Criptografando arquivos localmente",
-      "Funcionando como backup na nuvem",
-      "Identificando você de forma única e segura",
-      "Sincronizando com outras carteiras"
+      "Hot wallets são mais caras que cold wallets",
+      "Cold wallets só funcionam com Bitcoin, hot wallets aceitam várias moedas",
+      "Hot wallets ficam online, cold wallets ficam offline",
+      "Não há diferença significativa entre elas"
     ],
     correctAnswer: 2,
-    explanation: "Sua chave privada de login funciona como uma identidade digital única. Assim como uma chave privada Bitcoin prova que você possui certos fundos, ela prova que você é o dono daquele progresso educacional específico."
+    explanation: "Hot wallets estão conectadas à internet (apps, extensões), oferecendo conveniência mas maior risco. Cold wallets ficam offline (hardware wallets, paper wallets), proporcionando máxima segurança para grandes quantias."
   }
 ]
 
@@ -77,28 +77,45 @@ export const module2Tasks: Task[] = [
       "Guarde sua seed phrase em local seguro - você precisará dela depois",
       "Faucets podem demorar alguns minutos para enviar",
       "Você pode verificar o recebimento no mempool.space/signet"
+    ],
+    externalLinks: [
+      {
+        label: "Signet Faucet",
+        url: "https://signet.bc-2.jp/"
+      },
+      {
+        label: "Verificar Transação",
+        url: "https://mempool.space/signet"
+      }
     ]
   },
   {
     id: 2,
-    title: "Proteger Seed Phrase",
-    description: "Gere e confirme o armazenamento seguro de uma frase-semente.",
+    title: "Verificar Transação do Faucet",
+    description: "Use o explorador blockchain para verificar se recebeu sBTC do faucet na sua carteira.",
     instructions: [
-      "Use o gerador para criar uma nova seed phrase de 12 palavras",
-      "Anote todas as palavras em ordem em papel físico",
-      "Confirme que anotou corretamente selecionando palavras aleatórias",
-      "Para finalizar, digite a primeira palavra da sua seed phrase"
+      "Use o faucet integrado abaixo para solicitar sBTC para sua carteira",
+      "Aguarde o processamento da transação (cerca de 30 segundos)",
+      "Copie o hash (TXID) da transação gerada",
+      "Opcionalmente, verifique a transação no explorador mempool.space/signet",
+      "Cole o TXID no campo abaixo para completar a tarefa"
     ],
-    type: "wallet" as const,
+    type: "explorer" as const,
     validation: {
-      type: "address" as const,
-      placeholder: "Digite a primeira palavra da sua seed phrase"
+      type: "hash" as const,
+      placeholder: "Cole o hash da transação que recebeu do faucet (64 caracteres)"
     },
     hints: [
-      "Nunca compartilhe sua seed phrase com ninguém",
-      "Anote em papel, não em arquivo digital",
-      "Guarde em local seguro, protegido de fogo e água",
-      "Algumas pessoas fazem múltiplas cópias em locais diferentes"
+      "O faucet pode demorar alguns minutos para enviar",
+      "Procure por transações de entrada (inputs) no seu endereço",
+      "O hash da transação tem exatamente 64 caracteres hexadecimais",
+      "Se não recebeu ainda, aguarde mais alguns minutos e atualize a página"
+    ],
+    externalLinks: [
+      {
+        label: "Explorador Signet",
+        url: "https://mempool.space/signet"
+      }
     ]
   }
 ]

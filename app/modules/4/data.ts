@@ -1,4 +1,4 @@
-import { Question } from '@/app/types'
+import { Question, Task, BadgeTemplate } from '@/app/types'
 
 export const module4Data = {
   id: 4,
@@ -43,7 +43,7 @@ export const module4Questions: Question[] = [
   }
 ]
 
-export const module4Tasks = [
+export const module4Tasks: Task[] = [
   {
     id: 1,
     title: "Simulador de Mineração",
@@ -52,18 +52,18 @@ export const module4Tasks = [
       "Inicie o simulador de mineração abaixo",
       "Observe o processo de tentativa e erro do algoritmo",
       "Aguarde até encontrar um hash que comece com '0000'",
-      "Anote o número de tentativas (nonce) necessárias"
+      "Copie o hash encontrado e cole no campo abaixo"
     ],
     type: "mining" as const,
     validation: {
       type: "hash" as const,
-      placeholder: "Hash encontrado pelo simulador",
-      expectedLength: 64
+      placeholder: "Hash encontrado pelo simulador (64 caracteres)"
     },
     hints: [
       "O processo pode levar alguns segundos dependendo da sorte",
       "Cada tentativa gera um hash diferente incrementando o nonce",
-      "Um hash válido deve começar com '0000' (4 zeros)"
+      "Um hash válido deve começar com '0000' (4 zeros)",
+      "O hash tem exatamente 64 caracteres hexadecimais"
     ]
   },
   {
@@ -71,28 +71,28 @@ export const module4Tasks = [
     title: "Simulação de Pool Mining",
     description: "Participe de uma simulação de pool mining por 5 minutos e observe as recompensas.",
     instructions: [
-      "Inicie a simulação de pool mining",
+      "Inicie a simulação de pool mining abaixo",
       "Contribua com hashrate por 5 minutos",
       "Observe sua participação percentual no pool",
-      "Anote as recompensas recebidas proporcionalmente"
+      "Anote as recompensas recebidas proporcionalmente e cole abaixo"
     ],
     type: "mining" as const,
     validation: {
       type: "amount" as const,
-      placeholder: "Recompensa total em sBTC (ex: 0.001)"
+      placeholder: "Recompensa total em BTC (ex: 0.001234)"
     },
     hints: [
       "Pools distribuem recompensas baseadas na contribuição de hashrate",
       "Mesmo pequenas contribuições recebem recompensas regulares",
-      "A simulação acelera o processo real de mineração"
+      "A simulação acelera o processo real de mineração",
+      "Use o valor exato mostrado no simulador"
     ]
   }
 ]
 
-export const module4Badge = {
+export const module4Badge: BadgeTemplate = {
   name: "Minerador Aprendiz",
   description: "Completou simulações de mineração e entendeu o processo de proof-of-work",
   type: "virtual" as const,
-  moduleId: 4,
   imageUrl: "/badges/mining-apprentice.png"
 }

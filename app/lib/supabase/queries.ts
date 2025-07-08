@@ -1,71 +1,105 @@
-import { createServerClient } from './server'
 import { createClient } from './client'
 import { User, ModuleProgress, Badge } from '@/app/types'
 
 export async function getUserByPublicKey(publicKey: string): Promise<User | null> {
-  const supabase = createServerClient()
-  
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('public_key', publicKey)
-    .single()
-  
-  if (error) return null
-  
-  const progress = await getUserProgress(data.id)
-  const badges = await getUserBadges(data.id)
-  
-  return {
-    id: data.id,
-    publicKey: data.public_key,
-    progress,
-    badges,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at
+  try {
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('public_key', publicKey)
+      .single()
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No user found - this is normal for new users
+        return null
+      }
+      console.error('Error fetching user:', error)
+      return null
+    }
+    
+    const progress = await getUserProgress(data.id)
+    const badges = await getUserBadges(data.id)
+    
+    return {
+      id: data.id,
+      publicKey: data.public_key,
+      progress,
+      badges,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    }
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return null
   }
 }
 
-export async function createUser(publicKey: string): Promise<User | null> {
-  const supabase = createServerClient()
-  
-  const { data, error } = await supabase
-    .from('users')
-    .insert([{ public_key: publicKey }])
-    .select()
-    .single()
-  
-  if (error) return null
-  
-  return {
-    id: data.id,
-    publicKey: data.public_key,
-    progress: [],
-    badges: [],
-    createdAt: data.created_at,
-    updatedAt: data.updated_at
+export async function createUser(publicKey: string, ipAddress?: string): Promise<User | null> {
+  try {
+    const supabase = createClient()
+    
+    const userData: any = { public_key: publicKey }
+    if (ipAddress) {
+      userData.ip_address = ipAddress
+      userData.last_login_ip = ipAddress
+      userData.last_login_at = new Date().toISOString()
+    }
+    
+    const { data, error } = await supabase
+      .from('users')
+      .insert([userData])
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error creating user:', error)
+      return null
+    }
+    
+    return {
+      id: data.id,
+      publicKey: data.public_key,
+      progress: [],
+      badges: [],
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    }
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return null
   }
 }
 
 export async function getUserProgress(userId: string): Promise<ModuleProgress[]> {
-  const supabase = createServerClient()
-  
-  const { data, error } = await supabase
-    .from('module_progress')
-    .select('*')
-    .eq('user_id', userId)
-    .order('module_id')
-  
-  if (error) return []
-  
-  return data.map(item => ({
-    moduleId: item.module_id,
-    completed: item.completed,
-    currentTask: item.current_task,
-    completedTasks: item.completed_tasks,
-    score: item.score,
-    completedAt: item.completed_at
-  }))
+  try {
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .order('module_id')
+    
+    if (error) {
+      console.error('Error loading user progress:', error)
+      return []
+    }
+    
+    return data?.map(item => ({
+      moduleId: item.module_id,
+      completed: item.completed,
+      currentTask: item.current_task,
+      completedTasks: item.completed_tasks || [],
+      score: item.score || 0,
+      completedAt: item.completed_at
+    })) || []
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return []
+  }
 }
 
 export async function updateModuleProgress(
@@ -76,41 +110,54 @@ export async function updateModuleProgress(
   const supabase = createClient()
   
   const { error } = await supabase
-    .from('module_progress')
+    .from('user_progress')
     .upsert({
       user_id: userId,
       module_id: moduleId,
-      completed: progress.completed,
-      current_task: progress.currentTask,
-      completed_tasks: progress.completedTasks,
-      score: progress.score,
-      completed_at: progress.completed ? new Date().toISOString() : null
+      completed: progress.completed || false,
+      current_task: progress.currentTask || 0,
+      completed_tasks: progress.completedTasks || [],
+      score: progress.score || 0,
+      completed_at: progress.completed ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
     })
+  
+  if (error) {
+    console.error('Error updating module progress:', error)
+  }
   
   return !error
 }
 
 export async function getUserBadges(userId: string): Promise<Badge[]> {
-  const supabase = createServerClient()
-  
-  const { data, error } = await supabase
-    .from('badges')
-    .select('*')
-    .eq('user_id', userId)
-    .order('earned_at', { ascending: false })
-  
-  if (error) return []
-  
-  return data.map(item => ({
-    id: item.id,
-    name: item.name,
-    description: item.description,
-    moduleId: item.module_id,
-    type: item.type,
-    imageUrl: item.image_url,
-    ordinalId: item.ordinal_id,
-    earnedAt: item.earned_at
-  }))
+  try {
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
+      .from('badges')
+      .select('*')
+      .eq('user_id', userId)
+      .order('earned_at', { ascending: false })
+    
+    if (error) {
+      console.error('Error loading user badges:', error)
+      return []
+    }
+    
+    return data?.map(item => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      moduleId: item.module_id,
+      type: item.type,
+      imageUrl: item.image_url,
+      ordinalId: item.ordinal_id,
+      earnedAt: item.earned_at
+    })) || []
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return []
+  }
 }
 
 export async function awardBadge(

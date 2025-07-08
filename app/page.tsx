@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/app/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
@@ -6,8 +8,10 @@ import { Progress } from '@/app/components/ui/progress'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
   ChevronRight, Bitcoin, Trophy, Clock, CheckCircle, Circle,
-  Target, Gamepad2, Award
+  Target, Gamepad2, Award, LogOut
 } from 'lucide-react'
+import { useAuth } from '@/app/components/auth/AuthProvider'
+import { useEffect, useState } from 'react'
 
 // Dados dos módulos (idêntico ao bitcoin-course)
 const modules = [
@@ -102,6 +106,13 @@ const totalModules = modules.length
 const progressPercentage = (completedModules / totalModules) * 100
 
 export default function HomePage() {
+  const { session, logout } = useAuth()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    setIsAuthenticated(!!session)
+  }, [session])
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -113,16 +124,36 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-white">SatsLab</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth">
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                  Entrar
-                </Button>
-              </Link>
-              <Link href="/modules/1">
-                <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-                  Começar Curso
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-300 hover:text-white"
+                    onClick={logout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth">
+                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                      Entrar
+                    </Button>
+                  </Link>
+                  <Link href="/modules/1">
+                    <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                      Começar Curso
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

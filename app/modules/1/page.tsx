@@ -1,207 +1,64 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
 import { ArrowLeft, CheckCircle, Clock, Trophy, BookOpen, Award } from 'lucide-react'
 import Link from 'next/link'
-import { supabase } from '@/app/lib/supabase'
+import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
+import { module1Questions, module1Tasks, module1Badge } from './data'
 
-// Types
-interface UserProgress {
-  timeSpent: number
-  questionsCompleted: boolean
-  questionsScore: number
-  tasksCompleted: boolean
-  tasksScore: number
-  badgeEarned: boolean
-  completed: boolean
-}
 
-// Module 1 Data
-const moduleQuestions = [
-  {
-    id: 'blockchain_definition',
-    question: 'O que é uma blockchain?',
-    options: [
-      'Um tipo de criptomoeda',
-      'Um software de mineração',
-      'Um livro-razão distribuído',
-      'Um protocolo de internet'
-    ],
-    correct: 2,
-    explanation: 'Blockchain é um livro-razão distribuído que registra transações de forma transparente e imutável, mantido por uma rede descentralizada de computadores.',
-    hint: 'Pense em um livro de registros que é compartilhado e verificado por todos os participantes da rede.'
-  },
-  {
-    id: 'mainnet_vs_signet',
-    question: 'Qual é a diferença principal entre Mainnet e Signet?',
-    options: [
-      'Signet é mais rápida que a Mainnet',
-      'Mainnet usa moedas reais; Signet é para testes',
-      'Signet tem mais segurança que a Mainnet',
-      'Não há diferença significativa'
-    ],
-    correct: 1,
-    explanation: 'A Mainnet é a rede principal do Bitcoin onde as transações envolvem bitcoin real com valor econômico. A Signet é uma rede de teste onde os bitcoins não têm valor real, sendo usada para experimentação e desenvolvimento.',
-    hint: 'Uma das redes usa dinheiro real, a outra é apenas para praticar e testar.'
-  },
-  {
-    id: 'faucet_definition',
-    question: 'O que é um faucet na rede Signet?',
-    options: [
-      'Um tipo de carteira Bitcoin',
-      'Um serviço que distribui bitcoins de teste gratuitos',
-      'Um protocolo de segurança',
-      'Um tipo de transação especial'
-    ],
-    correct: 1,
-    explanation: 'Um faucet é um serviço que distribui pequenas quantidades de bitcoins de teste (sBTC) gratuitamente para desenvolvedores e estudantes poderem experimentar com a rede Signet sem custos.',
-    hint: 'É como uma "torneira" que goteja bitcoins de teste gratuitos para quem quer aprender.'
-  }
-]
+// Use imported data - converting format
+const moduleQuestions = module1Questions.map(q => ({
+  id: q.id.toString(),
+  question: q.question,
+  options: q.options,
+  correct: q.correctAnswer, // Already 0-based index
+  explanation: q.explanation,
+  hint: '' // Add default hint as it's not in the imported data
+}))
 
-const moduleTasks = [
-  {
-    id: 'explore_mempool',
-    title: 'Explorar o Mempool Signet',
-    description: 'Encontre uma transação recente na rede Signet usando o explorador mempool.space',
-    instructions: [
-      'Acesse mempool.space/signet no seu navegador',
-      'Observe as transações recentes na página inicial',
-      'Clique em uma transação para ver seus detalhes',
-      'Copie o hash (ID) da transação (64 caracteres hexadecimais)',
-      'Cole o hash no campo abaixo para validação'
-    ],
-    inputLabel: 'Hash da Transação (TXID)',
-    inputPlaceholder: 'ex: a1b2c3d4e5f6...',
-    validationType: 'transaction' as const,
-    hints: [
-      'O hash da transação aparece no topo da página de detalhes da transação.',
-      'Um hash válido tem exatamente 64 caracteres e contém apenas números (0-9) e letras (a-f).',
-      'Se estiver com dificuldade, procure por "Recent Transactions" na página inicial do mempool.'
-    ],
-    externalLinks: [
-      {
-        label: 'Mempool Signet Explorer',
-        url: 'https://mempool.space/signet'
-      }
-    ]
-  },
-  {
-    id: 'read_transaction_value',
-    title: 'Identificar Valor da Transação',
-    description: 'Analise uma transação no explorador e identifique o valor total transferido',
-    instructions: [
-      'Escolha uma transação no mempool.space/signet',
-      'Na página da transação, observe a seção "Outputs"',
-      'Some todos os valores dos outputs (em sBTC)',
-      'Subtraia o valor que retorna para o remetente (change)',
-      'O resultado é o valor líquido transferido'
-    ],
-    inputLabel: 'Valor Total Transferido (em sBTC)',
-    inputPlaceholder: 'ex: 0.001',
-    validationType: 'amount' as const,
-    hints: [
-      'Os outputs mostram para onde o dinheiro está indo. Um dos outputs geralmente é o "troco" que volta para o remetente.',
-      'O valor transferido é normalmente menor que a soma total dos outputs.',
-      'Observe que 1 sBTC = 100,000,000 satoshis. O explorador pode mostrar valores em diferentes unidades.'
-    ],
-    externalLinks: [
-      {
-        label: 'Mempool Signet Explorer',
-        url: 'https://mempool.space/signet'
-      }
-    ]
-  }
-]
+const moduleTasks = module1Tasks.map(t => ({
+  id: t.id.toString(),
+  title: t.title,
+  description: t.description,
+  instructions: t.instructions,
+  inputLabel: t.validation.type === 'hash' ? 'Hash da Transação (TXID)' : 'Valor Total Transferido (em sBTC)',
+  inputPlaceholder: t.validation.placeholder,
+  validationType: (t.validation.type === 'hash' ? 'transaction' : 'amount') as 'transaction' | 'amount' | 'address' | 'custom',
+  hints: t.hints,
+  externalLinks: [
+    {
+      label: 'Mempool Signet Explorer',
+      url: 'https://mempool.space/signet'
+    }
+  ]
+}))
 
 export default function Module1() {
-  const [progress, setProgress] = useState<UserProgress>({
-    timeSpent: 0,
-    questionsCompleted: false,
-    questionsScore: 0,
-    tasksCompleted: false,
-    tasksScore: 0,
-    badgeEarned: false,
-    completed: false
-  })
-  
+  const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(1, module1Badge)
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
-  const [startTime] = useState(Date.now())
 
-  const handleQuestionsComplete = (score: number, total: number) => {
-    setProgress(prev => ({
-      ...prev,
-      questionsCompleted: true,
-      questionsScore: score
-    }))
-    
+  const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
+    await handleQuestionsComplete(score, total)
     // Auto advance to tasks after 2 seconds
     setTimeout(() => {
       setCurrentSection('tasks')
     }, 2000)
   }
 
-  const handleTasksComplete = (completedTasks: number, totalTasks: number) => {
-    const allTasksCompleted = completedTasks === totalTasks
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
     
-    setProgress(prev => ({
-      ...prev,
-      tasksCompleted: true,
-      tasksScore: completedTasks,
-      badgeEarned: allTasksCompleted && prev.questionsCompleted,
-      completed: allTasksCompleted && prev.questionsCompleted
-    }))
-    
-    if (allTasksCompleted && progress.questionsCompleted) {
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
       setTimeout(() => {
         setCurrentSection('completed')
-        saveProgress()
       }, 2000)
-    }
-  }
-
-  // Timer effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => ({
-        ...prev,
-        timeSpent: Math.floor((Date.now() - startTime) / 1000)
-      }))
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [startTime])
-
-  // Save progress to Supabase (only if user is logged in)
-  const saveProgress = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return // Skip saving if not logged in
-      
-      const { error } = await supabase
-        .from('user_progress')
-        .upsert({
-          user_id: user.id,
-          module_id: 1,
-          completed: progress.completed,
-          badge_earned: progress.badgeEarned,
-          questions_score: progress.questionsScore,
-          tasks_score: progress.tasksScore,
-          time_spent: progress.timeSpent,
-          updated_at: new Date().toISOString()
-        })
-      
-      if (error) {
-        console.error('Error saving progress:', error)
-      }
-    } catch (error) {
-      console.error('Error saving progress:', error)
     }
   }
 
@@ -315,7 +172,7 @@ export default function Module1() {
             
             <QuestionSystem 
               questions={moduleQuestions}
-              onComplete={handleQuestionsComplete}
+              onComplete={handleQuestionsCompleteWithAdvance}
               moduleId={1}
             />
           </div>
@@ -335,7 +192,7 @@ export default function Module1() {
             
             <TaskSystem 
               tasks={moduleTasks}
-              onComplete={handleTasksComplete}
+              onComplete={handleTasksCompleteWithAdvance}
               moduleId={1}
             />
           </div>
