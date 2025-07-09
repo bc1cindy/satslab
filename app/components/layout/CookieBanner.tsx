@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/app/components/ui/button'
 import { Card } from '@/app/components/ui/card'
-import { Cookie, Shield, X } from 'lucide-react'
+import { Cookie, Shield, X, Activity, Settings2 } from 'lucide-react'
 
 interface CookiePreferences {
   essential: boolean
@@ -214,6 +214,3 @@ export default function CookieBanner() {
     </div>
   )
 }
-
-// Import Settings2 icon
-import { Settings2 } from 'lucide-react'
