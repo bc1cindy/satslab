@@ -100,7 +100,6 @@ export class SecurityConfigManager {
   private readonly requiredEnvVars: string[] = [
     'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-    'SESSION_ENCRYPTION_KEY',
     'NODE_ENV'
   ]
 

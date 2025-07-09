@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { securityMiddleware } from './app/lib/security/security-middleware'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Get client IP address
   const ip = request.ip || 
              request.headers.get('x-forwarded-for') ||
@@ -31,12 +32,22 @@ export function middleware(request: NextRequest) {
     requestHeaders.set('x-user-city', city)
   }
 
-  // Pass the request with modified headers
-  return NextResponse.next({
+  // Apply enterprise security middleware
+  const securityResponse = await securityMiddleware.handleRequest(request)
+  if (securityResponse) {
+    // Security middleware blocked the request
+    return securityResponse
+  }
+
+  // Create response with modified headers
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders
     }
   })
+
+  // Add security headers to the response
+  return securityMiddleware.addSecurityHeaders(response)
 }
 
 export const config = {

@@ -42,6 +42,7 @@ type SecurityEventType =
   | 'configuration_change'
   | 'system_error'
   | 'security_alert'
+  | 'system_init'
 
 interface SecurityMetrics {
   totalEvents: number
@@ -98,6 +99,16 @@ export class SecurityMonitor {
       SecurityMonitor.instance = new SecurityMonitor()
     }
     return SecurityMonitor.instance
+  }
+
+  /**
+   * Initialize the security monitor system
+   */
+  public async initialize(): Promise<void> {
+    // Perform any initialization tasks
+    this.logEvent('system_init', 'low', 'system', 'security_monitor', {
+      initialization: 'Security monitoring system initialized'
+    })
   }
 
   /**

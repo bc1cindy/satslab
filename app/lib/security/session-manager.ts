@@ -98,7 +98,8 @@ export class SecureSessionManager {
     }
     
     // Generate encryption key from environment or create secure random
-    const keySource = process.env.SESSION_ENCRYPTION_KEY || this.generateSecureKey()
+    const keySource = process.env.SESSION_ENCRYPTION_KEY || 
+      (process.env.NODE_ENV === 'development' ? 'development-key-not-for-production' : this.generateSecureKey())
     this.encryptionKey = Buffer.from(createHash('sha256').update(keySource).digest())
     
     // Clean up expired sessions every 15 minutes
