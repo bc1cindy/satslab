@@ -12,33 +12,30 @@ export class IPAuth {
   
   static async authenticateByIP(): Promise<IPAuthSession | null> {
     try {
-      // Get user IP address
-      let ipAddress: string
-      try {
-        const response = await fetch('https://api.ipify.org?format=json')
-        const data = await response.json()
-        ipAddress = data.ip
-      } catch (error) {
-        console.warn('Could not fetch IP address, using fallback')
-        ipAddress = '127.0.0.1'
+      // Call the API route for IP authentication
+      const response = await fetch('/api/auth/ip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!response.ok) {
+        console.error('IP authentication API failed:', response.status)
+        return null
       }
       
-      // Import queries functions
-      const { getUserByIP, createUserByIP } = await import('@/app/lib/supabase/queries')
+      const data = await response.json()
       
-      // Check if user exists, create if not
-      let user = await getUserByIP(ipAddress)
-      if (!user) {
-        user = await createUserByIP(ipAddress)
-        if (!user) {
-          throw new Error('Failed to create user')
-        }
+      if (!data.success || !data.user) {
+        console.error('IP authentication failed:', data.error)
+        return null
       }
       
       const session: IPAuthSession = {
         user: {
-          id: user.id,
-          ipAddress: user.ipAddress || ipAddress
+          id: data.user.id,
+          ipAddress: data.user.ipAddress
         },
         isAuthenticated: true,
         loginTime: Date.now()

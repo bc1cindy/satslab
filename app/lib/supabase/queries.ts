@@ -240,65 +240,14 @@ export async function recordTransaction(
   return !error
 }
 
-// IP-based authentication functions
+// IP-based authentication functions are now handled by the API route
+// These functions are kept for backward compatibility but should not be used directly
 export async function getUserByIP(ipAddress: string): Promise<{ id: string; ipAddress: string } | null> {
-  try {
-    // Use server client to bypass RLS for system operations
-    const { createServerClient } = await import('./server')
-    const supabase = createServerClient()
-    
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, ip_address')
-      .eq('ip_address', ipAddress)
-      .single()
-    
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      console.error('Error fetching user by IP:', error)
-      return null
-    }
-    
-    return {
-      id: data.id,
-      ipAddress: data.ip_address
-    }
-  } catch (error) {
-    console.error('Database connection error:', error)
-    return null
-  }
+  console.warn('getUserByIP is deprecated. Use /api/auth/ip instead.')
+  return null
 }
 
 export async function createUserByIP(ipAddress: string): Promise<{ id: string; ipAddress: string } | null> {
-  try {
-    // Use server client to bypass RLS for system operations
-    const { createServerClient } = await import('./server')
-    const supabase = createServerClient()
-    
-    const { data, error } = await supabase
-      .from('users')
-      .insert([{
-        public_key: `ip_${ipAddress}_${Date.now()}`, // Unique public_key for IP users
-        ip_address: ipAddress,
-        last_login_ip: ipAddress,
-        last_login_at: new Date().toISOString()
-      }])
-      .select('id, ip_address')
-      .single()
-    
-    if (error) {
-      console.error('Error creating user by IP:', error)
-      return null
-    }
-    
-    return {
-      id: data.id,
-      ipAddress: data.ip_address
-    }
-  } catch (error) {
-    console.error('Database connection error:', error)
-    return null
-  }
+  console.warn('createUserByIP is deprecated. Use /api/auth/ip instead.')
+  return null
 }
