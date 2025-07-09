@@ -11,6 +11,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    appDir: true,
+  },
   webpack: (config, { isServer }) => {
     // Handle WebAssembly modules
     config.experiments = {
