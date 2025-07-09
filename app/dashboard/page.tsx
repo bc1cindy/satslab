@@ -1,6 +1,7 @@
 'use client'
 
-import { useRequireAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
+import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
+import { IPAuth } from '@/app/lib/auth/ip-auth'
 import { Button } from '@/app/components/ui/button'
 import { Progress } from '@/app/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
@@ -15,12 +16,30 @@ import UserAnalytics from '@/app/components/dashboard/UserAnalytics'
 import AnalyticsDebug from '@/app/components/debug/AnalyticsDebug'
 
 export default function DashboardPage() {
-  const { session, isLoading } = useRequireAuth()
+  const { session } = useAuth()
   const [copied, setCopied] = useState(false)
   const [userProgress, setUserProgress] = useState<ModuleProgress[]>([])
   const [userBadges, setUserBadges] = useState<BadgeType[]>([])
   const [userWallets, setUserWallets] = useState<number>(0)
   const [progressLoading, setProgressLoading] = useState(true)
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
+
+  // Auto-authenticate with IP if no session
+  useEffect(() => {
+    const autoAuth = async () => {
+      if (!session && !isAuthenticating) {
+        setIsAuthenticating(true)
+        try {
+          await IPAuth.authenticateByIP()
+        } catch (error) {
+          console.error('Auto authentication failed:', error)
+        } finally {
+          setIsAuthenticating(false)
+        }
+      }
+    }
+    autoAuth()
+  }, [session, isAuthenticating])
 
   // Load user progress and badges
   useEffect(() => {
@@ -69,19 +88,15 @@ export default function DashboardPage() {
     }
   }
 
-  if (isLoading) {
+  if (isAuthenticating || (!session && progressLoading)) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-white">Carregando...</p>
+          <p className="text-white">Carregando dashboard...</p>
         </div>
       </div>
     )
-  }
-
-  if (!session) {
-    return null // useRequireAuth will redirect
   }
 
   const modules = [

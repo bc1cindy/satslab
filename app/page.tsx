@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { Button } from '@/app/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
@@ -7,11 +5,9 @@ import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
-  ChevronRight, Bitcoin, Trophy, Clock, CheckCircle, Circle,
-  Target, Gamepad2, Award, LogOut
+  ChevronRight, Bitcoin, Trophy, Clock,
+  Target, Gamepad2, Award
 } from 'lucide-react'
-import { useAuth } from '@/app/components/auth/AuthProvider'
-import { useEffect, useState } from 'react'
 
 // Dados dos módulos (idêntico ao bitcoin-course)
 const modules = [
@@ -22,10 +18,8 @@ const modules = [
     icon: BookOpen,
     difficulty: "Iniciante",
     duration: "15 min",
-    requiresLogin: false,
     badge: "Explorador Iniciante",
-    color: "bg-blue-500",
-    status: "available" // available, completed, locked
+    color: "bg-blue-500"
   },
   {
     id: 2,
@@ -34,10 +28,8 @@ const modules = [
     icon: Shield,
     difficulty: "Iniciante",
     duration: "20 min",
-    requiresLogin: true,
     badge: "Guardião da Chave",
-    color: "bg-green-500",
-    status: "locked"
+    color: "bg-green-500"
   },
   {
     id: 3,
@@ -46,10 +38,8 @@ const modules = [
     icon: Send,
     difficulty: "Intermediário",
     duration: "25 min",
-    requiresLogin: true,
     badge: "Mensageiro da Blockchain",
-    color: "bg-purple-500",
-    status: "locked"
+    color: "bg-purple-500"
   },
   {
     id: 4,
@@ -58,10 +48,8 @@ const modules = [
     icon: Pickaxe,
     difficulty: "Intermediário",
     duration: "20 min",
-    requiresLogin: true,
     badge: "Minerador Aprendiz",
-    color: "bg-orange-500",
-    status: "locked"
+    color: "bg-orange-500"
   },
   {
     id: 5,
@@ -70,10 +58,8 @@ const modules = [
     icon: Zap,
     difficulty: "Intermediário",
     duration: "30 min",
-    requiresLogin: true,
     badge: "Raio Rápido",
-    color: "bg-yellow-500",
-    status: "locked"
+    color: "bg-yellow-500"
   },
   {
     id: 6,
@@ -82,10 +68,8 @@ const modules = [
     icon: Layers,
     difficulty: "Avançado",
     duration: "35 min",
-    requiresLogin: true,
     badge: "Pioneiro Taproot",
-    color: "bg-indigo-500",
-    status: "locked"
+    color: "bg-indigo-500"
   },
   {
     id: 7,
@@ -94,25 +78,12 @@ const modules = [
     icon: Users,
     difficulty: "Avançado",
     duration: "40 min",
-    requiresLogin: true,
     badge: "Mestre Multisig",
-    color: "bg-red-500",
-    status: "locked"
+    color: "bg-red-500"
   }
 ]
 
-const completedModules = 0 // Calcular dinamicamente
-const totalModules = modules.length
-const progressPercentage = (completedModules / totalModules) * 100
-
 export default function HomePage() {
-  const { session, logout } = useAuth()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  useEffect(() => {
-    setIsAuthenticated(!!session)
-  }, [session])
-
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -124,36 +95,16 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-white">SatsLab</h1>
             </div>
             <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
-                <>
-                  <Link href="/dashboard">
-                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-gray-300 hover:text-white"
-                    onClick={logout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth">
-                    <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                      Entrar
-                    </Button>
-                  </Link>
-                  <Link href="/modules/1">
-                    <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-                      Começar Curso
-                    </Button>
-                  </Link>
-                </>
-              )}
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/modules/1">
+                <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                  Começar Curso
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -169,21 +120,6 @@ export default function HomePage() {
             Experimente Bitcoin através de módulos interativos, tarefas práticas e experiência hands-on com a rede Signet
           </p>
 
-          {/* Progress Card */}
-          <Card className="bg-gray-900 border border-gray-800 rounded-2xl mb-16 max-w-md mx-auto">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-center mb-4">
-                <Trophy className="h-8 w-8 text-orange-500 mr-3" />
-                <div className="text-left">
-                  <h3 className="text-lg font-semibold text-white">Seu Progresso</h3>
-                  <p className="text-gray-400 text-sm">{completedModules} de {totalModules} módulos concluídos</p>
-                </div>
-              </div>
-              <Progress value={progressPercentage} className="h-3 mb-4" />
-              <div className="text-2xl font-bold text-orange-500">{Math.round(progressPercentage)}%</div>
-            </CardContent>
-          </Card>
-
           <Link href="/modules/1">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-4">
               Começar Jornada
@@ -198,18 +134,11 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((module) => {
               const IconComponent = module.icon
-              const isLocked = module.status === 'locked'
-              const isCompleted = module.status === 'completed'
               
               return (
                 <Card 
                   key={module.id}
-                  className={`
-                    group relative overflow-hidden transition-all duration-300
-                    ${isLocked ? 'opacity-60' : 'hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-1'}
-                    ${isCompleted ? 'ring-2 ring-green-500' : ''}
-                    bg-gray-900 border border-gray-800 rounded-2xl
-                  `}
+                  className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-1 bg-gray-900 border border-gray-800 rounded-2xl"
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between mb-4">
@@ -218,15 +147,6 @@ export default function HomePage() {
                         ${module.color} bg-opacity-10
                       `}>
                         <IconComponent className={`h-6 w-6 ${module.color.replace('bg-', 'text-')}`} />
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {isCompleted ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : isLocked ? (
-                          <Circle className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-orange-500" />
-                        )}
                       </div>
                     </div>
                     <CardTitle className="text-xl text-white mb-2">{module.title}</CardTitle>
@@ -252,16 +172,12 @@ export default function HomePage() {
                       🏆 {module.badge}
                     </Badge>
 
-                    <Link href={isLocked ? '#' : `/modules/${module.id}`}>
+                    <Link href={`/modules/${module.id}`}>
                       <Button 
-                        className={`
-                          w-full
-                          ${isLocked ? 'opacity-50 cursor-not-allowed' : module.color + ' hover:' + module.color.replace('500', '600')}
-                        `}
-                        disabled={isLocked}
+                        className={`w-full ${module.color} hover:${module.color.replace('500', '600')}`}
                       >
-                        {isLocked ? 'Bloqueado' : isCompleted ? 'Revisar' : 'Começar'}
-                        {!isLocked && <ChevronRight className="ml-2 h-4 w-4" />}
+                        Começar
+                        <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                   </CardContent>

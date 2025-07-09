@@ -11,7 +11,6 @@ const modules = [
     description: "Conceitos básicos sobre Bitcoin e exploração da rede Signet",
     difficulty: "Iniciante",
     duration: "30 min",
-    requiresLogin: false,
     topics: ["Blockchain", "Signet", "Exploradores", "Transações"]
   },
   {
@@ -20,7 +19,6 @@ const modules = [
     description: "Chaves privadas, carteiras e segurança Bitcoin",
     difficulty: "Iniciante",
     duration: "45 min",
-    requiresLogin: true,
     topics: ["Chaves Privadas", "Carteiras", "Seed Phrases", "Segurança"]
   },
   {
@@ -29,7 +27,6 @@ const modules = [
     description: "Criando e enviando transações, taxas e OP_RETURN",
     difficulty: "Intermediário",
     duration: "60 min",
-    requiresLogin: true,
     topics: ["Transações", "Taxas", "OP_RETURN", "UTXOs"]
   },
   {
@@ -38,7 +35,6 @@ const modules = [
     description: "Prova de trabalho, mineração e consensus",
     difficulty: "Intermediário",
     duration: "45 min",
-    requiresLogin: true,
     topics: ["Prova de Trabalho", "Mineração", "Dificuldade", "Pools"]
   },
   {
@@ -47,7 +43,6 @@ const modules = [
     description: "Pagamentos instantâneos e canais de pagamento",
     difficulty: "Intermediário",
     duration: "75 min",
-    requiresLogin: true,
     topics: ["Lightning", "Canais", "Roteamento", "Invoices"]
   },
   {
@@ -56,7 +51,6 @@ const modules = [
     description: "Tecnologias avançadas e NFTs no Bitcoin",
     difficulty: "Avançado",
     duration: "90 min",
-    requiresLogin: true,
     topics: ["Taproot", "Schnorr", "Ordinals", "Inscriptions"]
   },
   {
@@ -65,7 +59,6 @@ const modules = [
     description: "Carteiras multi-assinatura e tecnologias Taproot",
     difficulty: "Avançado",
     duration: "90 min",
-    requiresLogin: true,
     topics: ["Multisig", "Taproot", "Schnorr", "Segurança"]
   }
 ]
@@ -97,9 +90,6 @@ export default function ModulesPage() {
                   </div>
                   <div className="flex flex-col gap-2 items-end">
                     <Badge variant="outline">Módulo {module.id}</Badge>
-                    {module.requiresLogin && (
-                      <Badge variant="secondary">Login Necessário</Badge>
-                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -127,11 +117,11 @@ export default function ModulesPage() {
 
                   <div className="flex justify-between items-center pt-2">
                     <div className="text-sm text-gray-400">
-                      {module.id === 1 ? '✨ Gratuito - Sem login necessário' : '🔒 Requer login'}
+                      ✨ Disponível agora
                     </div>
                     <Link href={`/modules/${module.id}`}>
                       <Button>
-                        {module.id === 1 ? 'Começar Grátis' : 'Acessar Módulo'}
+                        Começar Módulo
                       </Button>
                     </Link>
                   </div>
@@ -144,18 +134,18 @@ export default function ModulesPage() {
         <div className="mt-8 bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-lg">
           <h3 className="text-xl font-bold mb-2">🚀 Pronto para começar?</h3>
           <p className="mb-4">
-            Comece pelo Módulo 1 para aprender os fundamentos, ou faça login 
-            para acessar todos os módulos e salvar seu progresso.
+            Comece pelo Módulo 1 para aprender os fundamentos do Bitcoin, ou escolha 
+            qualquer módulo que desperte seu interesse. Seu progresso será salvo automaticamente!
           </p>
           <div className="flex gap-4">
             <Link href="/modules/1">
               <Button variant="secondary">
-                📚 Módulo 1 - Grátis
+                📚 Começar pelo Módulo 1
               </Button>
             </Link>
-            <Link href="/auth">
+            <Link href="/dashboard">
               <Button variant="secondary">
-                🔐 Fazer Login
+                📊 Ver Progresso
               </Button>
             </Link>
           </div>
