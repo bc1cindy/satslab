@@ -78,7 +78,7 @@ export async function getUserProgress(userId: string): Promise<ModuleProgress[]>
     const supabase = createClient()
     
     const { data, error } = await supabase
-      .from('user_progress')
+      .from('module_progress')
       .select('*')
       .eq('user_id', userId)
       .order('module_id')
@@ -110,7 +110,7 @@ export async function updateModuleProgress(
   const supabase = createClient()
   
   const { error } = await supabase
-    .from('user_progress')
+    .from('module_progress')
     .upsert({
       user_id: userId,
       module_id: moduleId,
@@ -237,4 +237,74 @@ export async function recordTransaction(
     }])
   
   return !error
+}
+
+// IP-based authentication functions
+export async function getUserByIP(ipAddress: string): Promise<User | null> {
+  try {
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', ipAddress) // Using IP as ID
+      .single()
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null
+      }
+      console.error('Error fetching user by IP:', error)
+      return null
+    }
+    
+    const progress = await getUserProgress(data.id)
+    const badges = await getUserBadges(data.id)
+    
+    return {
+      id: data.id,
+      publicKey: data.public_key || ipAddress,
+      progress,
+      badges,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      ipAddress: ipAddress
+    }
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return null
+  }
+}
+
+export async function createUserByIP(ipAddress: string): Promise<User | null> {
+  try {
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{
+        id: ipAddress, // Using IP as unique ID
+        public_key: ipAddress // Using IP as public key too
+      }])
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error creating user by IP:', error)
+      return null
+    }
+    
+    return {
+      id: data.id,
+      publicKey: data.public_key,
+      progress: [],
+      badges: [],
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      ipAddress: ipAddress
+    }
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return null
+  }
 }

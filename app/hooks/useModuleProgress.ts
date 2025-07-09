@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useAuth } from '@/app/components/auth/AuthProvider'
+import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
 import { updateModuleProgress, awardBadge } from '@/app/lib/supabase/queries'
+import { analyticsService } from '@/app/lib/supabase/analytics-service'
 import { Badge } from '@/app/types'
 
 interface ModuleProgressState {
@@ -79,7 +80,7 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
   }, [session?.user.id, moduleId, moduleBadge, progress])
 
   // Handle questions completion
-  const handleQuestionsComplete = useCallback(async (score: number, _total: number) => {
+  const handleQuestionsComplete = useCallback(async (score: number, total: number) => {
     setProgress(currentProgress => {
       const newProgress = {
         ...currentProgress,
@@ -87,12 +88,32 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         questionsScore: score
       }
       
+      // Track analytics
+      const userIdentifier = getUserIdentifier(session)
+      if (userIdentifier) {
+        // Track each question answer if we have the data
+        for (let i = 0; i < total; i++) {
+          analyticsService.trackEvent(
+            userIdentifier,
+            'question_answer',
+            { 
+              moduleId, 
+              questionId: i + 1, 
+              correct: i < score,
+              score: score,
+              total: total
+            },
+            moduleId
+          )
+        }
+      }
+      
       // Save partial progress
       saveProgress(newProgress)
       
       return newProgress
     })
-  }, [saveProgress])
+  }, [saveProgress, session, moduleId])
 
   // Handle tasks completion
   const handleTasksComplete = useCallback(async (completedTasks: number, totalTasks: number) => {
@@ -115,12 +136,59 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         completed: newProgress.completed
       })
       
+      // Track analytics
+      const userIdentifier = getUserIdentifier(session)
+      if (userIdentifier) {
+        // Track task completion
+        analyticsService.trackEvent(
+          userIdentifier,
+          'task_complete',
+          { 
+            moduleId, 
+            tasksCompleted: completedTasks,
+            totalTasks: totalTasks,
+            allCompleted: allTasksCompleted
+          },
+          moduleId
+        )
+        
+        // Track module completion if all done
+        if (newProgress.completed) {
+          analyticsService.trackEvent(
+            userIdentifier,
+            'module_complete',
+            { 
+              moduleId,
+              finalScore: newProgress.questionsScore + newProgress.tasksScore,
+              timeSpent: newProgress.timeSpent,
+              completedAt: new Date().toISOString()
+            },
+            moduleId
+          )
+        }
+        
+        // Track badge earned
+        if (newProgress.badgeEarned && moduleBadge) {
+          analyticsService.trackEvent(
+            userIdentifier,
+            'badge_earned',
+            { 
+              moduleId,
+              badgeName: moduleBadge.name,
+              badgeType: moduleBadge.type,
+              earnedAt: new Date().toISOString()
+            },
+            moduleId
+          )
+        }
+      }
+      
       // Save progress asynchronously
       saveProgress(newProgress)
       
       return newProgress
     })
-  }, [saveProgress])
+  }, [saveProgress, session, moduleId, moduleBadge])
 
   return {
     progress,

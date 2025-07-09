@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/app/components/auth/AuthProvider'
+import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
 import { Button } from '@/app/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Badge } from '@/app/components/ui/badge'
@@ -67,7 +67,8 @@ export default function ModulePage({ params }: ModulePageProps) {
   useEffect(() => {
     if (!moduleData) return
     
-    if (session?.user?.publicKey) {
+    const userIdentifier = getUserIdentifier(session)
+    if (userIdentifier) {
       loadProgress()
       checkBadgeStatus()
     }
@@ -77,16 +78,18 @@ export default function ModulePage({ params }: ModulePageProps) {
   useEffect(() => {
     if (!moduleData) return
     
-    if (session?.user?.publicKey) {
+    const userIdentifier = getUserIdentifier(session)
+    if (userIdentifier) {
       saveProgress()
     }
   }, [completedQuestions, completedTasks, hintsUsed, timeSpent, session, moduleData])
 
   const loadProgress = async () => {
-    if (!session?.user?.publicKey) return
+    const userIdentifier = getUserIdentifier(session)
+    if (!userIdentifier) return
 
     try {
-      const progress = await progressService.getModuleProgress(session.user.publicKey, moduleId)
+      const progress = await progressService.getModuleProgress(userIdentifier, moduleId)
       if (progress) {
         setCompletedQuestions(progress.completed_questions || [])
         setCompletedTasks(progress.completed_tasks || [])
@@ -99,10 +102,11 @@ export default function ModulePage({ params }: ModulePageProps) {
   }
 
   const checkBadgeStatus = async () => {
-    if (!session?.user?.publicKey) return
+    const userIdentifier = getUserIdentifier(session)
+    if (!userIdentifier) return
 
     try {
-      const earned = await progressService.checkBadgeEarned(session.user.publicKey, moduleId)
+      const earned = await progressService.checkBadgeEarned(userIdentifier, moduleId)
       setBadgeEarned(earned)
     } catch (error) {
       console.error('Error checking badge status:', error)
@@ -110,14 +114,15 @@ export default function ModulePage({ params }: ModulePageProps) {
   }
 
   const saveProgress = async () => {
-    if (!session?.user?.publicKey) return
+    const userIdentifier = getUserIdentifier(session)
+    if (!userIdentifier) return
 
     try {
       const isCompleted = completedQuestions.length === questions.length && 
                          completedTasks.length === tasks.length
 
       await progressService.saveModuleProgress({
-        user_id: session.user.publicKey,
+        user_id: userIdentifier,
         module_id: moduleId,
         completed_questions: completedQuestions,
         completed_tasks: completedTasks,
@@ -218,13 +223,14 @@ export default function ModulePage({ params }: ModulePageProps) {
   }
 
   const handleBadgeClaim = async () => {
-    if (!session?.user?.publicKey || !badge) return
+    const userIdentifier = getUserIdentifier(session)
+    if (!userIdentifier || !badge) return
 
     try {
       setLoading({...loading, badge: true})
       
       const result = await progressService.awardBadge({
-        user_id: session.user.publicKey,
+        user_id: userIdentifier,
         module_id: moduleId,
         badge_name: badge.name,
         badge_type: badge.type,

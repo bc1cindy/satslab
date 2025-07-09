@@ -5,6 +5,7 @@ export interface User {
   badges: Badge[]
   createdAt: string
   updatedAt: string
+  ipAddress?: string
 }
 
 export interface ModuleProgress {

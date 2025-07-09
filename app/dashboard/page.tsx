@@ -1,6 +1,6 @@
 'use client'
 
-import { useRequireAuth } from '@/app/components/auth/AuthProvider'
+import { useRequireAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
 import { Button } from '@/app/components/ui/button'
 import { Progress } from '@/app/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
@@ -11,6 +11,8 @@ import { useState, useEffect } from 'react'
 import { getUserProgress, getUserBadges } from '@/app/lib/supabase/queries'
 import { ModuleProgress, Badge as BadgeType } from '@/app/types'
 import { createClient } from '@/app/lib/supabase/client'
+import UserAnalytics from '@/app/components/dashboard/UserAnalytics'
+import AnalyticsDebug from '@/app/components/debug/AnalyticsDebug'
 
 export default function DashboardPage() {
   const { session, isLoading } = useRequireAuth()
@@ -55,9 +57,10 @@ export default function DashboardPage() {
   }, [session?.user.id])
 
   const copyPublicKey = async () => {
-    if (session?.user.publicKey) {
+    const userIdentifier = getUserIdentifier(session)
+    if (userIdentifier) {
       try {
-        await navigator.clipboard.writeText(session.user.publicKey)
+        await navigator.clipboard.writeText(userIdentifier)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
       } catch (err) {
@@ -116,7 +119,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-gray-400">Chave Pública</p>
                 <div className="flex items-center space-x-2">
                   <code className="text-xs font-mono bg-gray-800 px-2 py-1 rounded text-gray-300">
-                    {session.user.publicKey.slice(0, 20)}...
+                    {getUserIdentifier(session)?.slice(0, 20)}...
                   </code>
                   <button
                     onClick={copyPublicKey}
@@ -145,6 +148,14 @@ export default function DashboardPage() {
           <p className="text-gray-300">
             Bem-vindo de volta! Continue sua jornada Bitcoin.
           </p>
+        </div>
+
+        {/* User Analytics */}
+        <UserAnalytics />
+
+        {/* Analytics Debug Panel */}
+        <div className="mb-8">
+          <AnalyticsDebug />
         </div>
 
         {/* Stats Cards */}
@@ -272,6 +283,10 @@ export default function DashboardPage() {
             <span className="text-gray-600">•</span>
             <Link href="/wallets" className="text-gray-400 hover:text-white">
               Gerenciar Carteiras
+            </Link>
+            <span className="text-gray-600">•</span>
+            <Link href="/admin" className="text-red-400 hover:text-red-300 font-medium">
+              Admin Dashboard
             </Link>
           </div>
         </div>

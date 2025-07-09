@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@/app/components/auth/AuthProvider'
+import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
 import { Button } from '@/app/components/ui/button'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -53,7 +53,7 @@ export function Header() {
                 <div className="hidden sm:block text-right">
                   <p className="text-xs text-gray-500">Logado como:</p>
                   <p className="text-xs font-mono text-gray-700">
-                    {session.user.publicKey.slice(0, 12)}...
+                    {getUserIdentifier(session)?.slice(0, 12)}...
                   </p>
                 </div>
                 <Button 
