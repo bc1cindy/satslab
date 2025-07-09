@@ -88,11 +88,6 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-white">SatsLab</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/badges">
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                  Badges
-                </Button>
-              </Link>
               <Link href="/modules/1">
                 <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
                   Começar Curso
