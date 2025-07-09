@@ -49,7 +49,7 @@ const moduleTasks = module6Tasks.map(t => ({
 }))
 
 export default function Module6() {
-  const { progress, handleQuestionsComplete, handleTasksComplete, isAuthenticated } = useModuleProgress(6, {
+  const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(6, {
     ...module6Badge,
     moduleId: 6
   })
@@ -81,65 +81,7 @@ export default function Module6() {
     (progress.badgeEarned ? 20 : 0)
   )
 
-  // Login required screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-              <ArrowLeft className="h-5 w-5" />
-              <span>Voltar</span>
-            </Link>
-          </div>
-        </header>
-
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <Card className="bg-gray-900 border-gray-800 text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl text-pink-400 flex items-center justify-center">
-                <Palette className="h-8 w-8 mr-3" />
-                Taproot e Ordinals
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                Explore as tecnologias avançadas do Bitcoin
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-pink-500/10 border border-pink-500/20 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-pink-400 mb-4">🎨 Login Necessário</h3>
-                <p className="text-gray-300 mb-4">
-                  Este módulo requer login para criar transações Taproot e mintar Ordinals NFT.
-                </p>
-                <div className="space-y-2 text-sm text-gray-400">
-                  <p>🎯 <strong>Objetivos:</strong></p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Compreender o protocolo Taproot e suas vantagens</li>
-                    <li>Criar transações Taproot na rede Signet</li>
-                    <li>Mintar um Ordinal NFT Badge personalizado</li>
-                    <li>Analisar o impacto das taxas em transações com dados</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <Link href="/auth/login">
-                  <Button className="w-full bg-pink-500 hover:bg-pink-600 text-lg px-8 py-3">
-                    Fazer Login para Continuar
-                  </Button>
-                </Link>
-                <Link href="/auth/register">
-                  <Button variant="outline" className="w-full border-gray-600 text-gray-300">
-                    Criar Conta Gratuita
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    )
-  }
+  // Module is now accessible without login - IP auth handles authentication
 
   return (
     <div className="min-h-screen bg-black text-white">

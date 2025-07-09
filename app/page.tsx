@@ -3,6 +3,7 @@ import { Button } from '@/app/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
+import DonationButton from '@/app/components/donation/DonationButton'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
   ChevronRight, Bitcoin, Trophy,
@@ -169,6 +170,17 @@ export default function HomePage() {
               )
             })}
           </div>
+        </section>
+
+        {/* Donation Section */}
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Apoie o SatsLab</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Ajude a manter o SatsLab funcionando e contribua para o desenvolvimento de mais conteúdo educacional sobre Bitcoin
+            </p>
+          </div>
+          <DonationButton storeId="ChfbUhF85cr8ngfnkLAMMHHkfidTa8y2fsSrrnqwjCPN" />
         </section>
 
         {/* Features Section */}

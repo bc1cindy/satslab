@@ -54,7 +54,7 @@ const moduleTasks = module7Tasks.map(t => ({
 }))
 
 export default function Module7() {
-  const { progress, handleQuestionsComplete, handleTasksComplete, isAuthenticated } = useModuleProgress(7, {
+  const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(7, {
     ...module7Badge,
     moduleId: 7
   })
@@ -86,65 +86,7 @@ export default function Module7() {
     (progress.badgeEarned ? 20 : 0)
   )
 
-  // Login required screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-              <ArrowLeft className="h-5 w-5" />
-              <span>Voltar</span>
-            </Link>
-          </div>
-        </header>
-
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <Card className="bg-gray-900 border-gray-800 text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl text-purple-400 flex items-center justify-center">
-                <Shield className="h-8 w-8 mr-3" />
-                Carteiras Multisig
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                Domine segurança avançada com carteiras multisig e Taproot
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-purple-400 mb-4">🔐 Login Necessário</h3>
-                <p className="text-gray-300 mb-4">
-                  Este módulo requer login para criar carteiras multisig avançadas.
-                </p>
-                <div className="space-y-2 text-sm text-gray-400">
-                  <p>🎯 <strong>Objetivos:</strong></p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Criar carteiras multisig para segurança máxima</li>
-                    <li>Dominar tecnologias Taproot para eficiência</li>
-                    <li>Assinar transações com múltiplas chaves independentes</li>
-                    <li>Mintar Ordinal NFT Badge final</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <Link href="/auth/login">
-                  <Button className="w-full bg-purple-500 hover:bg-purple-600 text-lg px-8 py-3">
-                    Fazer Login para Continuar
-                  </Button>
-                </Link>
-                <Link href="/auth/register">
-                  <Button variant="outline" className="w-full border-gray-600 text-gray-300">
-                    Criar Conta Gratuita
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    )
-  }
+  // Module is now accessible without login - IP auth handles authentication
 
   return (
     <div className="min-h-screen bg-black text-white">
