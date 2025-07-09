@@ -5,7 +5,7 @@ import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
-  ChevronRight, Bitcoin, Trophy, Clock,
+  ChevronRight, Bitcoin, Trophy,
   Target, Gamepad2, Award
 } from 'lucide-react'
 
@@ -17,7 +17,6 @@ const modules = [
     description: "Conceitos básicos e exploração da blockchain",
     icon: BookOpen,
     difficulty: "Iniciante",
-    duration: "15 min",
     badge: "Explorador Iniciante",
     color: "bg-blue-500"
   },
@@ -27,7 +26,6 @@ const modules = [
     description: "Chaves privadas, carteiras e segurança",
     icon: Shield,
     difficulty: "Iniciante",
-    duration: "20 min",
     badge: "Guardião da Chave",
     color: "bg-green-500"
   },
@@ -37,7 +35,6 @@ const modules = [
     description: "Criação de transações e OP_RETURN",
     icon: Send,
     difficulty: "Intermediário",
-    duration: "25 min",
     badge: "Mensageiro da Blockchain",
     color: "bg-purple-500"
   },
@@ -47,7 +44,6 @@ const modules = [
     description: "Prova de trabalho e mineradores",
     icon: Pickaxe,
     difficulty: "Intermediário",
-    duration: "20 min",
     badge: "Minerador Aprendiz",
     color: "bg-orange-500"
   },
@@ -57,7 +53,6 @@ const modules = [
     description: "Camada de escalabilidade do Bitcoin",
     icon: Zap,
     difficulty: "Intermediário",
-    duration: "30 min",
     badge: "Raio Rápido",
     color: "bg-yellow-500"
   },
@@ -67,7 +62,6 @@ const modules = [
     description: "Funcionalidades avançadas do Bitcoin",
     icon: Layers,
     difficulty: "Avançado",
-    duration: "35 min",
     badge: "Pioneiro Taproot",
     color: "bg-indigo-500"
   },
@@ -77,7 +71,6 @@ const modules = [
     description: "Segurança avançada com carteiras multisig",
     icon: Users,
     difficulty: "Avançado",
-    duration: "40 min",
     badge: "Mestre Multisig",
     color: "bg-red-500"
   }
@@ -95,9 +88,9 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-white">SatsLab</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
+              <Link href="/badges">
                 <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                  Dashboard
+                  Badges
                 </Button>
               </Link>
               <Link href="/modules/1">
@@ -157,10 +150,6 @@ export default function HomePage() {
                       <Badge variant="secondary" className="bg-gray-800 text-gray-300">
                         {module.difficulty}
                       </Badge>
-                      <div className="flex items-center text-gray-400">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {module.duration}
-                      </div>
                     </div>
                     
                     <Badge className={`

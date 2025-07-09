@@ -27,7 +27,7 @@ export function LoginForm({}: LoginFormProps) {
       const session = await BitcoinAuth.authenticate(privateKey)
       if (session) {
         // Força um reload do AuthProvider
-        window.location.href = '/dashboard'
+        window.location.href = '/modules'
       } else {
         setError('Falha na autenticação')
       }

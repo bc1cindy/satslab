@@ -38,7 +38,7 @@ export function IPLoginForm({ onSuccess }: IPLoginFormProps) {
       if (session) {
         setSuccess(true)
         setTimeout(() => {
-          window.location.href = '/dashboard'
+          window.location.href = '/modules'
         }, 1500)
       } else {
         setError('Falha na autenticação por IP')

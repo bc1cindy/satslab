@@ -11,16 +11,10 @@ export function Header() {
 
           <nav className="flex items-center gap-6">
             <Link 
-              href="/modules" 
+              href="/" 
               className="text-gray-600 hover:text-orange-600 font-medium"
             >
               Módulos
-            </Link>
-            <Link 
-              href="/dashboard" 
-              className="text-gray-600 hover:text-orange-600 font-medium"
-            >
-              Dashboard
             </Link>
             <Link 
               href="/badges" 
