@@ -39,8 +39,8 @@ const moduleTasks = module5Tasks.map(t => ({
   description: t.description,
   instructions: t.instructions,
   inputLabel: t.validation.type === 'address' ? 'Endereço Lightning' :
-              t.validation.type === 'hash' ? 'Hash da Transação Lightning' :
-              t.validation.type === 'fee' ? 'Taxa On-chain (satoshis)' :
+              t.validation.type === 'transaction' ? 'Hash da Transação Lightning' :
+              t.validation.type === 'amount' ? 'Taxa On-chain (satoshis)' :
               'Resposta',
   inputPlaceholder: t.validation.placeholder || '',
   validationType: t.validation.type as 'transaction' | 'amount' | 'address' | 'custom',
