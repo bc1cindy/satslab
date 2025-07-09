@@ -5,6 +5,7 @@ import { AuthProvider } from '@/app/components/auth/AuthProvider'
 import { ThemeProvider } from '@/app/components/theme-provider'
 import { Toaster } from '@/app/components/ui/toaster'
 import AnalyticsWrapper from '@/app/components/layout/AnalyticsWrapper'
+import AutoIPAuth from '@/app/components/auth/AutoIPAuth'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,11 +29,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AnalyticsWrapper>
-              <div className="min-h-screen bg-background">
-                {children}
-              </div>
-            </AnalyticsWrapper>
+            <AutoIPAuth>
+              <AnalyticsWrapper>
+                <div className="min-h-screen bg-background">
+                  {children}
+                </div>
+              </AnalyticsWrapper>
+            </AutoIPAuth>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

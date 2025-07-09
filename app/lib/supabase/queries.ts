@@ -37,6 +37,7 @@ export async function getUserByPublicKey(publicKey: string): Promise<User | null
   }
 }
 
+
 export async function createUser(publicKey: string, ipAddress?: string): Promise<User | null> {
   try {
     const supabase = createClient()
@@ -240,14 +241,14 @@ export async function recordTransaction(
 }
 
 // IP-based authentication functions
-export async function getUserByIP(ipAddress: string): Promise<User | null> {
+export async function getUserByIP(ipAddress: string): Promise<{ id: string; ipAddress: string } | null> {
   try {
     const supabase = createClient()
     
     const { data, error } = await supabase
       .from('users')
-      .select('*')
-      .eq('id', ipAddress) // Using IP as ID
+      .select('id, ip_address')
+      .eq('ip_address', ipAddress)
       .single()
     
     if (error) {
@@ -258,17 +259,9 @@ export async function getUserByIP(ipAddress: string): Promise<User | null> {
       return null
     }
     
-    const progress = await getUserProgress(data.id)
-    const badges = await getUserBadges(data.id)
-    
     return {
       id: data.id,
-      publicKey: data.public_key || ipAddress,
-      progress,
-      badges,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-      ipAddress: ipAddress
+      ipAddress: data.ip_address
     }
   } catch (error) {
     console.error('Database connection error:', error)
@@ -276,17 +269,19 @@ export async function getUserByIP(ipAddress: string): Promise<User | null> {
   }
 }
 
-export async function createUserByIP(ipAddress: string): Promise<User | null> {
+export async function createUserByIP(ipAddress: string): Promise<{ id: string; ipAddress: string } | null> {
   try {
     const supabase = createClient()
     
     const { data, error } = await supabase
       .from('users')
       .insert([{
-        id: ipAddress, // Using IP as unique ID
-        public_key: ipAddress // Using IP as public key too
+        public_key: `ip_${ipAddress}_${Date.now()}`, // Unique public_key for IP users
+        ip_address: ipAddress,
+        last_login_ip: ipAddress,
+        last_login_at: new Date().toISOString()
       }])
-      .select()
+      .select('id, ip_address')
       .single()
     
     if (error) {
@@ -296,12 +291,7 @@ export async function createUserByIP(ipAddress: string): Promise<User | null> {
     
     return {
       id: data.id,
-      publicKey: data.public_key,
-      progress: [],
-      badges: [],
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-      ipAddress: ipAddress
+      ipAddress: data.ip_address
     }
   } catch (error) {
     console.error('Database connection error:', error)
