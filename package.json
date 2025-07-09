@@ -32,6 +32,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "ecpair": "^2.1.0",
+    "eslint": "^8.57.1",
     "isomorphic-dompurify": "^2.25.0",
     "lucide-react": "^0.436.0",
     "next": "^14.2.5",
@@ -55,7 +56,6 @@
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
     "@typescript-eslint/parser": "^8.4.0",
-    "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.5",
     "typescript": "^5.5.4"
   },
