@@ -4,7 +4,10 @@ export async function POST(request: NextRequest) {
   try {
     const { storeId, amount, currency = 'SATS', paymentMethod = 'lightning' } = await request.json()
 
+    console.log('Dados recebidos:', { storeId, amount, currency, paymentMethod })
+
     if (!storeId || !amount || amount <= 0) {
+      console.error('Validação falhou:', { storeId, amount })
       return NextResponse.json(
         { error: 'Store ID e quantidade são obrigatórios' },
         { status: 400 }
@@ -14,7 +17,10 @@ export async function POST(request: NextRequest) {
     const btcpayUrl = process.env.BTCPAY_URL || 'https://demo.btcpayserver.org'
     const apiKey = process.env.BTCPAY_API_KEY
 
+    console.log('Configuração BTCPay:', { btcpayUrl, hasApiKey: !!apiKey })
+
     if (!apiKey) {
+      console.error('BTCPay API key não configurada')
       return NextResponse.json(
         { error: 'BTCPay API key não configurada' },
         { status: 500 }
@@ -22,19 +28,15 @@ export async function POST(request: NextRequest) {
     }
 
     const invoiceData = {
-      storeId,
       amount: amount.toString(),
       currency,
       metadata: {
         buyerName: 'Apoiador SatsLab',
-        itemDesc: 'Doação para SatsLab',
-        paymentMethod
-      },
-      checkout: {
-        redirectURL: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?donation=success`,
-        closeOnComplete: true
+        itemDesc: 'Doação para SatsLab'
       }
     }
+
+    console.log('Enviando para BTCPay:', { url: `${btcpayUrl}/api/v1/stores/${storeId}/invoices`, invoiceData })
 
     const response = await fetch(`${btcpayUrl}/api/v1/stores/${storeId}/invoices`, {
       method: 'POST',
@@ -45,11 +47,13 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(invoiceData)
     })
 
+    console.log('Resposta BTCPay:', { status: response.status, statusText: response.statusText })
+
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('BTCPay API error:', errorData)
+      console.error('BTCPay API error:', { status: response.status, error: errorData })
       return NextResponse.json(
-        { error: 'Erro ao criar invoice no BTCPay' },
+        { error: 'Erro ao criar invoice no BTCPay', details: errorData },
         { status: response.status }
       )
     }

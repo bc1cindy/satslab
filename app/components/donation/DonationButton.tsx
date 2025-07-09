@@ -17,6 +17,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
   const [isOpen, setIsOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'lightning' | 'onchain'>('lightning')
 
   const presetAmounts = [1000, 5000, 10000, 50000, 100000]
@@ -25,6 +26,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
     if (!amount || parseInt(amount) <= 0) return
 
     setLoading(true)
+    setError(null)
     try {
       const response = await fetch('/api/btcpay/create-invoice', {
         method: 'POST',
@@ -40,7 +42,8 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao criar invoice')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao criar invoice')
       }
 
       const data = await response.json()
@@ -49,8 +52,10 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
       // Fechar modal
       setIsOpen(false)
       setAmount('')
+      setError(null)
     } catch (error) {
       console.error('Erro ao criar invoice:', error)
+      setError(error instanceof Error ? error.message : 'Erro desconhecido')
     } finally {
       setLoading(false)
     }
@@ -137,6 +142,12 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
             </div>
           </div>
         </div>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button
