@@ -29,8 +29,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 2. Create module_analytics view
-CREATE OR REPLACE VIEW module_analytics AS
+-- 2. Drop and create module_analytics view
+DROP VIEW IF EXISTS module_analytics;
+CREATE VIEW module_analytics AS
 WITH module_stats AS (
   SELECT 
     module_id,

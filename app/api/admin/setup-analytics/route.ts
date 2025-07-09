@@ -36,9 +36,10 @@ export async function POST(request: NextRequest) {
       $$ LANGUAGE plpgsql;
     `
     
-    // 2. Create module_analytics view
+    // 2. Drop and recreate module_analytics view
+    const dropModuleView = `DROP VIEW IF EXISTS module_analytics;`
     const moduleAnalyticsView = `
-      CREATE OR REPLACE VIEW module_analytics AS
+      CREATE VIEW module_analytics AS
       WITH module_stats AS (
         SELECT 
           module_id,
@@ -69,9 +70,10 @@ export async function POST(request: NextRequest) {
       ORDER BY module_id;
     `
     
-    // 3. Create realtime_analytics view
+    // 3. Drop and recreate realtime_analytics view
+    const dropRealtimeView = `DROP VIEW IF EXISTS realtime_analytics;`
     const realtimeAnalyticsView = `
-      CREATE OR REPLACE VIEW realtime_analytics AS
+      CREATE VIEW realtime_analytics AS
       SELECT 
         (SELECT COUNT(DISTINCT user_id) FROM user_sessions 
          WHERE session_start >= NOW() - INTERVAL '1 hour' AND user_id LIKE 'session_%') as active_users,
@@ -85,12 +87,24 @@ export async function POST(request: NextRequest) {
          WHERE total_duration_seconds > 0 AND user_id LIKE 'session_%') as avg_session_duration;
     `
     
-    // Execute SQL commands
+    // Execute SQL commands in order
     const { error: functionError } = await supabase.rpc('exec_sql', { sql: platformStatsFunction })
     if (functionError) {
       console.error('Function creation error:', functionError)
     }
     
+    // Drop existing views first
+    const { error: dropModuleError } = await supabase.rpc('exec_sql', { sql: dropModuleView })
+    if (dropModuleError) {
+      console.error('Drop module view error:', dropModuleError)
+    }
+    
+    const { error: dropRealtimeError } = await supabase.rpc('exec_sql', { sql: dropRealtimeView })
+    if (dropRealtimeError) {
+      console.error('Drop realtime view error:', dropRealtimeError)
+    }
+    
+    // Create new views
     const { error: moduleViewError } = await supabase.rpc('exec_sql', { sql: moduleAnalyticsView })
     if (moduleViewError) {
       console.error('Module view creation error:', moduleViewError)
