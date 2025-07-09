@@ -16,12 +16,6 @@ export function Header() {
             >
               Módulos
             </Link>
-            <Link 
-              href="/badges" 
-              className="text-gray-600 hover:text-orange-600 font-medium"
-            >
-              Badges
-            </Link>
           </nav>
         </div>
       </div>
