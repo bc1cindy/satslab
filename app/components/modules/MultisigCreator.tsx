@@ -15,10 +15,12 @@ import { useToast } from '@/app/hooks/use-toast'
 
 interface MultisigCreatorProps {
   onWalletCreated?: (address: string) => void
+  onWalletObjectCreated?: (wallet: MultisigWallet) => void
   onTransactionSigned?: (txId: string) => void
+  onKeysGenerated?: (keys: MultisigKey[]) => void
 }
 
-export default function MultisigCreator({ onWalletCreated, onTransactionSigned }: MultisigCreatorProps) {
+export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated, onTransactionSigned, onKeysGenerated }: MultisigCreatorProps) {
   const [multisigKeys, setMultisigKeys] = useState<MultisigKey[]>([])
   const [multisigWallet, setMultisigWallet] = useState<MultisigWallet | null>(null)
   const [m, setM] = useState(2)
@@ -43,6 +45,10 @@ export default function MultisigCreator({ onWalletCreated, onTransactionSigned }
         title: "Chaves Geradas!",
         description: `${n} chaves privadas geradas com sucesso`,
       })
+      
+      if (onKeysGenerated) {
+        onKeysGenerated(keys)
+      }
     } catch (error) {
       toast({
         title: "Erro ao gerar chaves",
@@ -74,6 +80,10 @@ export default function MultisigCreator({ onWalletCreated, onTransactionSigned }
 
       if (onWalletCreated) {
         onWalletCreated(wallet.address)
+      }
+      
+      if (onWalletObjectCreated) {
+        onWalletObjectCreated(wallet)
       }
     } catch (error) {
       toast({

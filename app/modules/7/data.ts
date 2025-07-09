@@ -2,17 +2,17 @@ import { Question } from '@/app/types'
 
 export const module7Data = {
   id: 7,
-  title: "Multisig e HD Wallets",
-  description: "Domine carteiras multisig para segurança e HD wallets para gestão hierárquica de endereços",
+  title: "Carteiras Multisig",
+  description: "Domine carteiras multisig para segurança avançada e transações colaborativas",
   objectives: [
     "Compreender carteiras multisig e seus casos de uso",
-    "Aprender sobre HD wallets e derivação hierárquica",
+    "Aprender sobre diferentes tipos de multisig (P2SH, P2WSH, P2TR)",
     "Criar uma carteira multisig 2-de-3 funcional",
-    "Implementar derivação de endereços BIP32/BIP44",
+    "Assinar transações multisig colaborativamente",
     "Mintar um Ordinal NFT Badge usando multisig"
   ],
   requiresLogin: true,
-  estimatedTime: "75 minutos",
+  estimatedTime: "60 minutos",
   difficulty: "Avançado"
 }
 
@@ -31,15 +31,15 @@ export const module7Questions: Question[] = [
   },
   {
     id: 2,
-    question: "O que é uma carteira HD (Hierarchical Deterministic)?",
+    question: "Qual é a vantagem do Taproot para multisig?",
     options: [
-      "Uma carteira com alta definição",
-      "Uma carteira que gera endereços de forma hierárquica a partir de uma seed",
-      "Uma carteira apenas para desenvolvedores",
-      "Uma carteira que requer hardware especial"
+      "Elimina completamente as taxas",
+      "Faz transações multisig parecerem transações simples, reduzindo custos e melhorando privacidade",
+      "Permite apenas multisig 2-de-3",
+      "Torna multisig mais lento"
     ],
     correctAnswer: 1,
-    explanation: "HD wallets geram endereços de forma determinística e hierárquica a partir de uma seed master. Seguem padrões como BIP32/BIP44 para derivação de chaves, permitindo backup e recuperação completa."
+    explanation: "Taproot permite que transações multisig complexas pareçam transações simples na blockchain, reduzindo custos de transação e melhorando a privacidade dos usuários."
   },
   {
     id: 3,
@@ -61,7 +61,7 @@ export const module7Tasks = [
     title: "Criar Carteira Multisig 2-de-3",
     description: "Configure uma carteira multisig que requer 2 assinaturas de 3 chaves possíveis",
     instructions: [
-      "Use o MultisigCreator para gerar 3 chaves públicas",
+      "Use o MultisigCreator para gerar 3 chaves públicas independentes",
       "Configure uma carteira 2-de-3 (2 assinaturas necessárias de 3 total)",
       "Gere o endereço multisig resultante",
       "Copie o endereço gerado"
@@ -73,29 +73,30 @@ export const module7Tasks = [
     },
     hints: [
       "O endereço multisig pode começar com '3' (P2SH) ou 'bc1' (P2WSH)",
-      "Certifique-se de que são 3 chaves públicas diferentes",
+      "Certifique-se de que são 3 chaves públicas diferentes e independentes",
       "O threshold deve ser 2 (2 assinaturas necessárias)"
     ]
   },
   {
     id: 2,
-    title: "Criar HD Wallet e Derivar Endereços",
-    description: "Implemente uma carteira HD e gere 2 endereços derivados",
+    title: "Criar Transação Taproot Multisig",
+    description: "Crie uma transação usando Taproot para multisig eficiente",
     instructions: [
-      "Use o HDWalletManager para criar uma carteira HD",
-      "Gere uma seed mnemônica (12 palavras)",
-      "Derive 2 endereços usando o path padrão BIP44",
-      "Copie o segundo endereço derivado (índice 1)"
+      "Use o TaprootTransactionCreator para gerar endereço Taproot",
+      "Configure uma transação multisig usando Taproot",
+      "Observe como Taproot melhora privacidade e eficiência",
+      "Copie o hash da transação criada"
     ],
-    type: "wallet" as const,
+    type: "transaction" as const,
     validation: {
-      type: "address" as const,
-      placeholder: "Cole o segundo endereço derivado (índice 1)"
+      type: "hash" as const,
+      placeholder: "Cole o hash da transação Taproot",
+      expectedLength: 64
     },
     hints: [
-      "Use o path de derivação padrão: m/44'/1'/0'/0/1",
-      "O índice 1 é o segundo endereço da sequência",
-      "Mantenha a seed segura para recuperação"
+      "Taproot faz transações multisig parecerem transações simples",
+      "Endereços Taproot começam com 'tb1p' na rede Signet",
+      "Aproveite as vantagens de privacidade e eficiência do Taproot"
     ]
   },
   {
@@ -105,14 +106,14 @@ export const module7Tasks = [
     instructions: [
       "Use a carteira multisig criada anteriormente",
       "Crie um Ordinal com JSON: {\"badge\": \"Mestre Multisig\", \"user_id\": \"sua_chave_publica\"}",
-      "Assine com pelo menos 2 das 3 chaves",
+      "Assine com pelo menos 2 das 3 chaves independentes",
       "Confirme o mint na rede Signet"
     ],
     type: "ordinal" as const,
     validation: {
       type: "hash" as const,
       placeholder: "Cole o ID do Ordinal multisig",
-      expectedLength: 66
+      expectedLength: 64
     },
     hints: [
       "Você precisa de 2 assinaturas para completar a transação",
@@ -124,7 +125,7 @@ export const module7Tasks = [
 
 export const module7Badge = {
   name: "Mestre Multisig",
-  description: "Dominou carteiras multisig e HD wallets, criando NFT Badge com segurança avançada",
+  description: "Dominou carteiras multisig e tecnologias Taproot, criando NFT Badge com segurança avançada",
   type: "ordinal" as const,
   moduleId: 7,
   imageUrl: "/badges/multisig-master.png"

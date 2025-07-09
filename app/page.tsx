@@ -89,8 +89,8 @@ const modules = [
   },
   {
     id: 7,
-    title: "Multisig e Carteiras Hierárquicas",
-    description: "Segurança avançada e HD wallets",
+    title: "Carteiras Multisig",
+    description: "Segurança avançada com carteiras multisig",
     icon: Users,
     difficulty: "Avançado",
     duration: "40 min",
@@ -166,7 +166,7 @@ export default function HomePage() {
             Aprenda Bitcoin na Prática
           </h1>
           <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Domine Bitcoin através de módulos interativos, tarefas práticas e experiência hands-on com a rede Signet
+            Experimente Bitcoin através de módulos interativos, tarefas práticas e experiência hands-on com a rede Signet
           </p>
 
           {/* Progress Card */}
@@ -273,7 +273,7 @@ export default function HomePage() {
 
         {/* Features Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Por que escolher o SatsLab?</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Por que fazer o SatsLab?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-4">

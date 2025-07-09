@@ -412,13 +412,13 @@ export default function Module6() {
               <div className="space-y-4">
                 <p className="text-gray-300">
                   Fantástico! Você dominou as tecnologias mais avançadas do Bitcoin. 
-                  Continue explorando com Multisig e HD Wallets.
+                  Continue explorando com Carteiras Multisig.
                 </p>
                 
                 <div className="flex space-x-4">
                   <Link href="/modules/7" className="flex-1">
                     <Button className="w-full bg-pink-500 hover:bg-pink-600">
-                      Próximo Módulo: Multisig e HD Wallets
+                      Próximo Módulo: Carteiras Multisig
                     </Button>
                   </Link>
                   <Link href="/">

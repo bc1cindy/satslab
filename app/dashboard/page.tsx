@@ -88,7 +88,7 @@ export default function DashboardPage() {
     { id: 4, title: "Mineração no Bitcoin", desc: "Proof-of-work e simulações", icon: "⛏️", available: true, color: "orange" },
     { id: 5, title: "Lightning Network", desc: "Pagamentos instantâneos e canais", icon: "⚡", available: true, color: "yellow" },
     { id: 6, title: "Taproot e Ordinals", desc: "Tecnologias avançadas do Bitcoin", icon: "🎨", available: true, color: "pink" },
-    { id: 7, title: "Multisig e HD Wallets", desc: "Carteiras multi-assinatura", icon: "🔒", available: true, color: "indigo" },
+    { id: 7, title: "Carteiras Multisig", desc: "Carteiras multi-assinatura", icon: "🔒", available: true, color: "indigo" },
   ].map(module => {
     const progress = userProgress.find(p => p.moduleId === module.id)
     return {

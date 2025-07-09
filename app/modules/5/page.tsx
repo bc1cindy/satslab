@@ -10,9 +10,8 @@ import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
-import WalletSetupGuide from '@/app/components/modules/WalletSetupGuide'
-import LightningPaymentDemo from '@/app/components/modules/LightningPaymentDemo'
-import LightningChannelDiagram from '@/app/components/modules/LightningChannelDiagram'
+import IntegratedLightningWallet from '@/app/components/modules/IntegratedLightningWallet'
+import InteractiveLightningChannel from '@/app/components/modules/InteractiveLightningChannel'
 import { module5Questions, module5Tasks, module5Badge } from './data'
 
 // Types
@@ -20,6 +19,8 @@ interface LightningResults {
   walletAddress?: string
   paymentHash?: string
   channelFee?: number
+  completedPayments?: number
+  channelsOpened?: number
 }
 
 // Use imported data - converting format
@@ -201,18 +202,20 @@ export default function Module5() {
                   <h3 className="font-semibold text-white mb-2">O que você vai aprender:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
                     <li>O conceito de camadas de escalabilidade</li>
-                    <li>Como configurar carteiras Lightning (Phoenix/Breez)</li>
+                    <li>Como funcionam os canais Lightning</li>
                     <li>Realizar pagamentos instantâneos</li>
-                    <li>Entender canais e roteamento</li>
+                    <li>Gerenciar canais e roteamento</li>
                     <li>Comparar taxas Lightning vs on-chain</li>
+                    <li>Experiência prática com carteira integrada</li>
                   </ul>
                 </div>
                 
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                  <h3 className="font-semibold text-yellow-400 mb-2">⚡ Experiência Prática:</h3>
+                  <h3 className="font-semibold text-yellow-400 mb-2">⚡ Experiência Integrada:</h3>
                   <p className="text-yellow-300 text-sm">
-                    Você vai configurar uma carteira Lightning real, receber fundos de teste e
-                    experimentar a velocidade dos pagamentos instantâneos.
+                    Você vai usar uma carteira Lightning totalmente integrada ao site, simular 
+                    canais de pagamento e experimentar a velocidade dos pagamentos instantâneos 
+                    sem precisar baixar nenhum aplicativo.
                   </p>
                 </div>
                 
@@ -255,61 +258,62 @@ export default function Module5() {
           <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-xl text-center">🎯 Tarefas Práticas</CardTitle>
+                <CardTitle className="text-xl text-center">🎯 Experiência Lightning Integrada</CardTitle>
                 <CardDescription className="text-center">
-                  Configure carteiras Lightning e realize pagamentos instantâneos
+                  Use uma carteira Lightning completa integrada ao site
                 </CardDescription>
               </CardHeader>
             </Card>
             
-            {/* Lightning Wallet Setup Guide */}
+            {/* Integrated Lightning Wallet */}
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">📱 Guia: Configurar Carteira Lightning</CardTitle>
+                <CardTitle className="text-lg">⚡ Carteira Lightning Integrada</CardTitle>
                 <CardDescription>
-                  Configure Phoenix ou Breez para usar na rede Signet
+                  Carteira Lightning completa com canais, pagamentos e histórico
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <WalletSetupGuide 
+                <IntegratedLightningWallet 
                   onAddressGenerated={(address) => {
                     setLightningResults(prev => ({ ...prev, walletAddress: address }))
                   }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Lightning Payment Demo */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg">⚡ Demo: Pagamentos Lightning</CardTitle>
-                <CardDescription>
-                  Experimente a velocidade dos pagamentos Lightning
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LightningPaymentDemo 
                   onPaymentCompleted={(payment) => {
-                    setLightningResults(prev => ({ ...prev, paymentHash: payment.preimage || payment.id }))
+                    setLightningResults(prev => ({ 
+                      ...prev, 
+                      paymentHash: payment.preimage || payment.id,
+                      completedPayments: (prev.completedPayments || 0) + 1
+                    }))
+                  }}
+                  onChannelOpened={(channel) => {
+                    setLightningResults(prev => ({ 
+                      ...prev, 
+                      channelsOpened: (prev.channelsOpened || 0) + 1
+                    }))
                   }}
                 />
               </CardContent>
             </Card>
 
-            {/* Lightning Channel Diagram */}
+            {/* Interactive Lightning Channel */}
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">🔗 Entendendo Canais Lightning</CardTitle>
+                <CardTitle className="text-lg">🔗 Simulador de Canais Lightning</CardTitle>
                 <CardDescription>
-                  Visualize como funcionam os canais de pagamento
+                  Aprenda como funcionam os canais Lightning na prática
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LightningChannelDiagram 
+                <InteractiveLightningChannel 
                   onChannelStateChange={(state) => {
-                    // Calculate estimated closing fee based on channel capacity
                     const estimatedClosingFee = Math.floor(state.capacity * 0.001)
                     setLightningResults(prev => ({ ...prev, channelFee: estimatedClosingFee }))
+                  }}
+                  onTransactionCompleted={(transaction) => {
+                    setLightningResults(prev => ({ 
+                      ...prev, 
+                      completedPayments: (prev.completedPayments || 0) + 1
+                    }))
                   }}
                 />
               </CardContent>
@@ -367,10 +371,10 @@ export default function Module5() {
               </div>
 
               {/* Lightning Results */}
-              {(lightningResults.walletAddress || lightningResults.paymentHash || lightningResults.channelFee) && (
+              {(lightningResults.walletAddress || lightningResults.paymentHash || lightningResults.channelFee || lightningResults.completedPayments || lightningResults.channelsOpened) && (
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-3">⚡ Seus Resultados Lightning:</h3>
-                  <div className="space-y-2 text-sm text-gray-300">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
                     {lightningResults.walletAddress && (
                       <div>
                         <span className="font-medium">Carteira Configurada:</span>
@@ -381,15 +385,31 @@ export default function Module5() {
                     )}
                     {lightningResults.paymentHash && (
                       <div>
-                        <span className="font-medium">Pagamento Realizado:</span>
+                        <span className="font-medium">Último Pagamento:</span>
                         <div className="font-mono text-xs bg-gray-700 p-2 rounded mt-1 break-all">
                           {lightningResults.paymentHash}
                         </div>
                       </div>
                     )}
+                    {lightningResults.completedPayments && (
+                      <div>
+                        <span className="font-medium">Pagamentos Realizados:</span>
+                        <div className="text-lg font-bold text-green-400">
+                          {lightningResults.completedPayments}
+                        </div>
+                      </div>
+                    )}
+                    {lightningResults.channelsOpened && (
+                      <div>
+                        <span className="font-medium">Canais Abertos:</span>
+                        <div className="text-lg font-bold text-blue-400">
+                          {lightningResults.channelsOpened}
+                        </div>
+                      </div>
+                    )}
                     {lightningResults.channelFee && (
                       <div>
-                        <span className="font-medium">Taxa de Fechamento:</span>
+                        <span className="font-medium">Taxa de Fechamento Estimada:</span>
                         <div className="text-lg font-bold text-red-400">
                           {lightningResults.channelFee} satoshis
                         </div>
@@ -408,14 +428,16 @@ export default function Module5() {
                   <li>Canais permitem múltiplas transações sem tocar a blockchain</li>
                   <li>Roteamento permite pagamentos entre usuários sem canais diretos</li>
                   <li>Abertura e fechamento de canais requerem transações on-chain</li>
+                  <li>Gerenciamento de carteira Lightning e canais na prática</li>
+                  <li>Simulação completa de pagamentos off-chain</li>
                 </ul>
               </div>
 
               {/* Next Steps */}
               <div className="space-y-4">
                 <p className="text-gray-300">
-                  Excelente! Agora você entende como funciona a Lightning Network. 
-                  Continue sua jornada explorando Taproot e Ordinals.
+                  Excelente! Agora você tem experiência prática com Lightning Network usando 
+                  uma carteira totalmente integrada. Continue sua jornada explorando Taproot e Ordinals.
                 </p>
                 
                 <div className="flex space-x-4">

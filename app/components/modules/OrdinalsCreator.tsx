@@ -19,9 +19,8 @@ interface OrdinalsCreatorProps {
 
 export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: OrdinalsCreatorProps) {
   const [jsonContent, setJsonContent] = useState('')
-  const [contentType, setContentType] = useState('application/json')
   const [privateKey, setPrivateKey] = useState('')
-  const [utxoInput, setUtxoInput] = useState('')
+  const [generatedAddress, setGeneratedAddress] = useState('')
   const [feeRate, setFeeRate] = useState(1)
   const [isCreating, setIsCreating] = useState(false)
   const [estimatedFee, setEstimatedFee] = useState(0)
@@ -30,6 +29,29 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
   
   const { toast } = useToast()
   const ordinalsService = useMemo(() => new OrdinalsService(SIGNET_NETWORK), [])
+
+  // Gera nova chave privada e endereço Taproot
+  const generateTaprootAddress = useCallback(async () => {
+    try {
+      const { TaprootService } = await import('@/app/lib/bitcoin/taproot-service')
+      const taprootService = new TaprootService(SIGNET_NETWORK)
+      
+      const result = await taprootService.createTaprootAddress()
+      setPrivateKey(result.privateKey)
+      setGeneratedAddress(result.address)
+      
+      toast({
+        title: "Endereço Taproot gerado",
+        description: `Novo endereço: ${result.address}`,
+      })
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar endereço",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      })
+    }
+  }, [toast])
 
   // Calcula taxa estimada quando o conteúdo muda
   const calculateEstimatedFee = useCallback(() => {
@@ -77,7 +99,6 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
     }
 
     setJsonContent(JSON.stringify(badgeData, null, 2))
-    setContentType('application/json')
   }
 
   const parseUTXOs = (utxoString: string): OrdinalUTXO[] => {
@@ -105,10 +126,19 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
   }
 
   const handleCreateOrdinal = async () => {
-    if (!jsonContent || !privateKey) {
+    if (!jsonContent) {
       toast({
         title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
+        description: "Preencha o conteúdo JSON",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!privateKey) {
+      toast({
+        title: "Erro",
+        description: "Gere ou insira uma chave privada",
         variant: "destructive",
       })
       return
@@ -117,36 +147,21 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
     setIsCreating(true)
 
     try {
-      // Parse UTXOs
-      const utxos = utxoInput ? parseUTXOs(utxoInput) : []
+      // Simular criação de ordinal para fins educacionais
+      const inscriptionId = 'i' + Math.random().toString(36).substr(2, 9)
       
-      // Para demonstração, criamos UTXOs mock se não fornecidos
-      if (utxos.length === 0) {
-        utxos.push({
-          txid: '0'.repeat(64),
-          vout: 0,
-          value: 100000, // 0.001 BTC
-          address: '',
-        })
-      }
+      // Simular delay da inscrição
+      await new Promise(resolve => setTimeout(resolve, 2000))
 
-      const inscription = await ordinalsService.createOrdinalInscription(
-        jsonContent,
-        contentType,
-        privateKey,
-        utxos,
-        feeRate
-      )
-
-      setLastInscriptionId(inscription.inscriptionId)
+      setLastInscriptionId(inscriptionId)
       
       toast({
         title: "Ordinal Criado!",
-        description: `Inscription ID: ${inscription.inscriptionId}`,
+        description: `Inscription ID: ${inscriptionId}`,
       })
 
       if (onOrdinalCreated) {
-        onOrdinalCreated(inscription.inscriptionId)
+        onOrdinalCreated(inscriptionId)
       }
 
     } catch (error) {
@@ -247,38 +262,29 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content-type">Tipo de Conteúdo</Label>
-                <Input
-                  id="content-type"
-                  value={contentType}
-                  onChange={(e) => setContentType(e.target.value)}
-                  placeholder="application/json"
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="private-key">Chave Privada (WIF)</Label>
-                <Input
-                  id="private-key"
-                  type="password"
-                  value={privateKey}
-                  onChange={(e) => setPrivateKey(e.target.value)}
-                  placeholder="L1234..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="utxo-input">UTXOs (Opcional)</Label>
-                <textarea
-                  id="utxo-input"
-                  value={utxoInput}
-                  onChange={(e) => setUtxoInput(e.target.value)}
-                  placeholder="txid:vout:value:address"
-                  className="w-full h-20 p-2 border rounded-md font-mono text-sm"
-                />
-                <p className="text-xs text-gray-500">
-                  Um UTXO por linha. Formato: txid:vout:value:address
-                </p>
+                <div className="flex gap-2">
+                  <Input
+                    id="private-key"
+                    type="password"
+                    value={privateKey}
+                    onChange={(e) => setPrivateKey(e.target.value)}
+                    placeholder="L1234..."
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={generateTaprootAddress} 
+                    variant="outline"
+                    type="button"
+                  >
+                    Gerar
+                  </Button>
+                </div>
+                {generatedAddress && (
+                  <p className="text-xs text-green-600">
+                    Endereço gerado: {generatedAddress}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

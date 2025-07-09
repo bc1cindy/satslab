@@ -11,8 +11,8 @@ import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
 import MultisigCreator from '@/app/components/modules/MultisigCreator'
-import HDWalletManager from '@/app/components/modules/HDWalletManager'
-import BadgeNFTCreator from '@/app/components/modules/BadgeNFTCreator'
+import TaprootTransactionCreator from '@/app/components/modules/TaprootTransactionCreator'
+import MultisigBadgeCreator from '@/app/components/modules/MultisigBadgeCreator'
 import { module7Questions, module7Tasks, module7Badge } from './data'
 
 // Types
@@ -20,6 +20,9 @@ interface MultisigResults {
   walletAddress?: string
   transactionHash?: string
   ordinalId?: string
+  multisigKeys?: any[]
+  multisigWallet?: any
+  taprootPrivateKey?: string
 }
 
 // Use imported data - converting format
@@ -38,10 +41,14 @@ const moduleTasks = module7Tasks.map(t => ({
   description: t.description,
   instructions: t.instructions,
   inputLabel: t.validation.type === 'address' ? 'Endereço da Carteira' :
-              t.validation.type === 'hash' ? 'ID do Ordinal' :
+              t.validation.type === 'hash' && t.type === 'transaction' ? 'Hash da Transação' :
+              t.validation.type === 'hash' && t.type === 'ordinal' ? 'ID do Ordinal' :
               'Resposta',
   inputPlaceholder: t.validation.placeholder || '',
-  validationType: t.validation.type as 'transaction' | 'amount' | 'address' | 'custom',
+  validationType: (t.type === 'transaction' ? 'transaction' : 
+                t.validation.type === 'address' ? 'address' : 
+                t.validation.type === 'hash' ? 'transaction' : 
+                'custom') as 'transaction' | 'amount' | 'address' | 'custom',
   hints: t.hints || [],
   externalLinks: []
 }))
@@ -97,24 +104,24 @@ export default function Module7() {
             <CardHeader>
               <CardTitle className="text-2xl text-purple-400 flex items-center justify-center">
                 <Shield className="h-8 w-8 mr-3" />
-                Multisig e HD Wallets
+                Carteiras Multisig
               </CardTitle>
               <CardDescription className="text-gray-400">
-                Domine segurança avançada e gestão hierárquica de chaves
+                Domine segurança avançada com carteiras multisig e Taproot
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-6">
                 <h3 className="text-xl font-semibold text-purple-400 mb-4">🔐 Login Necessário</h3>
                 <p className="text-gray-300 mb-4">
-                  Este módulo requer login para criar carteiras multisig e HD wallets avançadas.
+                  Este módulo requer login para criar carteiras multisig avançadas.
                 </p>
                 <div className="space-y-2 text-sm text-gray-400">
                   <p>🎯 <strong>Objetivos:</strong></p>
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li>Criar carteiras multisig para segurança máxima</li>
-                    <li>Implementar HD wallets com derivação hierárquica</li>
-                    <li>Assinar transações com múltiplas chaves</li>
+                    <li>Dominar tecnologias Taproot para eficiência</li>
+                    <li>Assinar transações com múltiplas chaves independentes</li>
                     <li>Mintar Ordinal NFT Badge final</li>
                   </ul>
                 </div>
@@ -167,8 +174,8 @@ export default function Module7() {
           <div className="flex items-center justify-center mb-4">
             <Shield className="h-12 w-12 text-purple-500 mr-4" />
             <div>
-              <h1 className="text-3xl font-bold">Multisig e HD Wallets</h1>
-              <p className="text-gray-400 mt-2">Segurança avançada e gestão hierárquica</p>
+              <h1 className="text-3xl font-bold">Carteiras Multisig</h1>
+              <p className="text-gray-400 mt-2">Segurança avançada com multisig e Taproot</p>
             </div>
           </div>
           
@@ -192,7 +199,7 @@ export default function Module7() {
                   Bem-vindo à segurança máxima do Bitcoin!
                 </CardTitle>
                 <CardDescription>
-                  Aprenda sobre multisig para segurança e HD wallets para gestão avançada
+                  Aprenda sobre multisig para segurança e gestão avançada de carteiras
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -200,9 +207,9 @@ export default function Module7() {
                   <h3 className="font-semibold text-white mb-2">O que você vai aprender:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
                     <li>Carteiras multisig para distribuir risco entre múltiplas chaves</li>
-                    <li>HD wallets com derivação hierárquica BIP32/BIP44</li>
-                    <li>Assinatura de transações com múltiplas chaves</li>
-                    <li>Gestão avançada de endereços e chaves</li>
+                    <li>Tecnologias Taproot para transações multisig eficientes</li>
+                    <li>Assinatura de transações com múltiplas chaves independentes</li>
+                    <li>Vantagens de privacidade e eficiência do Taproot</li>
                     <li>Casos de uso corporativos e de alta segurança</li>
                   </ul>
                 </div>
@@ -210,8 +217,8 @@ export default function Module7() {
                 <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
                   <h3 className="font-semibold text-purple-400 mb-2">🔐 Experiência Prática:</h3>
                   <p className="text-purple-300 text-sm">
-                    Você vai criar carteiras multisig reais, implementar HD wallets com derivação 
-                    de endereços e mintar seu NFT Badge final como Ordinal multisig.
+                    Você vai criar carteiras multisig reais, dominar tecnologias Taproot 
+                    para transações eficientes e mintar seu NFT Badge final como Ordinal multisig.
                   </p>
                 </div>
                 
@@ -236,7 +243,7 @@ export default function Module7() {
               <CardHeader>
                 <CardTitle className="text-xl text-center">📚 Perguntas Teóricas</CardTitle>
                 <CardDescription className="text-center">
-                  Teste seus conhecimentos sobre Multisig e HD Wallets
+                  Teste seus conhecimentos sobre Multisig e Taproot
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -256,7 +263,7 @@ export default function Module7() {
               <CardHeader>
                 <CardTitle className="text-xl text-center">🎯 Tarefas Práticas</CardTitle>
                 <CardDescription className="text-center">
-                  Crie carteiras multisig e HD wallets avançadas
+                  Crie carteiras multisig e transações Taproot avançadas
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -277,25 +284,31 @@ export default function Module7() {
                   onTransactionSigned={(txId) => {
                     setMultisigResults(prev => ({ ...prev, transactionHash: txId }))
                   }}
+                  onKeysGenerated={(keys) => {
+                    setMultisigResults(prev => ({ ...prev, multisigKeys: keys }))
+                  }}
+                  onWalletObjectCreated={(wallet) => {
+                    setMultisigResults(prev => ({ ...prev, multisigWallet: wallet }))
+                  }}
                 />
               </CardContent>
             </Card>
 
-            {/* HD Wallet Manager */}
+            {/* Taproot Transaction Creator */}
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">🏗️ Gerenciador de HD Wallets</CardTitle>
+                <CardTitle className="text-lg">🌿 Criador de Transações Taproot</CardTitle>
                 <CardDescription>
-                  Implemente derivação hierárquica de endereços
+                  Crie transações multisig eficientes usando Taproot
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <HDWalletManager 
-                  onWalletCreated={(wallet) => {
-                    setMultisigResults(prev => ({ ...prev, walletAddress: wallet.fingerprint }))
+                <TaprootTransactionCreator 
+                  onTransactionCreated={(txHash, address) => {
+                    setMultisigResults(prev => ({ ...prev, transactionHash: txHash, walletAddress: address }))
                   }}
-                  onAddressGenerated={(_address) => {
-                    // Handle address generation if needed
+                  onPrivateKeyGenerated={(privateKey) => {
+                    setMultisigResults(prev => ({ ...prev, taprootPrivateKey: privateKey }))
                   }}
                 />
               </CardContent>
@@ -310,8 +323,10 @@ export default function Module7() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <BadgeNFTCreator 
-                  onBadgeCreated={(badgeId, _badgeData) => {
+                <MultisigBadgeCreator 
+                  multisigWallet={multisigResults.multisigWallet}
+                  multisigKeys={multisigResults.multisigKeys}
+                  onBadgeCreated={(badgeId) => {
                     setMultisigResults(prev => ({ ...prev, ordinalId: badgeId }))
                   }}
                 />
@@ -335,7 +350,7 @@ export default function Module7() {
                 Parabéns! Módulo Final Concluído
               </CardTitle>
               <CardDescription>
-                Você completou com sucesso o Módulo 7 - Multisig e HD Wallets
+                Você completou com sucesso o Módulo 7 - Carteiras Multisig
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -380,7 +395,7 @@ export default function Module7() {
               {/* Multisig Results */}
               {(multisigResults.walletAddress || multisigResults.transactionHash || multisigResults.ordinalId) && (
                 <div className="bg-gray-800 rounded-lg p-4">
-                  <h3 className="font-semibold text-white mb-3">🔐 Seus Resultados Multisig/HD:</h3>
+                  <h3 className="font-semibold text-white mb-3">🔐 Seus Resultados Multisig/Taproot:</h3>
                   <div className="space-y-2 text-sm text-gray-300">
                     {multisigResults.walletAddress && (
                       <div>
@@ -392,7 +407,7 @@ export default function Module7() {
                     )}
                     {multisigResults.transactionHash && (
                       <div>
-                        <span className="font-medium">Transação Multisig:</span>
+                        <span className="font-medium">Transação Taproot:</span>
                         <div className="font-mono text-xs bg-gray-700 p-2 rounded mt-1 break-all">
                           {multisigResults.transactionHash}
                         </div>
@@ -417,11 +432,11 @@ export default function Module7() {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-semibold text-white mb-3">🎓 O que você aprendeu:</h3>
                 <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm text-left">
-                  <li>Carteiras multisig distribuem risco entre múltiplas chaves</li>
-                  <li>HD wallets permitem derivação infinita de endereços de uma seed</li>
-                  <li>BIP32/BIP44 organizam chaves em estruturas hierárquicas</li>
+                  <li>Carteiras multisig distribuem risco entre múltiplas chaves independentes</li>
+                  <li>Taproot melhora privacidade fazendo multisig parecer transações simples</li>
+                  <li>Assinaturas Schnorr reduzem tamanho e custos de transações multisig</li>
                   <li>Multisig é ideal para custódia corporativa e alta segurança</li>
-                  <li>HD wallets simplificam backup e melhoram privacidade</li>
+                  <li>Taproot permite contratos inteligentes mais sofisticados</li>
                 </ul>
               </div>
 

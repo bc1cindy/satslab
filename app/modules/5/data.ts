@@ -46,72 +46,73 @@ export const module5Questions: Question[] = [
 export const module5Tasks = [
   {
     id: 1,
-    title: "Configurar Carteira Lightning",
-    description: "Configure a carteira Phoenix ou Breez para usar na rede Signet e receba fundos do faucet.",
+    title: "Gerar Invoice na Carteira Integrada",
+    description: "Use a carteira Lightning integrada para gerar um invoice e receber um pagamento.",
     instructions: [
-      "Baixe a carteira Phoenix (iOS/Android) ou Breez (iOS/Android/Desktop)",
-      "Configure para usar a rede Signet (modo desenvolvedor)",
-      "Gere um endereço Lightning",
-      "Use o faucet starbackr.me para receber fundos de teste",
-      "Confirme o recebimento dos fundos"
+      "Vá para a aba 'Carteira' na seção 'Receber'",
+      "Digite um valor em satoshis (ex: 1000)",
+      "Adicione uma descrição opcional",
+      "Clique em 'Gerar Invoice'",
+      "Observe o invoice gerado e aguarde o pagamento simulado"
     ],
     type: "lightning" as const,
     validation: {
       type: "address" as const,
-      placeholder: "Endereço Lightning ou invoice (ex: lnbc1...)"
+      placeholder: "Invoice Lightning gerado (ex: lnbc1000u1p...)"
     },
     hints: [
-      "Phoenix: Vá em Configurações > Modo Desenvolvedor > Rede Signet",
-      "Breez: Ative o modo desenvolvedor nas configurações",
-      "O faucet starbackr.me funciona com endereços Lightning",
-      "Guarde o endereço da carteira para validação"
+      "A carteira integrada simula o recebimento automaticamente",
+      "O pagamento chegará após alguns segundos",
+      "Copie o invoice gerado para validação",
+      "Observe o aumento no saldo da carteira"
     ]
   },
   {
     id: 2,
     title: "Enviar Pagamento Lightning",
-    description: "Realize uma transação Lightning enviando 1000 satoshis para outro endereço.",
+    description: "Realize uma transação Lightning enviando satoshis através da carteira integrada.",
     instructions: [
-      "Abra sua carteira Lightning configurada",
-      "Gere um invoice ou use um endereço Lightning de teste",
-      "Envie exatamente 1000 satoshis (0.00001 BTC)",
-      "Observe a velocidade da transação (instantânea)",
-      "Anote o hash da transação ou preimage"
+      "Vá para a aba 'Carteira' na seção 'Enviar'",
+      "Digite um valor em satoshis",
+      "Use o invoice de teste fornecido ou cole um invoice válido",
+      "Clique em 'Enviar Pagamento'",
+      "Observe o processo de roteamento e confirmação"
     ],
     type: "lightning" as const,
     validation: {
-      type: "hash" as const,
-      placeholder: "Hash da transação Lightning ou preimage",
-      expectedLength: 64
+      type: "transaction" as const,
+      placeholder: "Hash da transação Lightning ou preimage"
     },
     hints: [
-      "Transações Lightning são instantâneas",
-      "O hash pode ser encontrado nos detalhes da transação",
-      "Use o invoice de teste fornecido se não tiver outro destino",
-      "A taxa será de apenas alguns satoshis"
+      "Gere um invoice primeiro na seção 'Receber' ou use um invoice válido",
+      "A transação será processada instantaneamente",
+      "O hash aparecerá no histórico de pagamentos",
+      "Observe a taxa baixa cobrada"
     ]
   },
   {
     id: 3,
-    title: "Fechar Canal e Observar Taxa",
-    description: "Feche um canal Lightning e observe a taxa on-chain cobrada.",
+    title: "Simular Canal Lightning",
+    description: "Use o simulador de canais para entender como funcionam os canais Lightning.",
     instructions: [
-      "Identifique um canal ativo na sua carteira",
-      "Inicie o processo de fechamento do canal",
-      "Observe a taxa on-chain estimada para o fechamento",
-      "Aguarde a confirmação na blockchain",
-      "Compare a taxa com transações Lightning anteriores"
+      "Vá para o 'Simulador de Canais Lightning'",
+      "Configure a capacidade do canal (ex: 100.000 sats)",
+      "Ajuste a contribuição de Alice e Bob",
+      "Abra o canal e realize algumas transações",
+      "Observe a 'Taxa de Fechamento Estimada' exibida em laranja",
+      "Use este valor em satoshis para validar a tarefa"
     ],
     type: "lightning" as const,
     validation: {
-      type: "fee" as const,
-      placeholder: "Taxa on-chain cobrada em satoshis"
+      type: "amount" as const,
+      placeholder: "Taxa de fechamento estimada em satoshis"
     },
     hints: [
-      "Fechamento de canal requer transação on-chain",
-      "A taxa será significativamente maior que Lightning",
-      "Processo pode levar alguns minutos para confirmar",
-      "Use carteiras que mostram detalhes de taxa claramente"
+      "Canais permitem múltiplas transações off-chain",
+      "A taxa de fechamento é baseada na capacidade do canal (aprox. 0.1%)",
+      "Experimente diferentes configurações de canal",
+      "Transações dentro do canal são instantâneas",
+      "Procure pela seção laranja 'Taxa de Fechamento Estimada'"
     ]
   }
 ]

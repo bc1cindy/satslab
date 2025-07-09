@@ -15,6 +15,8 @@ import { useToast } from '@/app/hooks/use-toast'
 interface BadgeNFTCreatorProps {
   userPublicKey?: string
   onBadgeCreated?: (badgeId: string, badgeData: BadgeNFT) => void
+  multisigKeys?: any[]
+  taprootPrivateKey?: string
 }
 
 interface BadgeTemplate {
@@ -66,7 +68,7 @@ const BADGE_TEMPLATES: BadgeTemplate[] = [
   }
 ]
 
-export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: BadgeNFTCreatorProps) {
+export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated, multisigKeys, multisigWallet, taprootPrivateKey }: BadgeNFTCreatorProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<BadgeTemplate | null>(null)
   const [customBadgeName, setCustomBadgeName] = useState('')
   const [customDescription, setCustomDescription] = useState('')
@@ -74,6 +76,9 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: Badge
   const [isMinting, setIsMinting] = useState(false)
   const [mintedBadges, setMintedBadges] = useState<Array<{id: string, data: BadgeNFT}>>([])
   const [previewMode, setPreviewMode] = useState<'template' | 'custom'>('template')
+  const [useMultisig, setUseMultisig] = useState(false)
+  const [selectedKeys, setSelectedKeys] = useState<number[]>([])
+  const [signingStep, setSigningStep] = useState(0)
   
   const { toast } = useToast()
   const ordinalsService = useMemo(() => new OrdinalsService(SIGNET_NETWORK), [])
@@ -379,8 +384,38 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated }: Badge
                   type="password"
                   value={privateKey}
                   onChange={(e) => setPrivateKey(e.target.value)}
-                  placeholder="L1234..."
+                  placeholder={taprootPrivateKey || "L1234..."}
                 />
+                {taprootPrivateKey && (
+                  <div className="flex space-x-2">
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setPrivateKey(taprootPrivateKey)}
+                    >
+                      Usar Chave Taproot
+                    </Button>
+                  </div>
+                )}
+                {multisigKeys && multisigKeys.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm">Chaves Multisig Disponíveis:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {multisigKeys.map((key, index) => (
+                        <Button 
+                          key={index}
+                          type="button" 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setPrivateKey(key.privateKey)}
+                        >
+                          Chave {index + 1}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {userPublicKey && (

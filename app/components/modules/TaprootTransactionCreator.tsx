@@ -11,14 +11,16 @@ import { ExternalLink, Hash, Zap } from 'lucide-react'
 
 interface TaprootTransactionCreatorProps {
   onTransactionCreated: (hash: string, address: string) => void
+  onPrivateKeyGenerated?: (privateKey: string) => void
 }
 
-export default function TaprootTransactionCreator({ onTransactionCreated }: TaprootTransactionCreatorProps) {
+export default function TaprootTransactionCreator({ onTransactionCreated, onPrivateKeyGenerated }: TaprootTransactionCreatorProps) {
   const [step, setStep] = useState<'address' | 'transaction' | 'broadcast'>('address')
   const [taprootAddress, setTaprootAddress] = useState('')
   const [amount, setAmount] = useState('')
   const [transactionHex, setTransactionHex] = useState('')
   const [transactionHash, setTransactionHash] = useState('')
+  const [privateKey, setPrivateKey] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const generateTaprootAddress = () => {
@@ -27,7 +29,18 @@ export default function TaprootTransactionCreator({ onTransactionCreated }: Tapr
       Math.floor(Math.random() * 36).toString(36)
     ).join('')
     const address = `tb1p${randomBytes}`
+    
+    // Gera chave privada WIF mock para Signet
+    const wifKey = `L${Array.from({ length: 51 }, () => 
+      Math.floor(Math.random() * 58).toString(36)
+    ).join('')}`
+    
     setTaprootAddress(address)
+    setPrivateKey(wifKey)
+    
+    if (onPrivateKeyGenerated) {
+      onPrivateKeyGenerated(wifKey)
+    }
   }
 
   const createTaprootTransaction = async () => {
@@ -242,6 +255,14 @@ export default function TaprootTransactionCreator({ onTransactionCreated }: Tapr
                 <Label className="text-sm text-gray-400">Valor:</Label>
                 <span className="text-sm block mt-1">{amount} sBTC</span>
               </div>
+
+              <div className="bg-gray-900 p-3 rounded">
+                <Label className="text-sm text-gray-400">Chave Privada (WIF):</Label>
+                <code className="text-xs break-all block mt-1 font-mono">{privateKey}</code>
+                <p className="text-xs text-gray-500 mt-1">
+                  Use esta chave para mintar o Ordinal NFT Badge
+                </p>
+              </div>
             </div>
 
             <div className="flex space-x-2">
@@ -260,6 +281,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated }: Tapr
                   setAmount('')
                   setTransactionHex('')
                   setTransactionHash('')
+                  setPrivateKey('')
                 }}
                 className="flex-1 bg-orange-500 hover:bg-orange-600"
               >

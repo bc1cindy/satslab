@@ -61,12 +61,12 @@ const modules = [
   },
   {
     id: 7,
-    title: "Multisig e HD Wallets",
-    description: "Carteiras multi-assinatura e hierárquicas",
+    title: "Carteiras Multisig",
+    description: "Carteiras multi-assinatura e tecnologias Taproot",
     difficulty: "Avançado",
     duration: "90 min",
     requiresLogin: true,
-    topics: ["Multisig", "HD Wallets", "BIP32", "Derivação"]
+    topics: ["Multisig", "Taproot", "Schnorr", "Segurança"]
   }
 ]
 

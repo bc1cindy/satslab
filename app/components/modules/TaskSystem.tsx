@@ -93,6 +93,32 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
     try {
       // Remove spaces and validate format
       const cleanTxid = txid.trim()
+      
+      // Module 5 Lightning Network - validate Lightning payment hash/preimage
+      if (moduleId === 5) {
+        // Lightning payment hash or preimage validation
+        if (cleanTxid.length < 16 || cleanTxid.length > 64) {
+          return {
+            success: false,
+            message: 'Hash Lightning deve ter entre 16 e 64 caracteres.'
+          }
+        }
+        
+        // Validate hex format (more flexible for Lightning)
+        if (!/^[a-fA-F0-9]+$/i.test(cleanTxid)) {
+          return {
+            success: false,
+            message: 'Hash deve conter apenas caracteres hexadecimais.'
+          }
+        }
+        
+        return {
+          success: true,
+          message: 'Hash Lightning válido!'
+        }
+      }
+      
+      // Regular Bitcoin transaction validation
       if (!/^[a-fA-F0-9]{64}$/.test(cleanTxid)) {
         return {
           success: false,
@@ -133,7 +159,31 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
     try {
       const cleanAddress = address.trim()
       
-      // Basic validation for Signet addresses
+      // Module 5 is Lightning Network - validate Lightning invoices
+      if (moduleId === 5) {
+        // Lightning invoice validation - accept any format starting with 'lnbc'
+        if (!cleanAddress.startsWith('lnbc')) {
+          return {
+            success: false,
+            message: 'Deve ser um invoice Lightning válido (inicia com lnbc).'
+          }
+        }
+        
+        // Basic Lightning invoice format validation
+        if (cleanAddress.length < 15) {
+          return {
+            success: false,
+            message: 'Invoice Lightning muito curto.'
+          }
+        }
+        
+        return {
+          success: true,
+          message: 'Invoice Lightning válido!'
+        }
+      }
+      
+      // Basic validation for Signet addresses (other modules)
       if (!cleanAddress.startsWith('tb1') && !cleanAddress.startsWith('2') && !cleanAddress.startsWith('m') && !cleanAddress.startsWith('n')) {
         return {
           success: false,
@@ -207,11 +257,21 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
           break
         case 'amount':
           const amount = parseFloat(userInputs[currentTask])
-          validationResult = {
-            success: !isNaN(amount) && amount > 0,
-            message: !isNaN(amount) && amount > 0 
-              ? `Valor válido: ${amount} sBTC` 
-              : 'Por favor, insira um valor numérico válido maior que 0.'
+          if (moduleId === 5) {
+            // Lightning Network amount validation (for fees in sats)
+            validationResult = {
+              success: !isNaN(amount) && amount >= 0,
+              message: !isNaN(amount) && amount >= 0 
+                ? `Taxa Lightning válida: ${amount} satoshis` 
+                : 'Por favor, insira um valor numérico válido maior ou igual a 0.'
+            }
+          } else {
+            validationResult = {
+              success: !isNaN(amount) && amount > 0,
+              message: !isNaN(amount) && amount > 0 
+                ? `Valor válido: ${amount} sBTC` 
+                : 'Por favor, insira um valor numérico válido maior que 0.'
+            }
           }
           break
         case 'custom':
