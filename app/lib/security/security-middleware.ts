@@ -287,12 +287,6 @@ class SecurityMiddleware {
   private isProtectedRoute(path: string): boolean {
     const protectedRoutes = [
       '/dashboard',
-      '/modules/2',
-      '/modules/3',
-      '/modules/4',
-      '/modules/5',
-      '/modules/6',
-      '/modules/7',
       '/api/user',
       '/api/progress'
     ]
