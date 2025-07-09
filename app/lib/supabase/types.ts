@@ -13,23 +13,32 @@ export interface Database {
         Row: {
           id: string
           public_key: string
+          ip_address: string | null
+          last_login_ip: string | null
+          last_login_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           public_key: string
+          ip_address?: string | null
+          last_login_ip?: string | null
+          last_login_at?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           public_key?: string
+          ip_address?: string | null
+          last_login_ip?: string | null
+          last_login_at?: string | null
           created_at?: string
           updated_at?: string
         }
       }
-      module_progress: {
+      user_progress: {
         Row: {
           id: string
           user_id: string

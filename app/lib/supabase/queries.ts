@@ -79,7 +79,7 @@ export async function getUserProgress(userId: string): Promise<ModuleProgress[]>
     const supabase = createClient()
     
     const { data, error } = await supabase
-      .from('module_progress')
+      .from('user_progress')
       .select('*')
       .eq('user_id', userId)
       .order('module_id')
@@ -111,7 +111,7 @@ export async function updateModuleProgress(
   const supabase = createClient()
   
   const { error } = await supabase
-    .from('module_progress')
+    .from('user_progress')
     .upsert({
       user_id: userId,
       module_id: moduleId,
@@ -243,7 +243,9 @@ export async function recordTransaction(
 // IP-based authentication functions
 export async function getUserByIP(ipAddress: string): Promise<{ id: string; ipAddress: string } | null> {
   try {
-    const supabase = createClient()
+    // Use server client to bypass RLS for system operations
+    const { createServerClient } = await import('./server')
+    const supabase = createServerClient()
     
     const { data, error } = await supabase
       .from('users')
@@ -271,7 +273,9 @@ export async function getUserByIP(ipAddress: string): Promise<{ id: string; ipAd
 
 export async function createUserByIP(ipAddress: string): Promise<{ id: string; ipAddress: string } | null> {
   try {
-    const supabase = createClient()
+    // Use server client to bypass RLS for system operations
+    const { createServerClient } = await import('./server')
+    const supabase = createServerClient()
     
     const { data, error } = await supabase
       .from('users')
