@@ -43,7 +43,7 @@ const moduleTasks = module4Tasks.map(t => ({
 }))
 
 export default function Module4() {
-  const { progress, handleQuestionsComplete, handleTasksComplete, isAuthenticated } = useModuleProgress(4, {
+  const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(4, {
     ...module4Badge,
     moduleId: 4
   })
@@ -92,65 +92,7 @@ export default function Module4() {
     (progress.badgeEarned ? 20 : 0)
   )
 
-  // Login required screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-              <ArrowLeft className="h-5 w-5" />
-              <span>Voltar</span>
-            </Link>
-          </div>
-        </header>
-
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <Card className="bg-gray-900 border-gray-800 text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl text-orange-400 flex items-center justify-center">
-                <Zap className="h-8 w-8 mr-3" />
-                Mineração no Bitcoin
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                Aprenda sobre proof-of-work e simule o processo de mineração
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-orange-400 mb-4">🔒 Login Necessário</h3>
-                <p className="text-gray-300 mb-4">
-                  Este módulo requer login para acessar as simulações de mineração e salvar seu progresso.
-                </p>
-                <div className="space-y-2 text-sm text-gray-400">
-                  <p>🎯 <strong>Objetivos:</strong></p>
-                  <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Entender o conceito de prova de trabalho (proof-of-work)</li>
-                    <li>Compreender o papel dos mineradores na segurança da rede</li>
-                    <li>Simular o processo de mineração com algoritmo SHA-256</li>
-                    <li>Explorar pools de mineração e recompensas</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <Link href="/auth/login">
-                  <Button className="w-full bg-orange-500 hover:bg-orange-600 text-lg px-8 py-3">
-                    Fazer Login para Continuar
-                  </Button>
-                </Link>
-                <Link href="/auth/register">
-                  <Button variant="outline" className="w-full border-gray-600 text-gray-300">
-                    Criar Conta Gratuita
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    )
-  }
+  // Module is now accessible without login - IP auth handles authentication
 
   return (
     <div className="min-h-screen bg-black text-white">

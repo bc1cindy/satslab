@@ -133,6 +133,7 @@ export default function Module3() {
                   <h3 className="font-semibold text-white mb-2">O que você vai aprender:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
                     <li>Como funcionam as taxas de transação e sua relação com velocidade</li>
+                    <li>Por que blocos Bitcoin demoram ~10 minutos para confirmar</li>
                     <li>Estratégias para otimizar custos vs. tempo de confirmação</li>
                     <li>Como enviar transações na rede Signet de forma prática</li>
                     <li>O que é OP_RETURN e como gravar dados na blockchain</li>
@@ -145,6 +146,16 @@ export default function Module3() {
                   <p className="text-blue-300 text-sm">
                     Você precisará da carteira Signet criada no Módulo 2 e alguns sBTC do faucet 
                     para praticar o envio de transações.
+                  </p>
+                </div>
+                
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                  <h3 className="font-semibold text-yellow-400 mb-2">⏱️ Tempo de Bloco Bitcoin:</h3>
+                  <p className="text-yellow-300 text-sm">
+                    <strong>Blocos Bitcoin são minerados a cada ~10 minutos</strong> - isso significa que 
+                    suas transações podem demorar esse tempo para a primeira confirmação. 
+                    Esta é uma das razões pelas quais a <strong>Lightning Network</strong> foi criada: 
+                    para pagamentos instantâneos! Você vai aprender sobre ela no Módulo 5.
                   </p>
                 </div>
                 
@@ -249,8 +260,10 @@ export default function Module3() {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-semibold text-white mb-3">🎓 O que você aprendeu:</h3>
                 <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm text-left">
+                  <li>Blocos Bitcoin são minerados a cada ~10 minutos</li>
                   <li>Taxas de transação incentivam mineradores e afetam velocidade</li>
                   <li>Taxas altas = confirmação rápida, taxas baixas = espera mais longa</li>
+                  <li>Lightning Network resolve o problema de tempo de confirmação</li>
                   <li>OP_RETURN permite gravar dados permanentes na blockchain</li>
                   <li>Transações são imutáveis e verificáveis publicamente</li>
                 </ul>
@@ -259,14 +272,14 @@ export default function Module3() {
               {/* Next Steps */}
               <div className="space-y-4">
                 <p className="text-gray-300">
-                  Excelente! Agora que você domina transações, 
-                  está pronto para aprender sobre tecnologias avançadas do Bitcoin.
+                  Excelente! Agora que você entende como funcionam as transações Bitcoin e por que 
+                  demoram ~10 minutos para confirmar, está pronto para aprender sobre mineração.
                 </p>
                 
                 <div className="flex space-x-4">
                   <Link href="/modules/4" className="flex-1">
                     <Button className="w-full bg-green-500 hover:bg-green-600">
-                      Próximo Módulo: Tecnologias Avançadas
+                      Próximo Módulo: Mineração Bitcoin
                     </Button>
                   </Link>
                   <Link href="/">
@@ -277,7 +290,7 @@ export default function Module3() {
                 </div>
                 
                 <p className="text-sm text-gray-400">
-                  💡 Dica: Experimente diferentes níveis de taxa para ver a diferença na velocidade!
+                  💡 Dica: Lembre-se que a Lightning Network (Módulo 5) resolve o problema de tempo!
                 </p>
               </div>
             </CardContent>
