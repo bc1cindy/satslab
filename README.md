@@ -1,118 +1,141 @@
-# SatsLab - Bitcoin Operations Platform
+# SatsLab - Bitcoin Education Platform
 
-Plataforma educacional interativa para aprender operações Bitcoin através de módulos práticos com a rede Signet.
+🚀 **Experience**: https://satslab.org/
 
-## 🚀 Recursos
+Interactive Bitcoin education platform with hands-on learning through practical modules using the Signet network.
 
-- **7 Módulos Educacionais**: Do básico ao avançado
-- **Rede Signet**: Ambiente seguro para testes com Bitcoin
-- **Sistema de Badges**: Recompensas virtuais e Ordinals
-- **Autenticação por Chave Privada**: Sem senhas tradicionais
-- **Hands-on Learning**: Experiência prática com transações reais
+## ⚡ Features
 
-## 📚 Módulos
+- **7 Educational Modules**: From basics to advanced Bitcoin operations
+- **Signet Network**: Safe Bitcoin testing environment
+- **Badge System**: Virtual rewards and Ordinals
+- **Bitcoin Authentication**: Private key-based login
+- **Hands-on Learning**: Real transaction experience
+- **Admin Dashboard**: Analytics and user monitoring
 
-1. **Introdução ao Bitcoin e Signet** (sem login necessário)
-2. **Segurança e Carteiras**
-3. **Transações na Signet**
-4. **Mineração no Bitcoin**
+## 📚 Modules
+
+1. **Bitcoin & Signet Introduction** (no login required)
+2. **Security & Wallets**
+3. **Signet Transactions**
+4. **Bitcoin Mining**
 5. **Lightning Network**
-6. **Taproot e Ordinals**
-7. **Multisig e Carteiras Hierárquicas**
+6. **Taproot & Ordinals**
+7. **Multisig & HD Wallets**
 
-## 🛠️ Tecnologias
+## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Backend**: Supabase (PostgreSQL)
 - **Bitcoin**: bitcoinjs-lib, mempool.space API
-- **Autenticação**: NextAuth.js com chave privada
+- **Authentication**: Bitcoin private key + IP-based auth
 - **UI**: Radix UI, Lucide React
 
-## 🏃‍♂️ Como Executar
+## 🚀 Quick Start
 
-1. **Clone o repositório**
+1. **Clone & Install**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/bc1cindy/satslab.git
    cd satslab
-   ```
-
-2. **Instale as dependências**
-   ```bash
    npm install
    ```
 
-3. **Configure o ambiente**
+2. **Environment Setup**
    ```bash
    cp .env.local.example .env.local
-   # Configure suas variáveis de ambiente
+   # Configure your environment variables
    ```
 
-4. **Configure o Supabase**
-   - Crie um projeto no [Supabase](https://supabase.com)
-   - Execute o script SQL em `supabase/schema.sql`
-   - Configure as variáveis de ambiente
+3. **Database Setup**
+   - Create a [Supabase](https://supabase.com) project
+   - Run the SQL scripts in order (check `/supabase/` directory)
+   - Configure environment variables
 
-5. **Execute o projeto**
+4. **Run Development Server**
    ```bash
    npm run dev
    ```
 
-## 🔧 Configuração do Supabase
+## 🔧 Environment Variables
 
-1. Crie um novo projeto no Supabase
-2. Execute o script SQL localizado em `supabase/schema.sql`
-3. Configure as variáveis de ambiente:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
+Required variables in `.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 app/
-├── components/          # Componentes React
-│   ├── ui/             # Componentes de UI reutilizáveis
-│   ├── modules/        # Componentes específicos dos módulos
-│   ├── auth/           # Componentes de autenticação
-│   └── layout/         # Componentes de layout
-├── lib/                # Bibliotecas e utilitários
-│   ├── bitcoin/        # Utilitários Bitcoin
-│   ├── supabase/       # Configuração e queries Supabase
-│   ├── auth/           # Lógica de autenticação
-│   └── utils/          # Utilitários gerais
-├── modules/            # Páginas dos módulos
-├── api/                # API routes
-├── types/              # Definições de tipos TypeScript
-└── hooks/              # React hooks customizados
+├── components/          # React components
+│   ├── ui/             # Reusable UI components
+│   ├── modules/        # Module-specific components
+│   ├── auth/           # Authentication components
+│   └── layout/         # Layout components
+├── lib/                # Libraries and utilities
+│   ├── bitcoin/        # Bitcoin utilities
+│   ├── supabase/       # Supabase configuration
+│   ├── auth/           # Authentication logic
+│   └── security/       # Security utilities
+├── modules/            # Module pages
+├── admin/              # Admin dashboard
+└── api/                # API routes
 ```
 
-## 🔐 Autenticação
+## 🔐 Authentication
 
-O sistema usa chaves privadas Bitcoin para autenticação:
-- Usuários fazem login com sua chave privada
-- A chave pública é usada como identificador único
-- Progressos e badges são vinculados à chave pública
+Bitcoin-based authentication system:
+- Private key login
+- IP-based authentication
+- Public key as unique identifier
+- Progress tracking per user
 
-## 🏆 Sistema de Recompensas
+## 🏆 Rewards System
 
-- **Badges Virtuais**: Módulos 1-5, salvos no Supabase
-- **Ordinals**: Módulos 6-7, mintados na Signet pelo usuário
-- **Progresso Persistente**: Trackagem completa de atividades
+- **Virtual Badges**: Modules 1-5 (stored in Supabase)
+- **Ordinals**: Modules 6-7 (minted on Signet)
+- **Progress Tracking**: Complete activity monitoring
+- **Analytics**: User engagement metrics
 
-## 🌐 APIs Utilizadas
+## 🌐 APIs Used
 
-- **mempool.space/signet**: Explorador de blocos Signet
-- **signetfaucet.com**: Faucet para obter sBTC
-- **starbackr.me**: Faucet Lightning Network
+- **mempool.space/signet**: Signet block explorer
+- **signetfaucet.com**: Signet Bitcoin faucet
+- **starbackr.me**: Lightning Network faucet
 
-## 📝 Licença
+## 📊 Admin Features
 
-MIT License - veja o arquivo LICENSE para detalhes.
+- Real-time user analytics
+- Module completion tracking
+- Geographic user distribution
+- Session monitoring
+- Badge and wallet statistics
 
-## 🤝 Contribuição
+## 🤝 Contributing
 
-Contribuições são bem-vindas! Por favor, abra uma issue primeiro para discutir mudanças maiores.
+Open source project! Contributions welcome:
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
-## 📞 Suporte
+## 📝 License
 
-Para dúvidas ou suporte, abra uma issue no repositório.
+MIT License - see LICENSE file for details.
+
+## 🔗 Links
+
+- **Live Site**: https://satslab.org/
+- **Repository**: https://github.com/bc1cindy/satslab
+- **Issues**: https://github.com/bc1cindy/satslab/issues
+
+## 🙏 Support
+
+For questions or support, please open an issue in the repository.
+
+---
+
+*Built with ❤️ for the Bitcoin community*

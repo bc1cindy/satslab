@@ -1,4 +1,4 @@
-import { keyPairFromWIF, signMessage, verifySignature, validatePrivateKey, SIGNET_NETWORK } from '@/app/lib/bitcoin/crypto-mock'
+import { keyPairFromWIF, signMessage, verifySignature, validatePrivateKey, SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { getUserByPublicKey, createUser } from '@/app/lib/supabase/queries'
 
 export interface AuthSession {

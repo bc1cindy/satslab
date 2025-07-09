@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/app/components/ui/button'
 import { BitcoinAuth } from '@/app/lib/auth/bitcoin-auth'
-import { generateKeyPair, SIGNET_NETWORK } from '@/app/lib/bitcoin/crypto-mock'
+import { generateKeyPair, SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { Copy, Check, Eye, EyeOff } from 'lucide-react'
 
 interface LoginFormProps {
