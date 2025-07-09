@@ -9,14 +9,29 @@ export function useAnalytics() {
   const lastActivityRef = useRef<number>(Date.now())
 
   useEffect(() => {
-    const userId = getUserIdentifier(session)
-    if (!userId) return
+    // Allow tracking with temporary identifier before authentication
+    const userId = getUserIdentifier(session) || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
     let sessionId: string | null = null
+
+    // Get client IP for geolocation
+    const getClientIP = async (): Promise<string> => {
+      try {
+        const response = await fetch('/api/client-ip')
+        if (response.ok) {
+          const data = await response.json()
+          return data.ip || '127.0.0.1'
+        }
+      } catch (error) {
+        console.error('Failed to get client IP:', error)
+      }
+      return '127.0.0.1'
+    }
 
     // Start session
     const startSession = async () => {
       try {
-        sessionId = await analyticsService.startSession(userId)
+        const ipAddress = await getClientIP()
+        sessionId = await analyticsService.startSession(userId, ipAddress)
         sessionIdRef.current = sessionId
         startTimeRef.current = Date.now()
         lastActivityRef.current = Date.now()
@@ -116,8 +131,7 @@ export function useAnalytics() {
 
   // Helper functions for tracking specific events
   const trackEvent = async (eventType: EventType, eventData?: any, moduleId?: number) => {
-    const userId = getUserIdentifier(session)
-    if (!userId) return
+    const userId = getUserIdentifier(session) || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
 
     try {
       await analyticsService.trackEvent(
@@ -132,8 +146,7 @@ export function useAnalytics() {
   }
 
   const trackPageView = async (page: string) => {
-    const userId = getUserIdentifier(session)
-    if (!userId || !sessionIdRef.current) return
+    const userId = getUserIdentifier(session) || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
 
     try {
       await analyticsService.trackEvent(
@@ -142,7 +155,9 @@ export function useAnalytics() {
         { page, timestamp: new Date().toISOString() }
       )
       
-      await analyticsService.updatePageVisited(sessionIdRef.current, page)
+      if (sessionIdRef.current) {
+        await analyticsService.updatePageVisited(sessionIdRef.current, page)
+      }
     } catch (error) {
       console.error('Failed to track page view:', error)
     }

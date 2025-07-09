@@ -29,13 +29,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AutoIPAuth>
-              <AnalyticsWrapper>
+            <AnalyticsWrapper>
+              <AutoIPAuth>
                 <div className="min-h-screen bg-background">
                   {children}
                 </div>
-              </AnalyticsWrapper>
-            </AutoIPAuth>
+              </AutoIPAuth>
+            </AnalyticsWrapper>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

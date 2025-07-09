@@ -15,14 +15,11 @@ export default function AnalyticsWrapper({ children }: AnalyticsWrapperProps) {
   const pathname = usePathname()
 
   useEffect(() => {
-    const userIdentifier = getUserIdentifier(session)
-    if (!userIdentifier) return
-
-    // Track page view whenever pathname changes
+    // Track page view for all users (authenticated or not)
     if (typeof window !== 'undefined') {
       trackPageView(pathname)
     }
-  }, [session, pathname, trackPageView])
+  }, [pathname, trackPageView])
 
   return <>{children}</>
 }
