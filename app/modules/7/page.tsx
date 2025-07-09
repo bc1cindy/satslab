@@ -396,9 +396,9 @@ export default function Module7() {
                 </div>
                 
                 <div className="flex space-x-4">
-                  <Link href="/dashboard" className="flex-1">
+                  <Link href="/" className="flex-1">
                     <Button className="w-full bg-purple-500 hover:bg-purple-600">
-                      Ver Dashboard Completo
+                      Ver Módulos Completos
                     </Button>
                   </Link>
                   <Link href="/">
