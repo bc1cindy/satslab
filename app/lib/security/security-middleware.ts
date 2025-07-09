@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { sessionManager } from './session-manager'
+import { edgeSessionManager } from './edge-session-manager'
 
 interface RateLimitConfig {
   windowMs: number
@@ -167,7 +167,7 @@ class SecurityMiddleware {
       userAgent: request.headers.get('user-agent') || ''
     }
 
-    const session = sessionManager.validateSession(sessionToken, clientInfo)
+    const session = edgeSessionManager.validateSession(sessionToken, clientInfo)
     if (!session) {
       return { valid: false, reason: 'Invalid or expired session' }
     }
@@ -187,7 +187,7 @@ class SecurityMiddleware {
       return { valid: false, reason: 'Missing CSRF token' }
     }
 
-    const isValid = sessionManager.validateCSRFToken(sessionToken, csrfToken)
+    const isValid = edgeSessionManager.validateCSRFToken(sessionToken, csrfToken)
     return { valid: isValid, reason: isValid ? undefined : 'Invalid CSRF token' }
   }
 

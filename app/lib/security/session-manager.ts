@@ -4,31 +4,49 @@
  */
 
 // Crypto compatibility layer for Edge Runtime and Node.js
+let nodeCrypto: any = null
+
 function getCrypto() {
-  if (typeof window !== 'undefined') {
-    return window.crypto
-  }
   if (typeof globalThis !== 'undefined' && globalThis.crypto) {
     return globalThis.crypto
   }
-  // Fallback to Node.js crypto
-  const crypto = require('crypto')
-  return {
-    ...crypto,
-    getRandomValues: (array: Uint8Array) => {
-      const randomBytes = crypto.randomBytes(array.length)
-      array.set(randomBytes)
-      return array
+  if (typeof window !== 'undefined' && window.crypto) {
+    return window.crypto
+  }
+  // Lazy load Node.js crypto only when needed
+  if (!nodeCrypto) {
+    try {
+      nodeCrypto = require('crypto')
+    } catch (e) {
+      // Node crypto not available
     }
   }
+  return nodeCrypto
 }
 
-function createHash(algorithm: string) {
+async function createHash(algorithm: string) {
+  // For Edge Runtime, use Web Crypto API
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) {
+    return {
+      update: (data: string) => {
+        const encoder = new TextEncoder()
+        const encodedData = encoder.encode(data)
+        return {
+          digest: async () => {
+            const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', encodedData)
+            return Buffer.from(hashBuffer)
+          }
+        }
+      }
+    }
+  }
+  
+  // Fallback to Node.js crypto
   const crypto = getCrypto()
-  if (crypto.createHash) {
+  if (crypto && crypto.createHash) {
     return crypto.createHash(algorithm)
   }
-  // Browser implementation using SubtleCrypto would go here
+  
   throw new Error('Hash function not available in this environment')
 }
 
@@ -100,7 +118,9 @@ export class SecureSessionManager {
     // Generate encryption key from environment or create secure random
     const keySource = process.env.SESSION_ENCRYPTION_KEY || 
       (process.env.NODE_ENV === 'development' ? 'development-key-not-for-production' : this.generateSecureKey())
-    this.encryptionKey = Buffer.from(createHash('sha256').update(keySource).digest())
+    
+    // For Edge Runtime compatibility, use a simpler approach
+    this.encryptionKey = this.deriveKey(keySource)
     
     // Clean up expired sessions every 15 minutes
     setInterval(() => this.cleanupExpiredSessions(), 15 * 60 * 1000)
@@ -287,6 +307,23 @@ export class SecureSessionManager {
    */
   private generateSecureKey(): string {
     return randomBytes(64).toString('hex')
+  }
+
+  /**
+   * Derive encryption key from source string
+   */
+  private deriveKey(source: string): Buffer {
+    // Simple key derivation for Edge Runtime compatibility
+    const encoder = new TextEncoder()
+    const data = encoder.encode(source)
+    
+    // Ensure key is 32 bytes for AES-256
+    const key = new Uint8Array(32)
+    for (let i = 0; i < data.length && i < 32; i++) {
+      key[i] = data[i]
+    }
+    
+    return Buffer.from(key)
   }
 
   /**
