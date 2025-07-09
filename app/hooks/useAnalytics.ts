@@ -1,16 +1,18 @@
 import { useEffect, useRef } from 'react'
-import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
+import { useSession } from '@/app/lib/session/session-provider'
 import { analyticsService, EventType } from '@/app/lib/supabase/analytics-service'
 
 export function useAnalytics() {
-  const { session } = useAuth()
+  const { sessionId: cookieSessionId, isLoading } = useSession()
   const sessionIdRef = useRef<string | null>(null)
   const startTimeRef = useRef<number>(Date.now())
   const lastActivityRef = useRef<number>(Date.now())
 
   useEffect(() => {
-    // Allow tracking with temporary identifier before authentication
-    const userId = getUserIdentifier(session) || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+    // Wait for session to be initialized
+    if (isLoading || !cookieSessionId) return
+    
+    const userId = cookieSessionId // Use cookie session ID as user identifier
     let sessionId: string | null = null
 
     // Get client IP for geolocation
@@ -127,15 +129,15 @@ export function useAnalytics() {
       cleanup()
       endSession()
     }
-  }, [session])
+  }, [cookieSessionId, isLoading])
 
   // Helper functions for tracking specific events
   const trackEvent = async (eventType: EventType, eventData?: any, moduleId?: number) => {
-    const userId = getUserIdentifier(session) || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+    if (!cookieSessionId) return
 
     try {
       await analyticsService.trackEvent(
-        userId,
+        cookieSessionId,
         eventType,
         eventData,
         moduleId
@@ -146,11 +148,11 @@ export function useAnalytics() {
   }
 
   const trackPageView = async (page: string) => {
-    const userId = getUserIdentifier(session) || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+    if (!cookieSessionId) return
 
     try {
       await analyticsService.trackEvent(
-        userId,
+        cookieSessionId,
         'page_view',
         { page, timestamp: new Date().toISOString() }
       )

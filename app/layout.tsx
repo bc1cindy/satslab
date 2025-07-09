@@ -5,7 +5,8 @@ import { AuthProvider } from '@/app/components/auth/AuthProvider'
 import { ThemeProvider } from '@/app/components/theme-provider'
 import { Toaster } from '@/app/components/ui/toaster'
 import AnalyticsWrapper from '@/app/components/layout/AnalyticsWrapper'
-import AutoIPAuth from '@/app/components/auth/AutoIPAuth'
+import { SessionProvider } from '@/app/lib/session/session-provider'
+import CookieBanner from '@/app/components/layout/CookieBanner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,16 +29,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <AnalyticsWrapper>
-              <AutoIPAuth>
+          <SessionProvider>
+            <AuthProvider>
+              <AnalyticsWrapper>
                 <div className="min-h-screen bg-background">
                   {children}
+                  <CookieBanner />
                 </div>
-              </AutoIPAuth>
-            </AnalyticsWrapper>
-            <Toaster />
-          </AuthProvider>
+              </AnalyticsWrapper>
+              <Toaster />
+            </AuthProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

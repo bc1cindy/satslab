@@ -2,16 +2,14 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { BitcoinAuth, AuthSession } from '@/app/lib/auth/bitcoin-auth'
-import { IPAuth, IPAuthSession } from '@/app/lib/auth/ip-auth'
 
-// Union type for both auth sessions
-type UnifiedSession = AuthSession | IPAuthSession | null
+// Simple session type
+type UnifiedSession = AuthSession | null
 
 interface AuthContextType {
   session: UnifiedSession
   isLoading: boolean
   login: (privateKey: string) => Promise<AuthSession | null>
-  loginByIP: () => Promise<IPAuthSession | null>
   logout: () => void
 }
 
@@ -22,12 +20,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing sessions on mount - try IP first, then Bitcoin
-    const ipSession = IPAuth.getSession()
+    // Check for existing Bitcoin session on mount
     const bitcoinSession = BitcoinAuth.getSession()
-    
-    // Prefer IP session if available, otherwise use Bitcoin session
-    setSession(ipSession || bitcoinSession)
+    setSession(bitcoinSession)
     setIsLoading(false)
   }, [])
 
@@ -42,25 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const loginByIP = async (): Promise<IPAuthSession | null> => {
-    setIsLoading(true)
-    try {
-      const newSession = await IPAuth.authenticateByIP()
-      setSession(newSession)
-      return newSession
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const logout = () => {
     BitcoinAuth.logout()
-    IPAuth.logout()
     setSession(null)
   }
 
   return (
-    <AuthContext.Provider value={{ session, isLoading, login, loginByIP, logout }}>
+    <AuthContext.Provider value={{ session, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
@@ -88,14 +71,8 @@ export function getUserId(session: UnifiedSession): string | null {
   return session.user.id
 }
 
-// Helper function to get user identifier (publicKey or ipAddress)
+// Helper function to get user identifier
 export function getUserIdentifier(session: UnifiedSession): string | null {
   if (!session) return null
-  if ('publicKey' in session.user) {
-    return session.user.publicKey
-  }
-  if ('ipAddress' in session.user) {
-    return session.user.ipAddress
-  }
-  return null
+  return session.user.publicKey
 }

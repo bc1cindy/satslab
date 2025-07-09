@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
+import { useSession } from '@/app/lib/session/session-provider'
 import { updateModuleProgress, awardBadge } from '@/app/lib/supabase/queries'
 import { analyticsService } from '@/app/lib/supabase/analytics-service'
 import { Badge } from '@/app/types'
@@ -18,6 +19,7 @@ interface ModuleProgressState {
 
 export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'id' | 'earnedAt'>) {
   const { session } = useAuth()
+  const { sessionId } = useSession()
   const [progress, setProgress] = useState<ModuleProgressState>({
     timeSpent: 0,
     questionsCompleted: false,
@@ -88,13 +90,12 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         questionsScore: score
       }
       
-      // Track analytics
-      const userIdentifier = getUserIdentifier(session)
-      if (userIdentifier) {
+      // Track analytics using sessionId
+      if (sessionId) {
         // Track each question answer if we have the data
         for (let i = 0; i < total; i++) {
           analyticsService.trackEvent(
-            userIdentifier,
+            sessionId,
             'question_answer',
             { 
               moduleId, 
@@ -113,7 +114,7 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
       
       return newProgress
     })
-  }, [saveProgress, session, moduleId])
+  }, [saveProgress, sessionId, moduleId])
 
   // Handle tasks completion
   const handleTasksComplete = useCallback(async (completedTasks: number, totalTasks: number) => {
@@ -136,12 +137,11 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         completed: newProgress.completed
       })
       
-      // Track analytics
-      const userIdentifier = getUserIdentifier(session)
-      if (userIdentifier) {
+      // Track analytics using sessionId
+      if (sessionId) {
         // Track task completion
         analyticsService.trackEvent(
-          userIdentifier,
+          sessionId,
           'task_complete',
           { 
             moduleId, 
@@ -155,7 +155,7 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         // Track module completion if all done
         if (newProgress.completed) {
           analyticsService.trackEvent(
-            userIdentifier,
+            sessionId,
             'module_complete',
             { 
               moduleId,
@@ -170,7 +170,7 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         // Track badge earned
         if (newProgress.badgeEarned && moduleBadge) {
           analyticsService.trackEvent(
-            userIdentifier,
+            sessionId,
             'badge_earned',
             { 
               moduleId,
@@ -188,7 +188,7 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
       
       return newProgress
     })
-  }, [saveProgress, session, moduleId, moduleBadge])
+  }, [saveProgress, sessionId, moduleId, moduleBadge])
 
   return {
     progress,
