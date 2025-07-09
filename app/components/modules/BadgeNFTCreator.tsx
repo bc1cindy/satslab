@@ -16,6 +16,7 @@ interface BadgeNFTCreatorProps {
   userPublicKey?: string
   onBadgeCreated?: (badgeId: string, badgeData: BadgeNFT) => void
   multisigKeys?: any[]
+  multisigWallet?: any
   taprootPrivateKey?: string
 }
 
