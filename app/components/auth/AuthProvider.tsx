@@ -77,11 +77,7 @@ export function useAuth(): AuthContextType {
 export function useRequireAuth() {
   const { session, isLoading } = useAuth()
   
-  useEffect(() => {
-    if (!isLoading && !session) {
-      window.location.href = '/auth'
-    }
-  }, [session, isLoading])
+  // Removed redirect to /auth - admin page accessible without authentication
   
   return { session, isLoading }
 }
