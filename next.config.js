@@ -6,6 +6,11 @@ const nextConfig = {
     buildActivity: true,
     buildActivityPosition: 'bottom-right',
   },
+  // Configurações para deploy
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
   webpack: (config, { isServer }) => {
     // Handle WebAssembly modules
     config.experiments = {

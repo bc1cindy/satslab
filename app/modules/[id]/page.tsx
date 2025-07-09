@@ -27,6 +27,7 @@ interface ModulePageProps {
   }
 }
 
+
 export default function ModulePage({ params }: ModulePageProps) {
   const moduleId = parseInt(params.id)
   const { session } = useAuth()
