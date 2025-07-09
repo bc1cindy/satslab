@@ -93,8 +93,10 @@ export function useAnalytics() {
         }
         
         if (navigator.sendBeacon) {
-          navigator.sendBeacon('/api/analytics', JSON.stringify(eventData))
+          const blob = new Blob([JSON.stringify(eventData)], { type: 'application/json' })
+          navigator.sendBeacon('/api/analytics', blob)
         } else {
+          // Fallback: try to call endSession synchronously
           endSession()
         }
       }
@@ -120,13 +122,34 @@ export function useAnalytics() {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
 
+    // Heartbeat to update session duration every 30 seconds
+    const startHeartbeat = () => {
+      return setInterval(() => {
+        if (sessionId) {
+          const currentDuration = Date.now() - startTimeRef.current
+          fetch('/api/session/heartbeat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: sessionId,
+              duration: currentDuration
+            })
+          }).catch(error => {
+            console.error('Heartbeat failed:', error)
+          })
+        }
+      }, 30000) // Every 30 seconds
+    }
+
     // Initialize
     startSession()
     setupListeners()
+    const heartbeatInterval = startHeartbeat()
 
     // Cleanup on unmount
     return () => {
       cleanup()
+      clearInterval(heartbeatInterval)
       endSession()
     }
   }, [cookieSessionId, isLoading])
