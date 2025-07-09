@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/ta
 import { Badge } from '@/app/components/ui/badge'
 import { Separator } from '@/app/components/ui/separator'
 import { TaprootService, TaprootAddress, TaprootTransaction } from '@/app/lib/bitcoin/taproot-service'
-import { SIGNET_NETWORK } from '@/app/lib/bitcoin/crypto'
+import { SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { useToast } from '@/app/hooks/use-toast'
 
 interface TaprootTransactionsProps {

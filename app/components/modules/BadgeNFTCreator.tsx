@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/app/components/ui/alert'
 import { Badge } from '@/app/components/ui/badge'
 import { Separator } from '@/app/components/ui/separator'
 import { OrdinalsService, BadgeNFT, OrdinalUTXO } from '@/app/lib/bitcoin/ordinals-service'
-import { SIGNET_NETWORK } from '@/app/lib/bitcoin/crypto'
+import { SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { useToast } from '@/app/hooks/use-toast'
 
 interface BadgeNFTCreatorProps {

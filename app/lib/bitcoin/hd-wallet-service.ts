@@ -2,7 +2,7 @@ import * as bitcoin from 'bitcoinjs-lib'
 import * as ecc from 'tiny-secp256k1'
 import * as bip32 from 'bip32'
 import * as bip39 from 'bip39'
-import { SIGNET_NETWORK } from './crypto'
+import { SIGNET_NETWORK } from './bitcoin-crypto'
 
 bitcoin.initEccLib(ecc)
 const BIP32 = bip32.BIP32Factory(ecc)

@@ -17,15 +17,15 @@ export class BitcoinAuth {
   static async authenticate(privateKey: string): Promise<AuthSession | null> {
     try {
       // Validate private key format
-      if (!validatePrivateKey(privateKey, SIGNET_NETWORK)) {
+      if (!validatePrivateKey(privateKey)) {
         console.error('Invalid private key format:', privateKey)
         throw new Error('Invalid private key format')
       }
       
       // Generate key pair and signature
-      const keyPair = keyPairFromWIF(privateKey, SIGNET_NETWORK)
+      const keyPair = keyPairFromWIF(privateKey)
       const message = `SatsLab Login ${Date.now()}`
-      const signature = signMessage(message, privateKey, SIGNET_NETWORK)
+      const signature = signMessage(message, privateKey)
       
       // Verify signature (additional security check)
       const isValidSignature = verifySignature(message, signature, keyPair.publicKey)

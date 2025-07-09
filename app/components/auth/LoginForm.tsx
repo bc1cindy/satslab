@@ -40,7 +40,7 @@ export function LoginForm({}: LoginFormProps) {
   }
 
   const generateDemoKey = () => {
-    const keyPair = generateKeyPair(SIGNET_NETWORK)
+    const keyPair = generateKeyPair()
     setPrivateKey(keyPair.privateKey)
     setGeneratedKey({
       private: keyPair.privateKey,

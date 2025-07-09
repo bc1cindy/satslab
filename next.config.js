@@ -11,9 +11,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    appDir: true,
-  },
+  // experimental: {
+  //   appDir: true, // Removed - not needed in Next.js 14
+  // },
   webpack: (config, { isServer }) => {
     // Handle WebAssembly modules
     config.experiments = {

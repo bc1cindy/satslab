@@ -24,7 +24,7 @@ export {
   signMessage,
   verifySignature,
   SIGNET_NETWORK
-} from '../bitcoin/crypto'
+} from '../bitcoin/bitcoin-crypto'
 
 // Basic input validator
 export class SecureInputValidator {

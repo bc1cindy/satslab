@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { keyPairFromWIF, signMessage, verifySignature, validatePrivateKey, SIGNET_NETWORK } from '@/app/lib/bitcoin/crypto'
+import { keyPairFromWIF, signMessage, verifySignature, validatePrivateKey, SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { getUserByPublicKey, createUser } from '@/app/lib/supabase/queries'
 import { sessionManager } from '@/app/lib/security/session-manager'
 
@@ -76,9 +76,9 @@ export class SecureBitcoinAuth {
       }
       
       // Generate key pair with secure random nonce
-      const keyPair = keyPairFromWIF(privateKey, SIGNET_NETWORK)
+      const keyPair = keyPairFromWIF(privateKey)
       const challengeMessage = this.generateSecureChallenge()
-      const signature = signMessage(challengeMessage, privateKey, SIGNET_NETWORK)
+      const signature = signMessage(challengeMessage, privateKey)
       
       // Verify signature with timing attack protection
       const isValidSignature = await this.secureVerifySignature(
@@ -257,7 +257,7 @@ export class SecureBitcoinAuth {
     const startTime = Date.now()
     
     try {
-      const isValid = validatePrivateKey(privateKey, SIGNET_NETWORK)
+      const isValid = validatePrivateKey(privateKey)
       
       // Ensure consistent timing regardless of result
       const elapsed = Date.now() - startTime
