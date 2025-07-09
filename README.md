@@ -9,9 +9,7 @@ Interactive Bitcoin education platform with hands-on learning through practical 
 - **7 Educational Modules**: From basics to advanced Bitcoin operations
 - **Signet Network**: Safe Bitcoin testing environment
 - **Badge System**: Virtual rewards and Ordinals
-- **Bitcoin Authentication**: Private key-based login
 - **Hands-on Learning**: Real transaction experience
-- **Admin Dashboard**: Analytics and user monitoring
 
 ## 📚 Modules
 
@@ -28,7 +26,7 @@ Interactive Bitcoin education platform with hands-on learning through practical 
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Backend**: Supabase (PostgreSQL)
 - **Bitcoin**: bitcoinjs-lib, mempool.space API
-- **Authentication**: Bitcoin private key + IP-based auth
+- **Authentication**: IP-based auth
 - **UI**: Radix UI, Lucide React
 
 ## 🚀 Quick Start
@@ -86,10 +84,8 @@ app/
 
 ## 🔐 Authentication
 
-Bitcoin-based authentication system:
-- Private key login
+Simple authentication system:
 - IP-based authentication
-- Public key as unique identifier
 - Progress tracking per user
 
 ## 🏆 Rewards System
@@ -97,21 +93,12 @@ Bitcoin-based authentication system:
 - **Virtual Badges**: Modules 1-5 (stored in Supabase)
 - **Ordinals**: Modules 6-7 (minted on Signet)
 - **Progress Tracking**: Complete activity monitoring
-- **Analytics**: User engagement metrics
 
 ## 🌐 APIs Used
 
 - **mempool.space/signet**: Signet block explorer
 - **signetfaucet.com**: Signet Bitcoin faucet
 - **starbackr.me**: Lightning Network faucet
-
-## 📊 Admin Features
-
-- Real-time user analytics
-- Module completion tracking
-- Geographic user distribution
-- Session monitoring
-- Badge and wallet statistics
 
 ## 🤝 Contributing
 
