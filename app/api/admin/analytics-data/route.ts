@@ -108,6 +108,7 @@ export async function GET(request: Request) {
       .from('user_events')
       .select('*')
       .eq('event_type', 'wallet_created')
+      .like('user_id', 'session_%')
     
     const { data: moduleCompleteEvents, error: moduleError } = await supabase
       .from('user_events')
@@ -143,9 +144,23 @@ export async function GET(request: Request) {
     ).size
     
     const totalSessions = sessions?.length || 0
-    const avgSessionDuration = sessions && sessions.length > 0
-      ? sessions.reduce((sum, s) => sum + (s.total_duration_seconds || 0), 0) / sessions.length
+    
+    // Calculate average session duration only for sessions with valid duration
+    const sessionsWithDuration = sessions?.filter(s => 
+      s.total_duration_seconds && s.total_duration_seconds > 0
+    ) || []
+    
+    const avgSessionDuration = sessionsWithDuration.length > 0
+      ? sessionsWithDuration.reduce((sum, s) => sum + s.total_duration_seconds, 0) / sessionsWithDuration.length
       : 0
+    
+    // Log for debugging
+    console.log('Session duration calculation:', {
+      totalSessions: sessions?.length || 0,
+      sessionsWithDuration: sessionsWithDuration.length,
+      avgDurationSeconds: Math.round(avgSessionDuration),
+      avgDurationMinutes: Math.round(avgSessionDuration / 60)
+    })
     
     const activeSessions = sessions?.filter(s => !s.session_end)?.length || 0
     
@@ -179,6 +194,12 @@ export async function GET(request: Request) {
         .sort((a, b) => b.count - a.count)
         .slice(0, 10) // Top 10 countries
     }
+    
+    // Log wallet events for debugging
+    console.log('Wallet events:', {
+      total: walletEvents?.length || 0,
+      sessionUsers: walletEvents?.filter(e => e.user_id.startsWith('session_')).length || 0
+    })
     
     const response = NextResponse.json({
       success: true,
