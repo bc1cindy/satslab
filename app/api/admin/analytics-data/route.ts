@@ -192,7 +192,7 @@ export async function GET(request: Request) {
     
     // Log for debugging
     console.log('Session duration calculation:', {
-      totalSessions: sessions?.length || 0,
+      totalSessions: sessionData?.length || 0,
       sessionsWithDuration: sessionsWithDuration.length,
       avgDurationSeconds: Math.round(avgSessionDuration),
       avgDurationMinutes: Math.round(avgSessionDuration / 60)
