@@ -109,10 +109,21 @@ export async function GET(request: Request) {
     
     // Get platform stats
     console.log('Fetching sessions from database...')
+    
+    // First, let's get the total count to see if there's a limit issue
+    const { count: totalCount, error: countError } = await supabase
+      .from('user_sessions')
+      .select('*', { count: 'exact', head: true })
+      .like('user_id', 'session_%')
+    
+    console.log('Total count from database:', totalCount)
+    
+    // Supabase has a default limit of 1000 rows, let's override it
     const { data: sessions, error: sessionsError } = await supabase
       .from('user_sessions')
       .select('*')
       .like('user_id', 'session_%')
+      .range(0, 9999) // Get up to 10,000 sessions
     
     console.log(`Database returned ${sessions?.length || 0} sessions`)
     if (sessionsError) {
