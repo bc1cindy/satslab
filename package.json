@@ -23,7 +23,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.1",
-    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/supabase-js": "^2.50.4",
     "autoprefixer": "^10.4.20",
     "bip32": "^5.0.0-rc.0",
     "bip39": "^3.1.0",

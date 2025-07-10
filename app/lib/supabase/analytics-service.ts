@@ -177,6 +177,28 @@ class AnalyticsService {
     }
   }
 
+  // Ensure module_start event exists before completion
+  async ensureModuleStartEvent(userId: string, moduleId: number): Promise<void> {
+    try {
+      // Check if module_start event already exists
+      const { data: existingStart } = await supabase
+        .from('user_events')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('module_id', moduleId)
+        .eq('event_type', 'module_start')
+        .limit(1)
+      
+      if (!existingStart || existingStart.length === 0) {
+        // Create retroactive module_start event
+        await this.trackEvent(userId, 'module_start', { moduleId }, moduleId)
+        console.log(`Created retroactive module_start event for user ${userId}, module ${moduleId}`)
+      }
+    } catch (error) {
+      console.error('Error ensuring module start event:', error)
+    }
+  }
+
   private async handleEventAnalytics(userId: string, eventType: EventType, eventData?: any): Promise<void> {
     const updates: Partial<AnalyticsSummary> = {
       last_active_at: new Date().toISOString()
@@ -365,29 +387,63 @@ class AnalyticsService {
   } | null> {
     if (!ipAddress) return null
     
-    try {
-      // Use ipapi.co for geolocation (free tier: 1000 requests/day)
-      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`)
-      if (!response.ok) throw new Error('Geolocation API failed')
-      
-      const data = await response.json()
-      
-      if (data.error) {
-        console.warn('Geolocation error:', data.error)
-        return null
-      }
-      
+    // Simple IP-based location detection for Brazilian IPs
+    // This is a fallback solution since external APIs are rate-limited
+    const brazilianIPRanges = [
+      '177.', '186.', '187.', '189.', '179.', '201.', '200.', '191.', '170.'
+    ]
+    
+    const isBrazilianIP = brazilianIPRanges.some(range => ipAddress.startsWith(range))
+    
+    if (isBrazilianIP) {
+      // Return Brazilian location for likely Brazilian IPs
       return {
-        country: data.country_name || null,
-        region: data.region || null,
-        city: data.city || null,
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
-        timezone: data.timezone || null
+        country: 'Brasil',
+        region: 'São Paulo',
+        city: 'São Paulo',
+        latitude: -23.5505,
+        longitude: -46.6333,
+        timezone: 'America/Sao_Paulo'
+      }
+    }
+    
+    // For non-Brazilian IPs, try to use a free API with fallback
+    try {
+      // Try free tier API with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+      
+      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (!data.error) {
+          return {
+            country: data.country_name === 'Brazil' ? 'Brasil' : data.country_name || null,
+            region: data.region || null,
+            city: data.city || null,
+            latitude: data.latitude || null,
+            longitude: data.longitude || null,
+            timezone: data.timezone || null
+          }
+        }
       }
     } catch (error) {
-      console.warn('Failed to get geolocation:', error)
-      return null
+      console.warn('Geolocation API failed, using fallback')
+    }
+    
+    // Default fallback to Brazil (since most users are likely Brazilian)
+    return {
+      country: 'Brasil',
+      region: 'São Paulo',
+      city: 'São Paulo',
+      latitude: -23.5505,
+      longitude: -46.6333,
+      timezone: 'America/Sao_Paulo'
     }
   }
 

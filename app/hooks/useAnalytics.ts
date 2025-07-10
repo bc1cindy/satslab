@@ -272,8 +272,17 @@ export function useModuleAnalytics(moduleId: number) {
   useEffect(() => {
     // Only track once per module load
     if (!hasTracked.current) {
-      trackModuleStart(moduleId)
-      hasTracked.current = true
+      const track = async () => {
+        try {
+          await trackModuleStart(moduleId)
+          hasTracked.current = true
+        } catch (error) {
+          console.error('Failed to track module start:', error)
+          // Still mark as tracked to prevent infinite retries
+          hasTracked.current = true
+        }
+      }
+      track()
     }
   }, [moduleId]) // Remove trackModuleStart from dependencies to avoid re-tracking
 

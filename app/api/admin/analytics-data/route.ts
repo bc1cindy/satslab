@@ -60,20 +60,26 @@ export async function GET() {
       }
       
       // Count unique users who started vs completed
-      const uniqueStarters = new Set(moduleStartUsers?.map(u => u.user_id) || []).size
-      const uniqueCompleters = new Set(completions?.map(u => u.user_id) || []).size
+      const uniqueStarterIds = new Set(moduleStartUsers?.map(u => u.user_id) || [])
+      const uniqueCompleterIds = new Set(completions?.map(u => u.user_id) || [])
+      
+      // For total unique users, count anyone who either started OR completed
+      const allUniqueUsers = new Set([...uniqueStarterIds, ...uniqueCompleterIds])
+      
+      const uniqueCompleters = uniqueCompleterIds.size
       const startCount = starts?.length || 0
       const taskCount = tasks?.length || 0
       const badgeCount = badges?.length || 0
       
-      // Calculate completion rate correctly: unique completers / unique starters * 100
-      const completionRate = uniqueStarters > 0 
-        ? (uniqueCompleters / uniqueStarters) * 100 
+      // Calculate completion rate: unique completers / total unique users * 100
+      // This handles cases where someone completed without a recorded start
+      const completionRate = allUniqueUsers.size > 0 
+        ? (uniqueCompleters / allUniqueUsers.size) * 100 
         : 0
       
       moduleAnalytics.push({
         module_id: moduleId,
-        unique_users: uniqueStarters,
+        unique_users: allUniqueUsers.size, // Total unique users (started OR completed)
         module_starts: startCount,
         module_completions: uniqueCompleters,
         task_completions: taskCount,
@@ -164,7 +170,7 @@ export async function GET() {
         .slice(0, 10) // Top 10 countries
     }
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       moduleAnalytics,
       geolocationStats,
@@ -180,6 +186,13 @@ export async function GET() {
         total_wallets_created: walletEvents?.length || 0
       }
     })
+
+    // Add cache control headers to prevent caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    
+    return response
   } catch (error) {
     console.error('Analytics data error:', error)
     return NextResponse.json(

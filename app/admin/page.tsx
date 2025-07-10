@@ -69,7 +69,14 @@ export default function AdminDashboard() {
       setLoading(true)
       
       // Use our new analytics endpoint that calculates everything correctly
-      const analyticsResponse = await fetch('/api/admin/analytics-data')
+      // Add cache-busting timestamp to ensure fresh data
+      const analyticsResponse = await fetch(`/api/admin/analytics-data?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      })
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json()
         
