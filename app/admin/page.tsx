@@ -64,13 +64,22 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (forceRefresh = false) => {
     try {
       setLoading(true)
       
+      // Clear state if force refresh
+      if (forceRefresh) {
+        setPlatformStats(null)
+        setModuleStats([])
+        setRealtimeData(null)
+        setRecentActivity([])
+        setGeolocationStats([])
+      }
+      
       // Use our new analytics endpoint that calculates everything correctly
       // Add cache-busting timestamp to ensure fresh data
-      const analyticsResponse = await fetch(`/api/admin/analytics-data?t=${Date.now()}`, {
+      const analyticsResponse = await fetch(`/api/admin/analytics-data?t=${Date.now()}&force=true`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -85,6 +94,7 @@ export default function AdminDashboard() {
           setPlatformStats(analyticsData.platformStats)
           
           // Set module stats from our endpoint  
+          console.log('Module Analytics from API:', analyticsData.moduleAnalytics)
           setModuleStats(analyticsData.moduleAnalytics)
           
           // Set geolocation stats from our endpoint
@@ -216,7 +226,7 @@ export default function AdminDashboard() {
                 <p className="text-xs text-gray-400">Última atualização</p>
                 <p className="text-sm font-mono">{formatTimestamp(lastUpdated.toISOString())}</p>
               </div>
-              <Button onClick={fetchAllData} size="sm" variant="outline">
+              <Button onClick={() => fetchAllData(true)} size="sm" variant="outline">
                 <Activity className="h-4 w-4 mr-2" />
                 Atualizar
               </Button>

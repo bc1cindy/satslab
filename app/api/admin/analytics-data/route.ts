@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabase/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    console.log('Analytics API called at:', new Date().toISOString())
     const supabase = createServerClient()
     
     // Get module analytics data correctly
@@ -79,7 +80,7 @@ export async function GET() {
         ? (uniqueCompleters / allUniqueUsers.size) * 100 
         : 0
       
-      moduleAnalytics.push({
+      const moduleData = {
         module_id: moduleId,
         unique_users: allUniqueUsers.size, // Total unique users (started OR completed)
         module_starts: startCount,
@@ -87,7 +88,14 @@ export async function GET() {
         task_completions: taskCount,
         badges_earned: badgeCount,
         completion_rate: Math.round(completionRate * 10) / 10 // Round to 1 decimal
-      })
+      }
+      
+      // Log Module 6 data for debugging
+      if (moduleId === 6) {
+        console.log('Module 6 data:', moduleData)
+      }
+      
+      moduleAnalytics.push(moduleData)
     }
     
     // Get platform stats
