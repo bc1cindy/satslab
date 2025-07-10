@@ -65,11 +65,11 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
           {question.options.map((option, index) => (
             <div
               key={index}
-              className={`p-4 rounded-lg border-2 transition-all ${getOptionStyle(index)}`}
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] ${getOptionStyle(index)}`}
               onClick={() => handleAnswer(index)}
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
+              <div className="flex items-start gap-3">
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium flex-shrink-0 ${
                   hasAnswered && index === question.correctAnswer
                     ? 'border-green-500 bg-green-500 text-white'
                     : hasAnswered && index === selectedAnswer
@@ -78,12 +78,18 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
                 }`}>
                   {String.fromCharCode(65 + index)}
                 </div>
-                <span className="flex-1">{option}</span>
-                {hasAnswered && index === question.correctAnswer && (
-                  <span className="text-green-600">✓</span>
-                )}
-                {hasAnswered && index === selectedAnswer && index !== question.correctAnswer && (
-                  <span className="text-red-600">✗</span>
+                <span className="flex-1 min-w-0 text-sm sm:text-base leading-relaxed break-words">
+                  {option}
+                </span>
+                {hasAnswered && (
+                  <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                    {index === question.correctAnswer && (
+                      <span className="text-green-600 text-lg">✓</span>
+                    )}
+                    {index === selectedAnswer && index !== question.correctAnswer && (
+                      <span className="text-red-600 text-lg">✗</span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

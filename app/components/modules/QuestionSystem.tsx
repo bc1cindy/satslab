@@ -154,7 +154,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
           {/* Options */}
           <div className="space-y-3">
             {question.options.map((option, index) => {
-              let buttonClass = "w-full text-left p-4 rounded-lg border transition-all duration-200 "
+              let buttonClass = "w-full text-left p-3 sm:p-4 rounded-lg border transition-all duration-200 min-h-[60px] "
               
               if (!isAnswered) {
                 buttonClass += "border-gray-600 bg-gray-800 hover:bg-gray-700 hover:border-gray-500 text-white"
@@ -176,13 +176,21 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                   onClick={() => handleAnswer(index)}
                   disabled={isAnswered}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span>{String.fromCharCode(97 + index)}) {option}</span>
+                  <div className="flex items-start w-full gap-3">
+                    {/* Text Content - Takes available space */}
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-sm sm:text-base leading-relaxed break-words">
+                        <span className="font-medium mr-2">{String.fromCharCode(97 + index)})</span>
+                        {option}
+                      </span>
+                    </div>
+                    
+                    {/* Status Icon - Fixed width */}
                     {isAnswered && (
-                      <>
+                      <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
                         {index === question.correct && <CheckCircle className="h-5 w-5 text-green-500" />}
                         {index === selectedAnswer && index !== question.correct && <XCircle className="h-5 w-5 text-red-500" />}
-                      </>
+                      </div>
                     )}
                   </div>
                 </Button>
