@@ -7,6 +7,7 @@ import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Badge } from '@/app/components/ui/badge'
 import { Zap, Bitcoin, Heart } from 'lucide-react'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 interface DonationButtonProps {
   storeId: string
@@ -14,6 +15,7 @@ interface DonationButtonProps {
 }
 
 export default function DonationButton({ storeId, className = '' }: DonationButtonProps) {
+  const { t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,7 +45,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Erro ao criar invoice')
+        throw new Error(errorData.error || t('donation.errorCreatingInvoice'))
       }
 
       const data = await response.json()
@@ -57,7 +59,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
       setError(null)
     } catch (error) {
       console.error('Erro ao criar invoice:', error)
-      setError(error instanceof Error ? error.message : 'Erro desconhecido')
+      setError(error instanceof Error ? error.message : t('donation.unknownError'))
     } finally {
       setLoading(false)
     }
@@ -75,7 +77,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
           className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 mx-auto"
         >
           <Heart className="h-5 w-5" />
-          Apoiar SatsLab
+          {t('donation.supportButton')}
         </Button>
       </div>
     )
@@ -86,10 +88,10 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
       <CardHeader className="text-center">
         <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
           <Bitcoin className="h-6 w-6 text-orange-500" />
-          Doar Sats
+          {t('donation.title')}
         </CardTitle>
         <CardDescription className="text-gray-400">
-          Apoie o desenvolvimento do SatsLab
+          {t('donation.description')}
         </CardDescription>
       </CardHeader>
       
@@ -102,7 +104,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
               className="flex items-center gap-2"
             >
               <Zap className="h-4 w-4" />
-              Lightning
+              {t('donation.lightning')}
             </Button>
             <Button
               variant={paymentMethod === 'onchain' ? 'default' : 'outline'}
@@ -110,26 +112,26 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
               className="flex items-center gap-2"
             >
               <Bitcoin className="h-4 w-4" />
-              On-chain
+              {t('donation.onchain')}
             </Button>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="amount" className="text-white">
-              Quantidade (sats)
+              {t('donation.amountLabel')}
             </Label>
             <Input
               id="amount"
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Digite a quantidade de sats"
+              placeholder={t('donation.amountPlaceholder')}
               className="bg-gray-800 border-gray-700 text-white"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-white">Valores sugeridos</Label>
+            <Label className="text-white">{t('donation.suggestedAmounts')}</Label>
             <div className="flex flex-wrap gap-2">
               {presetAmounts.map((preset) => (
                 <Badge
@@ -157,14 +159,14 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
             variant="outline"
             className="flex-1"
           >
-            Cancelar
+            {t('donation.cancel')}
           </Button>
           <Button
             onClick={createInvoice}
             disabled={!amount || loading}
             className="flex-1 bg-orange-500 hover:bg-orange-600"
           >
-            {loading ? 'Abrindo BTCPay...' : 'Doar Agora'}
+            {loading ? t('donation.loading') : t('donation.donateNow')}
           </Button>
         </div>
       </CardContent>

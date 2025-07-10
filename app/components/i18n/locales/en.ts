@@ -45,12 +45,12 @@ export const en = {
         description: 'Learn about the Lightning Network and make instant Bitcoin transactions'
       },
       6: {
-        title: 'Advanced Concepts',
-        description: 'Explore advanced Bitcoin concepts and network mechanics'
+        title: 'Taproot and Ordinals',
+        description: 'Explore advanced Bitcoin features: Taproot for privacy and Ordinals for NFTs'
       },
       7: {
-        title: 'Complete Bitcoin Experience',
-        description: 'Apply all learned concepts in a comprehensive Bitcoin experience'
+        title: 'Multisig Wallets',
+        description: 'Master multisig wallets for advanced security and collaborative transactions'
       }
     }
   },
@@ -609,5 +609,22 @@ export const en = {
       name: 'Bitcoin Master',
       description: 'Achieved complete Bitcoin mastery through comprehensive experience'
     }
+  },
+
+  // Donation Component
+  donation: {
+    supportButton: 'Support SatsLab',
+    title: 'Donate Sats',
+    description: 'Support SatsLab development',
+    lightning: 'Lightning',
+    onchain: 'On-chain',
+    amountLabel: 'Amount (sats)',
+    amountPlaceholder: 'Enter the amount of sats',
+    suggestedAmounts: 'Suggested amounts',
+    cancel: 'Cancel',
+    donateNow: 'Donate Now',
+    loading: 'Opening BTCPay...',
+    errorCreatingInvoice: 'Error creating invoice',
+    unknownError: 'Unknown error'
   }
 }

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LanguageToggle } from '@/app/components/i18n/LanguageToggle'
+import { LanguageSelector } from '@/app/components/i18n/LanguageSelector'
 
 export function Header() {
   return (
@@ -17,7 +17,7 @@ export function Header() {
             >
               Módulos
             </Link>
-            <LanguageToggle />
+            <LanguageSelector />
           </nav>
         </div>
       </div>
