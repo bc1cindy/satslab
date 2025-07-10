@@ -5,9 +5,6 @@ export async function GET() {
   try {
     const supabase = createServerClient()
     
-    // Force cache busting with timestamp
-    const timestamp = new Date().toISOString()
-    
     // Get module analytics data correctly
     const moduleAnalytics = []
     
@@ -169,7 +166,6 @@ export async function GET() {
     
     return NextResponse.json({
       success: true,
-      timestamp,
       moduleAnalytics,
       geolocationStats,
       platformStats: {
