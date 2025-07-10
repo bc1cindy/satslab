@@ -64,7 +64,9 @@ export async function GET() {
       const uniqueCompleterIds = new Set(completions?.map(u => u.user_id) || [])
       
       // For total unique users, count anyone who either started OR completed
-      const allUniqueUsers = new Set([...uniqueStarterIds, ...uniqueCompleterIds])
+      const allUniqueUsers = new Set<string>()
+      uniqueStarterIds.forEach(id => allUniqueUsers.add(id))
+      uniqueCompleterIds.forEach(id => allUniqueUsers.add(id))
       
       const uniqueCompleters = uniqueCompleterIds.size
       const startCount = starts?.length || 0
