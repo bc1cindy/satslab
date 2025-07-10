@@ -7,6 +7,7 @@ import { Toaster } from '@/app/components/ui/toaster'
 import AnalyticsWrapper from '@/app/components/layout/AnalyticsWrapper'
 import { SessionProvider } from '@/app/lib/session/session-provider'
 import CookieBanner from '@/app/components/layout/CookieBanner'
+import { TranslationProvider } from '@/app/components/i18n/TranslationProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,17 +30,19 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider>
-            <AuthProvider>
-              <AnalyticsWrapper>
-                <div className="min-h-screen bg-background">
-                  {children}
-                  <CookieBanner />
-                </div>
-              </AnalyticsWrapper>
-              <Toaster />
-            </AuthProvider>
-          </SessionProvider>
+          <TranslationProvider>
+            <SessionProvider>
+              <AuthProvider>
+                <AnalyticsWrapper>
+                  <div className="min-h-screen bg-background">
+                    {children}
+                    <CookieBanner />
+                  </div>
+                </AnalyticsWrapper>
+                <Toaster />
+              </AuthProvider>
+            </SessionProvider>
+          </TranslationProvider>
         </ThemeProvider>
       </body>
     </html>
