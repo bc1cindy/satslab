@@ -31,9 +31,9 @@ const moduleTasks = module7Tasks.map(t => ({
   inputLabel: t.validation.type === 'address' ? 'Multisig Address' : 
               t.validation.type === 'hash' ? 'Transaction Hash / Ordinal ID' :
               'Value',
-  inputPlaceholder: t.validation.placeholder,
+  inputPlaceholder: t.validation.placeholder || '',
   validationType: (t.validation.type === 'address' ? 'address' : 'transaction') as 'transaction' | 'amount' | 'address' | 'custom',
-  hints: t.hints,
+  hints: t.hints || [],
   externalLinks: [
     {
       label: 'Signet Explorer',
@@ -55,9 +55,12 @@ export default function Module7EN() {
     setCurrentSection('tasks')
   }
 
-  const handleTasksCompleteWithAdvance = async () => {
-    await handleTasksComplete()
-    setCurrentSection('completed')
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
+    
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
+      setCurrentSection('completed')
+    }
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :

@@ -31,9 +31,9 @@ const moduleTasks = module5Tasks.map(t => ({
   inputLabel: t.validation.type === 'address' ? 'Lightning Invoice' : 
               t.validation.type === 'transaction' ? 'Transaction Hash/Preimage' :
               'Amount in Satoshis',
-  inputPlaceholder: t.validation.placeholder,
+  inputPlaceholder: t.validation.placeholder || '',
   validationType: t.validation.type as 'transaction' | 'amount' | 'address' | 'custom',
-  hints: t.hints,
+  hints: t.hints || [],
   externalLinks: []
 }))
 
@@ -50,9 +50,12 @@ export default function Module5EN() {
     setCurrentSection('tasks')
   }
 
-  const handleTasksCompleteWithAdvance = async () => {
-    await handleTasksComplete()
-    setCurrentSection('completed')
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
+    
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
+      setCurrentSection('completed')
+    }
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :

@@ -29,9 +29,9 @@ const moduleTasks = module4Tasks.map(t => ({
   description: t.description,
   instructions: t.instructions,
   inputLabel: t.validation.type === 'hash' ? 'Hash Found' : 'Total Reward (BTC)',
-  inputPlaceholder: t.validation.placeholder,
+  inputPlaceholder: t.validation.placeholder || '',
   validationType: (t.validation.type === 'hash' ? 'transaction' : 'amount') as 'transaction' | 'amount' | 'address' | 'custom',
-  hints: t.hints,
+  hints: t.hints || [],
   externalLinks: []
 }))
 
@@ -48,9 +48,12 @@ export default function Module4EN() {
     setCurrentSection('tasks')
   }
 
-  const handleTasksCompleteWithAdvance = async () => {
-    await handleTasksComplete()
-    setCurrentSection('completed')
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
+    
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
+      setCurrentSection('completed')
+    }
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :

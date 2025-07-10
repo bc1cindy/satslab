@@ -30,9 +30,9 @@ const moduleTasks = module1Tasks.map(t => ({
   description: t.description,
   instructions: t.instructions,
   inputLabel: t.validation.type === 'hash' ? 'Transaction Hash (TXID)' : 'Total Value Transferred (in sBTC)',
-  inputPlaceholder: t.validation.placeholder,
+  inputPlaceholder: t.validation.placeholder || '',
   validationType: (t.validation.type === 'hash' ? 'transaction' : 'amount') as 'transaction' | 'amount' | 'address' | 'custom',
-  hints: t.hints,
+  hints: t.hints || [],
   externalLinks: [
     {
       label: 'Mempool Signet Explorer',
@@ -51,9 +51,12 @@ export default function Module1EN() {
     setCurrentSection('tasks')
   }
 
-  const handleTasksCompleteWithAdvance = async () => {
-    await handleTasksComplete()
-    setCurrentSection('completed')
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
+    
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
+      setCurrentSection('completed')
+    }
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :

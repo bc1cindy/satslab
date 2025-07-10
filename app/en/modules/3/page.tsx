@@ -29,9 +29,9 @@ const moduleTasks = module3Tasks.map(t => ({
   description: t.description,
   instructions: t.instructions,
   inputLabel: 'Transaction Hash (TXID)',
-  inputPlaceholder: t.validation.placeholder,
+  inputPlaceholder: t.validation.placeholder || '',
   validationType: 'transaction' as 'transaction' | 'amount' | 'address' | 'custom',
-  hints: t.hints,
+  hints: t.hints || [],
   externalLinks: [
     {
       label: 'Signet Explorer',
@@ -53,9 +53,12 @@ export default function Module3EN() {
     setCurrentSection('tasks')
   }
 
-  const handleTasksCompleteWithAdvance = async () => {
-    await handleTasksComplete()
-    setCurrentSection('completed')
+  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
+    await handleTasksComplete(completedTasks, totalTasks)
+    
+    if (completedTasks === totalTasks && progress.questionsCompleted) {
+      setCurrentSection('completed')
+    }
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :
