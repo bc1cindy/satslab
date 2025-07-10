@@ -267,10 +267,15 @@ export function usePageAnalytics(page: string) {
 // Hook para tracking de módulos
 export function useModuleAnalytics(moduleId: number) {
   const { trackModuleStart } = useAnalytics()
+  const hasTracked = useRef(false)
 
   useEffect(() => {
-    trackModuleStart(moduleId)
-  }, [moduleId, trackModuleStart])
+    // Only track once per module load
+    if (!hasTracked.current) {
+      trackModuleStart(moduleId)
+      hasTracked.current = true
+    }
+  }, [moduleId]) // Remove trackModuleStart from dependencies to avoid re-tracking
 
   return useAnalytics()
 }

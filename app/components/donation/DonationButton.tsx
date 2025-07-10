@@ -47,8 +47,10 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
       }
 
       const data = await response.json()
-      // Abrir BTCPay diretamente
-      window.open(data.checkoutUrl, '_blank')
+      // Abrir BTCPay diretamente - mobile friendly
+      if (typeof window !== 'undefined') {
+        window.location.href = data.checkoutUrl
+      }
       // Fechar modal
       setIsOpen(false)
       setAmount('')

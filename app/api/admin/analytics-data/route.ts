@@ -8,6 +8,9 @@ export async function GET() {
     // Get module analytics data correctly
     const moduleAnalytics = []
     
+    // Filter events from when module_start tracking was implemented (today)
+    const trackingStartDate = '2025-07-10T00:00:00.000Z'
+    
     for (let moduleId = 1; moduleId <= 7; moduleId++) {
       // Get unique users who started this module (better metric than all interactions)
       const { data: moduleStartUsers, error: startUsersError } = await supabase
@@ -16,14 +19,16 @@ export async function GET() {
         .eq('module_id', moduleId)
         .eq('event_type', 'module_start')
         .like('user_id', 'session_%')
+        .gte('timestamp', trackingStartDate)
       
-      // Get module completions (unique completions only)
+      // Get module completions (only from tracking start date)
       const { data: completions, error: completionsError } = await supabase
         .from('user_events')
         .select('user_id')
         .eq('module_id', moduleId)
         .eq('event_type', 'module_complete')
         .like('user_id', 'session_%')
+        .gte('timestamp', trackingStartDate)
       
       // Get all starts for counting
       const { data: starts, error: startsError } = await supabase
@@ -32,6 +37,7 @@ export async function GET() {
         .eq('module_id', moduleId)
         .eq('event_type', 'module_start')
         .like('user_id', 'session_%')
+        .gte('timestamp', trackingStartDate)
       
       // Get task completions
       const { data: tasks, error: tasksError } = await supabase
@@ -40,6 +46,7 @@ export async function GET() {
         .eq('module_id', moduleId)
         .eq('event_type', 'task_complete')
         .like('user_id', 'session_%')
+        .gte('timestamp', trackingStartDate)
       
       // Get badges earned
       const { data: badges, error: badgesError } = await supabase
@@ -48,6 +55,7 @@ export async function GET() {
         .eq('module_id', moduleId)
         .eq('event_type', 'badge_earned')
         .like('user_id', 'session_%')
+        .gte('timestamp', trackingStartDate)
       
       if (startUsersError || completionsError || startsError || tasksError || badgesError) {
         console.error('Error fetching module data:', {
