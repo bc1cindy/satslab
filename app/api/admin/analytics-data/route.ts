@@ -127,7 +127,7 @@ export async function GET() {
     ).size
     
     const totalSessions = sessions?.length || 0
-    const avgSessionDuration = sessions?.length > 0
+    const avgSessionDuration = sessions && sessions.length > 0
       ? sessions.reduce((sum, s) => sum + (s.total_duration_seconds || 0), 0) / sessions.length
       : 0
     
@@ -140,7 +140,7 @@ export async function GET() {
       .neq('geolocation', null)
       .like('user_id', 'session_%')
     
-    let geolocationStats = []
+    let geolocationStats: Array<{country: string, count: number, percentage: number}> = []
     if (!geoError && geoData) {
       const countryStats = new Map<string, number>()
       const total = geoData.length
