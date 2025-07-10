@@ -67,70 +67,36 @@ export default function AdminDashboard() {
   const fetchAllData = async () => {
     try {
       setLoading(true)
+      
+      // Use our new analytics endpoint that calculates everything correctly
+      const analyticsResponse = await fetch('/api/admin/analytics-data')
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json()
+        
+        if (analyticsData.success) {
+          // Set platform stats from our endpoint
+          setPlatformStats(analyticsData.platformStats)
+          
+          // Set module stats from our endpoint  
+          setModuleStats(analyticsData.moduleAnalytics)
+          
+          // Set realtime data from platform stats
+          setRealtimeData({
+            active_users: analyticsData.platformStats.active_users_24h,
+            active_sessions: analyticsData.platformStats.active_sessions,
+            daily_active_users: analyticsData.platformStats.active_users_24h,
+            weekly_active_users: analyticsData.platformStats.active_users_7d,
+            avg_session_duration: analyticsData.platformStats.avg_session_duration
+          })
+        } else {
+          throw new Error('Analytics API returned error')
+        }
+      } else {
+        throw new Error('Failed to fetch analytics data')
+      }
+
+      // Still fetch activity and geolocation data directly from Supabase
       const supabase = createClient()
-
-      // Fetch platform stats using the SQL function with error handling
-      const { data: platformData, error: platformError } = await supabase
-        .rpc('get_platform_stats')
-
-      if (platformError) {
-        console.warn('Platform stats error:', platformError)
-        setPlatformStats({
-          total_users: 0,
-          active_users_24h: 0,
-          active_users_7d: 0,
-          total_sessions: 0,
-          avg_session_duration: 0,
-          total_modules_completed: 0,
-          total_badges_earned: 0,
-          total_wallets_created: 0
-        })
-      } else {
-        setPlatformStats(platformData?.[0] || {
-          total_users: 0,
-          active_users_24h: 0,
-          active_users_7d: 0,
-          total_sessions: 0,
-          avg_session_duration: 0,
-          total_modules_completed: 0,
-          total_badges_earned: 0,
-          total_wallets_created: 0
-        })
-      }
-
-      // Fetch realtime analytics with fallback
-      try {
-        const realtimeData = await analyticsService.getRealtimeAnalytics()
-        setRealtimeData(realtimeData || {
-          active_users: 0,
-          active_sessions: 0,
-          daily_active_users: 0,
-          weekly_active_users: 0,
-          avg_session_duration: 0
-        })
-      } catch (realtimeError) {
-        console.warn('Realtime analytics error:', realtimeError)
-        setRealtimeData({
-          active_users: 0,
-          active_sessions: 0,
-          daily_active_users: 0,
-          weekly_active_users: 0,
-          avg_session_duration: 0
-        })
-      }
-
-      // Fetch module analytics with fallback
-      const { data: moduleData, error: moduleError } = await supabase
-        .from('module_analytics')
-        .select('*')
-        .order('module_id')
-
-      if (moduleError) {
-        console.warn('Module analytics error:', moduleError)
-        setModuleStats([])
-      } else {
-        setModuleStats(moduleData || [])
-      }
 
       // Fetch recent activity with fallback
       const { data: activityData, error: activityError } = await supabase
