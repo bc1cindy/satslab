@@ -8,56 +8,46 @@ export async function GET() {
     // Get module analytics data correctly
     const moduleAnalytics = []
     
-    // Filter events from when module_start tracking was implemented - use current date start
-    const today = new Date()
-    today.setUTCHours(0, 0, 0, 0) // Start of today UTC
-    const trackingStartDate = today.toISOString()
-    
     for (let moduleId = 1; moduleId <= 7; moduleId++) {
-      // Get unique users who started this module (better metric than all interactions)
+      // Get unique users who started this module - ALL TIME (historical analysis)
       const { data: moduleStartUsers, error: startUsersError } = await supabase
         .from('user_events')
         .select('user_id')
         .eq('module_id', moduleId)
         .eq('event_type', 'module_start')
         .like('user_id', 'session_%')
-        .gte('timestamp', trackingStartDate)
       
-      // Get module completions (only from tracking start date)
+      // Get module completions - ALL TIME (historical analysis)
       const { data: completions, error: completionsError } = await supabase
         .from('user_events')
         .select('user_id')
         .eq('module_id', moduleId)
         .eq('event_type', 'module_complete')
         .like('user_id', 'session_%')
-        .gte('timestamp', trackingStartDate)
       
-      // Get all starts for counting
+      // Get all starts for counting - ALL TIME
       const { data: starts, error: startsError } = await supabase
         .from('user_events')
         .select('*')
         .eq('module_id', moduleId)
         .eq('event_type', 'module_start')
         .like('user_id', 'session_%')
-        .gte('timestamp', trackingStartDate)
       
-      // Get task completions
+      // Get task completions - ALL TIME
       const { data: tasks, error: tasksError } = await supabase
         .from('user_events')
         .select('*')
         .eq('module_id', moduleId)
         .eq('event_type', 'task_complete')
         .like('user_id', 'session_%')
-        .gte('timestamp', trackingStartDate)
       
-      // Get badges earned
+      // Get badges earned - ALL TIME
       const { data: badges, error: badgesError } = await supabase
         .from('user_events')
         .select('*')
         .eq('module_id', moduleId)
         .eq('event_type', 'badge_earned')
         .like('user_id', 'session_%')
-        .gte('timestamp', trackingStartDate)
       
       if (startUsersError || completionsError || startsError || tasksError || badgesError) {
         console.error('Error fetching module data:', {
