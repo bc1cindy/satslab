@@ -9,22 +9,23 @@ export async function GET() {
     const moduleAnalytics = []
     
     for (let moduleId = 1; moduleId <= 7; moduleId++) {
-      // Get unique users who interacted with this module
-      const { data: uniqueUsers, error: uniqueUsersError } = await supabase
+      // Get unique users who started this module (better metric than all interactions)
+      const { data: moduleStartUsers, error: startUsersError } = await supabase
         .from('user_events')
         .select('user_id')
         .eq('module_id', moduleId)
+        .eq('event_type', 'module_start')
         .like('user_id', 'session_%')
       
-      // Get module completions
+      // Get module completions (unique completions only)
       const { data: completions, error: completionsError } = await supabase
         .from('user_events')
-        .select('*')
+        .select('user_id')
         .eq('module_id', moduleId)
         .eq('event_type', 'module_complete')
         .like('user_id', 'session_%')
       
-      // Get module starts
+      // Get all starts for counting
       const { data: starts, error: startsError } = await supabase
         .from('user_events')
         .select('*')
@@ -48,9 +49,9 @@ export async function GET() {
         .eq('event_type', 'badge_earned')
         .like('user_id', 'session_%')
       
-      if (uniqueUsersError || completionsError || startsError || tasksError || badgesError) {
+      if (startUsersError || completionsError || startsError || tasksError || badgesError) {
         console.error('Error fetching module data:', {
-          uniqueUsersError,
+          startUsersError,
           completionsError,
           startsError,
           tasksError,
@@ -58,22 +59,23 @@ export async function GET() {
         })
       }
       
-      const uniqueUserCount = new Set(uniqueUsers?.map(u => u.user_id) || []).size
-      const completionCount = completions?.length || 0
+      // Count unique users who started vs completed
+      const uniqueStarters = new Set(moduleStartUsers?.map(u => u.user_id) || []).size
+      const uniqueCompleters = new Set(completions?.map(u => u.user_id) || []).size
       const startCount = starts?.length || 0
       const taskCount = tasks?.length || 0
       const badgeCount = badges?.length || 0
       
-      // Calculate completion rate correctly: completions / unique users * 100
-      const completionRate = uniqueUserCount > 0 
-        ? (completionCount / uniqueUserCount) * 100 
+      // Calculate completion rate correctly: unique completers / unique starters * 100
+      const completionRate = uniqueStarters > 0 
+        ? (uniqueCompleters / uniqueStarters) * 100 
         : 0
       
       moduleAnalytics.push({
         module_id: moduleId,
-        unique_users: uniqueUserCount,
+        unique_users: uniqueStarters,
         module_starts: startCount,
-        module_completions: completionCount,
+        module_completions: uniqueCompleters,
         task_completions: taskCount,
         badges_earned: badgeCount,
         completion_rate: Math.round(completionRate * 10) / 10 // Round to 1 decimal
@@ -131,9 +133,41 @@ export async function GET() {
     
     const activeSessions = sessions?.filter(s => !s.session_end)?.length || 0
     
+    // Get geolocation stats and normalize country names
+    const { data: geoData, error: geoError } = await supabase
+      .from('user_sessions')
+      .select('geolocation')
+      .neq('geolocation', null)
+      .like('user_id', 'session_%')
+    
+    let geolocationStats = []
+    if (!geoError && geoData) {
+      const countryStats = new Map<string, number>()
+      const total = geoData.length
+      
+      geoData.forEach(session => {
+        if (session.geolocation?.country) {
+          let country = session.geolocation.country
+          // Normalize country names - fix Brazil/Brasil duplicates
+          if (country === 'Brazil') country = 'Brasil'
+          countryStats.set(country, (countryStats.get(country) || 0) + 1)
+        }
+      })
+      
+      geolocationStats = Array.from(countryStats.entries())
+        .map(([country, count]) => ({
+          country,
+          count,
+          percentage: total > 0 ? (count / total) * 100 : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10) // Top 10 countries
+    }
+    
     return NextResponse.json({
       success: true,
       moduleAnalytics,
+      geolocationStats,
       platformStats: {
         total_users: totalUsers,
         active_users_24h: activeUsers24h,

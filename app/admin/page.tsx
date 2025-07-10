@@ -80,6 +80,9 @@ export default function AdminDashboard() {
           // Set module stats from our endpoint  
           setModuleStats(analyticsData.moduleAnalytics)
           
+          // Set geolocation stats from our endpoint
+          setGeolocationStats(analyticsData.geolocationStats || [])
+          
           // Set realtime data from platform stats
           setRealtimeData({
             active_users: analyticsData.platformStats.active_users_24h,
@@ -95,7 +98,7 @@ export default function AdminDashboard() {
         throw new Error('Failed to fetch analytics data')
       }
 
-      // Still fetch activity and geolocation data directly from Supabase
+      // Still fetch activity data directly from Supabase
       const supabase = createClient()
 
       // Fetch recent activity with fallback
@@ -110,39 +113,6 @@ export default function AdminDashboard() {
         setRecentActivity([])
       } else {
         setRecentActivity(activityData || [])
-      }
-
-      // Fetch geolocation statistics
-      const { data: geoData, error: geoError } = await supabase
-        .from('user_sessions')
-        .select('geolocation')
-        .neq('geolocation', null)
-
-      if (geoError) {
-        console.warn('Geolocation stats error:', geoError)
-        setGeolocationStats([])
-      } else {
-        // Process geolocation data
-        const countryStats = new Map<string, number>()
-        const total = geoData?.length || 0
-        
-        geoData?.forEach(session => {
-          if (session.geolocation?.country) {
-            const country = session.geolocation.country
-            countryStats.set(country, (countryStats.get(country) || 0) + 1)
-          }
-        })
-        
-        const geoStats: GeolocationStats[] = Array.from(countryStats.entries())
-          .map(([country, count]) => ({
-            country,
-            count,
-            percentage: total > 0 ? (count / total) * 100 : 0
-          }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10) // Top 10 countries
-          
-        setGeolocationStats(geoStats)
       }
 
       setLastUpdated(new Date())

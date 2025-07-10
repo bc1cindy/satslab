@@ -8,6 +8,7 @@ import { Input } from '@/app/components/ui/input'
 import { Copy, RefreshCw, AlertTriangle, Check, Eye, EyeOff, Wallet, Key, Shield } from 'lucide-react'
 import { useAuth } from '@/app/components/auth/AuthProvider'
 import { createWallet } from '@/app/lib/supabase/queries'
+import { useAnalytics } from '@/app/hooks/useAnalytics'
 
 // Mock para ambiente educacional - gera endereços válidos para demonstração
 const generateMockWallet = () => {
@@ -54,6 +55,7 @@ interface WalletData {
 
 export default function WalletGeneratorEducational() {
   const { session } = useAuth()
+  const { trackWalletCreated } = useAnalytics()
   const [currentStep, setCurrentStep] = useState<'intro' | 'generate' | 'backup' | 'verify' | 'complete'>('intro')
   const [wallet, setWallet] = useState<WalletData | null>(null)
   const [copied, setCopied] = useState<string>('')
@@ -86,6 +88,13 @@ export default function WalletGeneratorEducational() {
       } catch (error) {
         console.error('Error saving wallet:', error)
       }
+    }
+    
+    // Track wallet creation in analytics
+    try {
+      await trackWalletCreated('educational', 'signet')
+    } catch (error) {
+      console.warn('Failed to track wallet creation:', error)
     }
   }
 

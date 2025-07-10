@@ -9,6 +9,7 @@ import * as bip39 from 'bip39'
 import * as bitcoin from 'bitcoinjs-lib'
 import * as ecc from 'tiny-secp256k1'
 import { BIP32Factory } from 'bip32'
+import { useAnalytics } from '@/app/hooks/useAnalytics'
 
 // Initialize BIP32
 const bip32 = BIP32Factory(ecc)
@@ -36,6 +37,7 @@ export default function WalletGeneratorSimple() {
   const [wallet, setWallet] = useState<WalletData | null>(null)
   const [copied, setCopied] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const { trackWalletCreated } = useAnalytics()
 
   const generateWallet = async () => {
     setIsGenerating(true)
@@ -72,6 +74,13 @@ export default function WalletGeneratorSimple() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('satslab_user_address', address)
         localStorage.setItem('satslab_wallet_created', Date.now().toString())
+      }
+      
+      // Track wallet creation in analytics
+      try {
+        await trackWalletCreated('signet', 'signet')
+      } catch (error) {
+        console.warn('Failed to track wallet creation:', error)
       }
     } catch (error) {
       console.error('Error generating wallet:', error)
