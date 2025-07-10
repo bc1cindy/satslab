@@ -8,6 +8,7 @@ import { Progress } from '@/app/components/ui/progress'
 import DonationButton from '@/app/components/donation/DonationButton'
 import { LanguageSelector } from '@/app/components/i18n/LanguageSelector'
 import { useLanguage } from '@/app/components/i18n/LanguageProvider'
+import { RealVideoPlayer } from '@/app/components/RealVideoPlayer'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
   ChevronRight, Bitcoin, Trophy,
@@ -17,6 +18,7 @@ import {
 export default function HomePage() {
   const { t, language } = useLanguage()
   const isEnglish = language === 'en'
+  
   
   // Module data with translations
   const modules = [
@@ -171,6 +173,19 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        {/* Portuguese Video Lessons Section */}
+        {!isEnglish && (
+          <section className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Bitcoin4all Videos
+              </h2>
+            </div>
+            
+            <RealVideoPlayer />
+          </section>
+        )}
 
         {/* Donation Section */}
         <section className="mb-16 mt-16 text-center border-t border-gray-800 pt-16">

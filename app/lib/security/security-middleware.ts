@@ -35,11 +35,12 @@ class SecurityMiddleware {
   private securityHeaders: SecurityHeaders = {
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://mempool.space",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://mempool.space https://www.youtube.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://mempool.space https://*.supabase.co wss://*.supabase.co",
+      "frame-src 'self' https://www.youtube.com https://youtube.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'"
@@ -207,12 +208,13 @@ class SecurityMiddleware {
       /(\b(WAITFOR|DELAY)\b)/i
     ]
 
-    // XSS patterns
+    // XSS patterns (excluding YouTube iframes)
     const xssPatterns = [
       /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi
+      // Only block iframes that are NOT from YouTube
+      /<iframe\b(?![^>]*src=['"]https:\/\/(www\.)?youtube\.com\/embed\/)[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi
     ]
 
     // Path traversal patterns
