@@ -20,8 +20,8 @@ export async function GET() {
       .limit(50)
     
     // 3. Analyze events by type and module
-    const eventsByType = {}
-    const eventsByModule = {}
+    const eventsByType: Record<string, number> = {}
+    const eventsByModule: Record<number, Record<string, number>> = {}
     const userIds = new Set()
     
     allEvents?.forEach(event => {
@@ -42,10 +42,10 @@ export async function GET() {
     })
     
     // 4. Check for suspicious patterns
-    const suspiciousPatterns = []
+    const suspiciousPatterns: string[] = []
     
     // Check for too many events from same user
-    const userEventCounts = {}
+    const userEventCounts: Record<string, number> = {}
     allEvents?.forEach(event => {
       userEventCounts[event.user_id] = (userEventCounts[event.user_id] || 0) + 1
     })
