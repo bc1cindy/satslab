@@ -8,6 +8,7 @@ import { Progress } from '@/app/components/ui/progress'
 import { ArrowLeft, Zap, Trophy, BookOpen, Award } from 'lucide-react'
 import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
+import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
 import IntegratedLightningWallet from '@/app/components/modules/IntegratedLightningWallet'
@@ -53,6 +54,7 @@ export default function Module5() {
     ...module5Badge,
     moduleId: 5
   })
+  useModuleAnalytics(5) // Track module start
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
   const [lightningResults, setLightningResults] = useState<LightningResults>({})
 

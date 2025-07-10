@@ -8,6 +8,7 @@ import { Progress } from '@/app/components/ui/progress'
 import { ArrowLeft, Palette, Trophy, BookOpen, Award } from 'lucide-react'
 import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
+import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
 import TaprootTransactionCreator from '@/app/components/modules/TaprootTransactionCreator'
@@ -53,6 +54,7 @@ export default function Module6() {
     ...module6Badge,
     moduleId: 6
   })
+  useModuleAnalytics(6) // Track module start
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
   const [taprootResults, setTaprootResults] = useState<TaprootResults>({})
 

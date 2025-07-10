@@ -8,6 +8,7 @@ import { Progress } from '@/app/components/ui/progress'
 import { ArrowLeft, Trophy, BookOpen, Award, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
+import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
 import MiningSimulator from '@/app/components/modules/MiningSimulator'
@@ -47,6 +48,7 @@ export default function Module4() {
     ...module4Badge,
     moduleId: 4
   })
+  useModuleAnalytics(4) // Track module start
   
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
   const [miningResults, setMiningResults] = useState<MiningResults>({})

@@ -8,6 +8,7 @@ import { Progress } from '@/app/components/ui/progress'
 import { ArrowLeft, Send, Trophy, BookOpen, Award, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
+import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
 import { module3Questions, module3Tasks, module3Badge } from './data'
@@ -44,6 +45,7 @@ export default function Module3() {
     ...module3Badge,
     moduleId: 3
   })
+  useModuleAnalytics(3) // Track module start
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
