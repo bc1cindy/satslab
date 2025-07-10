@@ -4,12 +4,17 @@ import { Database } from './types'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-// Create a singleton instance to avoid multiple GoTrueClient instances
-let supabaseServerInstance: ReturnType<typeof createSupabaseClient<Database>> | null = null
-
+// Create a new instance each time to avoid stale data
 export const createServerClient = () => {
-  if (!supabaseServerInstance) {
-    supabaseServerInstance = createSupabaseClient<Database>(supabaseUrl, supabaseServiceKey)
-  }
-  return supabaseServerInstance
+  return createSupabaseClient<Database>(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    },
+    global: {
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    }
+  })
 }

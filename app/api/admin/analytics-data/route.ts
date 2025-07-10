@@ -4,6 +4,15 @@ import { createServerClient } from '@/app/lib/supabase/server'
 export async function GET(request: Request) {
   try {
     console.log('Analytics API called at:', new Date().toISOString())
+    
+    // Force no-cache headers
+    const headers = new Headers({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Surrogate-Control': 'no-store'
+    })
+    
     const supabase = createServerClient()
     
     // Get module analytics data correctly
@@ -99,10 +108,16 @@ export async function GET(request: Request) {
     }
     
     // Get platform stats
+    console.log('Fetching sessions from database...')
     const { data: sessions, error: sessionsError } = await supabase
       .from('user_sessions')
       .select('*')
       .like('user_id', 'session_%')
+    
+    console.log(`Database returned ${sessions?.length || 0} sessions`)
+    if (sessionsError) {
+      console.error('Error fetching sessions:', sessionsError)
+    }
     
     const { data: walletEvents, error: walletError } = await supabase
       .from('user_events')
@@ -144,6 +159,7 @@ export async function GET(request: Request) {
     ).size
     
     const totalSessions = sessions?.length || 0
+    console.log(`Total sessions found: ${totalSessions} at ${new Date().toISOString()}`)
     
     // Calculate average session duration only for sessions with valid duration
     const sessionsWithDuration = sessions?.filter(s => 

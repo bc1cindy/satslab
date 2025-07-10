@@ -79,7 +79,10 @@ export default function AdminDashboard() {
       
       // Use our new analytics endpoint that calculates everything correctly
       // Add cache-busting timestamp to ensure fresh data
-      const analyticsResponse = await fetch(`/api/admin/analytics-data?t=${Date.now()}&force=true`, {
+      const timestamp = Date.now()
+      console.log(`Fetching analytics data at ${new Date(timestamp).toISOString()}...`)
+      
+      const analyticsResponse = await fetch(`/api/admin/analytics-data?t=${timestamp}&force=true`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -90,6 +93,12 @@ export default function AdminDashboard() {
         const analyticsData = await analyticsResponse.json()
         
         if (analyticsData.success) {
+          console.log('Analytics data received:', {
+            totalSessions: analyticsData.platformStats.total_sessions,
+            totalUsers: analyticsData.platformStats.total_users,
+            timestamp: new Date().toISOString()
+          })
+          
           // Set platform stats from our endpoint
           setPlatformStats(analyticsData.platformStats)
           
@@ -162,10 +171,27 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    fetchAllData()
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchAllData, 30000)
-    return () => clearInterval(interval)
+    fetchAllData(true) // Force refresh on mount
+    
+    // Auto-refresh every 10 seconds for real-time updates
+    const interval = setInterval(() => {
+      console.log('Auto-refreshing admin data...')
+      fetchAllData(true)
+    }, 10000) // Reduced to 10 seconds for more real-time feel
+    
+    // Also refresh when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Tab became visible, refreshing data...')
+        fetchAllData(true)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const formatDuration = (seconds: number) => {
@@ -226,7 +252,21 @@ export default function AdminDashboard() {
                 <p className="text-xs text-gray-400">Última atualização</p>
                 <p className="text-sm font-mono">{formatTimestamp(lastUpdated.toISOString())}</p>
               </div>
-              <Button onClick={() => fetchAllData(true)} size="sm" variant="outline">
+              <Button 
+                onClick={() => {
+                  console.log('Manual refresh triggered')
+                  // Clear all state first
+                  setPlatformStats(null)
+                  setModuleStats([])
+                  setRealtimeData(null)
+                  setRecentActivity([])
+                  setGeolocationStats([])
+                  // Force reload
+                  setTimeout(() => fetchAllData(true), 100)
+                }} 
+                size="sm" 
+                variant="outline"
+              >
                 <Activity className="h-4 w-4 mr-2" />
                 Atualizar
               </Button>
@@ -563,7 +603,7 @@ export default function AdminDashboard() {
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>SatsLab Analytics Dashboard • Atualização automática a cada 30 segundos</p>
+          <p>SatsLab Analytics Dashboard • Atualização automática a cada 10 segundos</p>
           <p className="mt-1">Monitoramento em tempo real de {platformStats?.total_users || 0} usuários ativos</p>
           <p className="mt-1 text-xs">Geolocalização: {geolocationStats.length > 0 ? `${geolocationStats.reduce((sum, stat) => sum + stat.count, 0)} localizações` : 'Aguardando dados'}</p>
         </div>
