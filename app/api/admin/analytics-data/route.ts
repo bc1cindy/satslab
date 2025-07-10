@@ -8,8 +8,8 @@ export async function GET() {
     // Get module analytics data correctly
     const moduleAnalytics = []
     
-    // Filter events from when module_start tracking was implemented (today)
-    const trackingStartDate = '2025-07-10T00:00:00.000Z'
+    // Filter events from when module_start tracking was implemented (around 21:50 BRT = 00:50 UTC)
+    const trackingStartDate = '2025-07-10T00:50:00.000Z'
     
     for (let moduleId = 1; moduleId <= 7; moduleId++) {
       // Get unique users who started this module (better metric than all interactions)
