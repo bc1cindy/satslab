@@ -179,7 +179,7 @@ export default function HomePage() {
           <section className="mb-16">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">
-                Bitcoin 4 All Videos
+                Bitcoin 4 All Classes
               </h2>
             </div>
             
