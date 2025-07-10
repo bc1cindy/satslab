@@ -8,7 +8,7 @@ import { useRequireAuth } from '@/app/components/auth/AuthProvider'
 import { analyticsService } from '@/app/lib/supabase/analytics-service'
 import { createClient } from '@/app/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowLeft, Users, Clock, Trophy, Wallet, Activity, TrendingUp, Calendar, BarChart3, Zap, Target, MapPin } from 'lucide-react'
+import { ArrowLeft, Users, Clock, Trophy, Wallet, Activity, TrendingUp, Calendar, BarChart3, Zap, Target, MapPin, Languages } from 'lucide-react'
 
 interface PlatformStats {
   total_users: number
@@ -54,6 +54,138 @@ interface GeolocationStats {
   percentage: number
 }
 
+// Translation object
+const translations = {
+  pt: {
+    // Header
+    backToDashboard: "Voltar ao Dashboard",
+    lastUpdate: "Última atualização",
+    refresh: "Atualizar",
+    
+    // Title
+    adminDashboard: "Admin Dashboard",
+    subtitle: "Monitore o desempenho da plataforma e atividade dos usuários em tempo real.",
+    
+    // Loading
+    loading: "Carregando dados administrativos...",
+    
+    // Stats Cards
+    totalUsers: "Total de Usuários",
+    active24h: "Ativos 24h",
+    avgSession: "Sessão Média",
+    totalSessions: "Sessões Totais",
+    badgesEarned: "Badges Conquistados",
+    gamificationActive: "Gamificação ativa",
+    walletsCreated: "Carteiras Criadas",
+    handsOnExperience: "Hands-on experience",
+    modulesCompleted: "Módulos Completados",
+    learningCompleted: "Aprendizado concluído",
+    
+    // Module Analytics
+    modulePerformance: "Performance por Módulo",
+    completion: "conclusão",
+    uniqueUsers: "Usuários únicos",
+    completions: "Conclusões",
+    tasks: "Tarefas",
+    badges: "Badges",
+    noModuleData: "Nenhum dado de módulo ainda",
+    moduleDataWillAppear: "Os dados aparecerão quando os usuários começarem a usar a plataforma",
+    
+    // Recent Activity
+    realtimeActivity: "Atividade em Tempo Real",
+    module: "Módulo",
+    noRecentActivity: "Nenhuma atividade recente",
+    activityWillAppear: "A atividade dos usuários aparecerá aqui em tempo real",
+    
+    // Geolocation
+    geographicDistribution: "Distribuição Geográfica",
+    users: "usuários",
+    noLocationData: "Nenhum dado de localização",
+    geoDataWillAppear: "Dados de geolocalização aparecerão quando usuários acessarem",
+    
+    // Platform Status
+    platformStatus: "Status da Plataforma",
+    activeUsers: "Usuários Ativos",
+    activeSessions: "Sessões Ativas",
+    active7Days: "Ativos (7 dias)",
+    avgTime: "Tempo Médio",
+    systemWorking: "Sistema funcionando normalmente",
+    online: "Online",
+    
+    // Footer
+    analyticsFooter: "SatsLab Analytics Dashboard • Atualização automática a cada 30 segundos",
+    realtimeMonitoring: "Monitoramento em tempo real de",
+    activeUsersText: "usuários ativos",
+    geolocation: "Geolocalização:",
+    locations: "localizações",
+    awaitingData: "Aguardando dados"
+  },
+  en: {
+    // Header
+    backToDashboard: "Back to Dashboard",
+    lastUpdate: "Last updated",
+    refresh: "Refresh",
+    
+    // Title
+    adminDashboard: "Admin Dashboard",
+    subtitle: "Monitor platform performance and user activity in real time.",
+    
+    // Loading
+    loading: "Loading administrative data...",
+    
+    // Stats Cards
+    totalUsers: "Total Users",
+    active24h: "Active 24h",
+    avgSession: "Avg Session",
+    totalSessions: "Total Sessions",
+    badgesEarned: "Badges Earned",
+    gamificationActive: "Active gamification",
+    walletsCreated: "Wallets Created",
+    handsOnExperience: "Hands-on experience",
+    modulesCompleted: "Modules Completed",
+    learningCompleted: "Learning completed",
+    
+    // Module Analytics
+    modulePerformance: "Performance by Module",
+    completion: "completion",
+    uniqueUsers: "Unique users",
+    completions: "Completions",
+    tasks: "Tasks",
+    badges: "Badges",
+    noModuleData: "No module data yet",
+    moduleDataWillAppear: "Data will appear when users start using the platform",
+    
+    // Recent Activity
+    realtimeActivity: "Real-time Activity",
+    module: "Module",
+    noRecentActivity: "No recent activity",
+    activityWillAppear: "User activity will appear here in real time",
+    
+    // Geolocation
+    geographicDistribution: "Geographic Distribution",
+    users: "users",
+    noLocationData: "No location data",
+    geoDataWillAppear: "Geolocation data will appear when users access",
+    
+    // Platform Status
+    platformStatus: "Platform Status",
+    activeUsers: "Active Users",
+    activeSessions: "Active Sessions",
+    active7Days: "Active (7 days)",
+    avgTime: "Avg Time",
+    systemWorking: "System working normally",
+    online: "Online",
+    
+    // Footer
+    analyticsFooter: "SatsLab Analytics Dashboard • Auto-refresh every 30 seconds",
+    realtimeMonitoring: "Real-time monitoring of",
+    activeUsersText: "active users",
+    geolocation: "Geolocation:",
+    locations: "locations",
+    awaitingData: "Awaiting data"
+  }
+}
+
 export default function AdminDashboard() {
   const { isLoading } = useRequireAuth()
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
@@ -63,6 +195,10 @@ export default function AdminDashboard() {
   const [geolocationStats, setGeolocationStats] = useState<GeolocationStats[]>([])
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const [language, setLanguage] = useState<'pt' | 'en'>('pt')
+
+  // Helper function to get translations
+  const t = (key: keyof typeof translations.pt) => translations[language][key]
 
   const fetchAllData = async (forceRefresh = false) => {
     try {
@@ -173,11 +309,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchAllData(true) // Force refresh on mount
     
-    // Auto-refresh every 10 seconds for real-time updates
+    // Auto-refresh every 30 seconds for real-time updates
     const interval = setInterval(() => {
       console.log('Auto-refreshing admin data...')
       fetchAllData(true)
-    }, 10000) // Reduced to 10 seconds for more real-time feel
+    }, 30000) // 30 seconds for real-time updates
     
     // Also refresh when tab becomes visible
     const handleVisibilityChange = () => {
@@ -231,7 +367,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-white">Carregando dados administrativos...</p>
+          <p className="text-white">{t('loading')}</p>
         </div>
       </div>
     )
@@ -245,13 +381,22 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
               <ArrowLeft className="h-5 w-5" />
-              <span>Voltar ao Dashboard</span>
+              <span>{t('backToDashboard')}</span>
             </Link>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-xs text-gray-400">Última atualização</p>
+                <p className="text-xs text-gray-400">{t('lastUpdate')}</p>
                 <p className="text-sm font-mono">{formatTimestamp(lastUpdated.toISOString())}</p>
               </div>
+              <Button 
+                onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                size="sm" 
+                variant="outline"
+                className="bg-gray-800 hover:bg-gray-700"
+              >
+                <Languages className="h-4 w-4 mr-2" />
+                {language === 'pt' ? 'EN' : 'PT'}
+              </Button>
               <Button 
                 onClick={() => {
                   console.log('Manual refresh triggered')
@@ -268,7 +413,7 @@ export default function AdminDashboard() {
                 variant="outline"
               >
                 <Activity className="h-4 w-4 mr-2" />
-                Atualizar
+                {t('refresh')}
               </Button>
             </div>
           </div>
@@ -279,10 +424,10 @@ export default function AdminDashboard() {
         {/* Welcome Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-orange-500 mb-2">
-            🔧 Admin Dashboard
+            🔧 {t('adminDashboard')}
           </h1>
           <p className="text-gray-300">
-            Monitore o desempenho da plataforma e atividade dos usuários em tempo real.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -292,7 +437,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <Users className="h-4 w-4 text-blue-500 mr-2" />
-                Total de Usuários
+                {t('totalUsers')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -306,7 +451,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <Activity className="h-4 w-4 text-green-500 mr-2" />
-                Ativos 24h
+                {t('active24h')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -320,7 +465,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <Clock className="h-4 w-4 text-purple-500 mr-2" />
-                Sessão Média
+                {t('avgSession')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -334,7 +479,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <TrendingUp className="h-4 w-4 text-orange-500 mr-2" />
-                Sessões Totais
+                {t('totalSessions')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -351,7 +496,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <Trophy className="h-4 w-4 text-yellow-500 mr-2" />
-                Badges Conquistados
+                {t('badgesEarned')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -359,7 +504,7 @@ export default function AdminDashboard() {
                 {platformStats?.total_badges_earned || 0}
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                Gamificação ativa
+                {t('gamificationActive')}
               </p>
             </CardContent>
           </Card>
@@ -368,7 +513,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <Wallet className="h-4 w-4 text-green-500 mr-2" />
-                Carteiras Criadas
+                {t('walletsCreated')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -376,7 +521,7 @@ export default function AdminDashboard() {
                 {platformStats?.total_wallets_created || 0}
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                Hands-on experience
+                {t('handsOnExperience')}
               </p>
             </CardContent>
           </Card>
@@ -385,7 +530,7 @@ export default function AdminDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-sm">
                 <Calendar className="h-4 w-4 text-blue-500 mr-2" />
-                Módulos Completados
+                {t('modulesCompleted')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -393,7 +538,7 @@ export default function AdminDashboard() {
                 {platformStats?.total_modules_completed || 0}
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                Aprendizado concluído
+                {t('learningCompleted')}
               </p>
             </CardContent>
           </Card>
@@ -405,7 +550,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <BarChart3 className="h-5 w-5 text-orange-500 mr-2" />
-                Performance por Módulo
+                {t('modulePerformance')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -414,26 +559,26 @@ export default function AdminDashboard() {
                   {moduleStats.map((module) => (
                     <div key={module.module_id} className="border border-gray-700 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">Módulo {module.module_id}</h3>
+                        <h3 className="font-semibold">{t('module')} {module.module_id}</h3>
                         <Badge variant="outline" className="text-orange-400 border-orange-500/20">
-                          {module.completion_rate.toFixed(1)}% conclusão
+                          {module.completion_rate.toFixed(1)}% {t('completion')}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-400">Usuários únicos</p>
+                          <p className="text-gray-400">{t('uniqueUsers')}</p>
                           <p className="font-medium">{module.unique_users}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400">Conclusões</p>
+                          <p className="text-gray-400">{t('completions')}</p>
                           <p className="font-medium">{module.module_completions}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400">Tarefas</p>
+                          <p className="text-gray-400">{t('tasks')}</p>
                           <p className="font-medium">{module.task_completions}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400">Badges</p>
+                          <p className="text-gray-400">{t('badges')}</p>
                           <p className="font-medium">{module.badges_earned}</p>
                         </div>
                       </div>
@@ -443,9 +588,9 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-8">
                   <Target className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-500">Nenhum dado de módulo ainda</p>
+                  <p className="text-gray-500">{t('noModuleData')}</p>
                   <p className="text-xs text-gray-600 mt-1">
-                    Os dados aparecerão quando os usuários começarem a usar a plataforma
+                    {t('moduleDataWillAppear')}
                   </p>
                 </div>
               )}
@@ -457,7 +602,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Zap className="h-5 w-5 text-blue-500 mr-2" />
-                Atividade em Tempo Real
+                {t('realtimeActivity')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -473,7 +618,7 @@ export default function AdminDashboard() {
                           </Badge>
                           {activity.module_id && (
                             <Badge variant="outline" className="text-gray-400 border-gray-600">
-                              Módulo {activity.module_id}
+                              {t('module')} {activity.module_id}
                             </Badge>
                           )}
                         </div>
@@ -487,9 +632,9 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-8">
                   <Activity className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-500">Nenhuma atividade recente</p>
+                  <p className="text-gray-500">{t('noRecentActivity')}</p>
                   <p className="text-xs text-gray-600 mt-1">
-                    A atividade dos usuários aparecerá aqui em tempo real
+                    {t('activityWillAppear')}
                   </p>
                 </div>
               )}
@@ -501,7 +646,7 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <MapPin className="h-5 w-5 text-green-500 mr-2" />
-                Distribuição Geográfica
+                {t('geographicDistribution')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -513,7 +658,7 @@ export default function AdminDashboard() {
                         <span className="text-lg">🌍</span>
                         <div>
                           <p className="font-medium text-white">{stat.country}</p>
-                          <p className="text-xs text-gray-400">{stat.count} usuários</p>
+                          <p className="text-xs text-gray-400">{stat.count} {t('users')}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -531,9 +676,9 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-8">
                   <MapPin className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-500">Nenhum dado de localização</p>
+                  <p className="text-gray-500">{t('noLocationData')}</p>
                   <p className="text-xs text-gray-600 mt-1">
-                    Dados de geolocalização aparecerão quando usuários acessarem
+                    {t('geoDataWillAppear')}
                   </p>
                 </div>
               )}
@@ -546,7 +691,7 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Activity className="h-5 w-5 text-green-500 mr-2" />
-              Status da Plataforma
+              {t('platformStatus')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -555,7 +700,7 @@ export default function AdminDashboard() {
                 <div className="text-2xl font-bold text-green-400 mb-1">
                   {realtimeData?.active_users || 0}
                 </div>
-                <p className="text-sm text-gray-400">Usuários Ativos</p>
+                <p className="text-sm text-gray-400">{t('activeUsers')}</p>
                 <div className="h-1 bg-gray-700 rounded-full mt-2">
                   <div className="h-1 bg-green-500 rounded-full w-3/4"></div>
                 </div>
@@ -564,7 +709,7 @@ export default function AdminDashboard() {
                 <div className="text-2xl font-bold text-blue-400 mb-1">
                   {realtimeData?.active_sessions || 0}
                 </div>
-                <p className="text-sm text-gray-400">Sessões Ativas</p>
+                <p className="text-sm text-gray-400">{t('activeSessions')}</p>
                 <div className="h-1 bg-gray-700 rounded-full mt-2">
                   <div className="h-1 bg-blue-500 rounded-full w-1/2"></div>
                 </div>
@@ -573,7 +718,7 @@ export default function AdminDashboard() {
                 <div className="text-2xl font-bold text-purple-400 mb-1">
                   {realtimeData?.weekly_active_users || 0}
                 </div>
-                <p className="text-sm text-gray-400">Ativos (7 dias)</p>
+                <p className="text-sm text-gray-400">{t('active7Days')}</p>
                 <div className="h-1 bg-gray-700 rounded-full mt-2">
                   <div className="h-1 bg-purple-500 rounded-full w-2/3"></div>
                 </div>
@@ -582,7 +727,7 @@ export default function AdminDashboard() {
                 <div className="text-2xl font-bold text-orange-400 mb-1">
                   {formatDuration(realtimeData?.avg_session_duration || 0)}
                 </div>
-                <p className="text-sm text-gray-400">Tempo Médio</p>
+                <p className="text-sm text-gray-400">{t('avgTime')}</p>
                 <div className="h-1 bg-gray-700 rounded-full mt-2">
                   <div className="h-1 bg-orange-500 rounded-full w-5/6"></div>
                 </div>
@@ -591,10 +736,10 @@ export default function AdminDashboard() {
             
             <div className="mt-6 pt-4 border-t border-gray-800">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">Sistema funcionando normalmente</span>
+                <span className="text-gray-400">{t('systemWorking')}</span>
                 <div className="flex items-center space-x-2">
                   <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-400">Online</span>
+                  <span className="text-green-400">{t('online')}</span>
                 </div>
               </div>
             </div>
@@ -603,9 +748,9 @@ export default function AdminDashboard() {
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>SatsLab Analytics Dashboard • Atualização automática a cada 10 segundos</p>
-          <p className="mt-1">Monitoramento em tempo real de {platformStats?.total_users || 0} usuários ativos</p>
-          <p className="mt-1 text-xs">Geolocalização: {geolocationStats.length > 0 ? `${geolocationStats.reduce((sum, stat) => sum + stat.count, 0)} localizações` : 'Aguardando dados'}</p>
+          <p>{t('analyticsFooter')}</p>
+          <p className="mt-1">{t('realtimeMonitoring')} {platformStats?.total_users || 0} {t('activeUsersText')}</p>
+          <p className="mt-1 text-xs">{t('geolocation')} {geolocationStats.length > 0 ? `${geolocationStats.reduce((sum, stat) => sum + stat.count, 0)} ${t('locations')}` : t('awaitingData')}</p>
         </div>
       </main>
     </div>

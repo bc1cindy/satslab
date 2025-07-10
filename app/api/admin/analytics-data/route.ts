@@ -203,27 +203,35 @@ export async function GET(request: Request) {
     const activeSessions = sessionData?.filter(s => !s.session_end)?.length || 0
     
     // Use geolocation data from sessionData we already fetched
+    // Count UNIQUE USERS per country, not sessions
     let geolocationStats: Array<{country: string, count: number, percentage: number}> = []
     const geoSessionsWithLocation = sessionData?.filter(s => s.geolocation?.country) || []
     
     if (geoSessionsWithLocation.length > 0) {
-      const countryStats = new Map<string, number>()
-      const total = geoSessionsWithLocation.length
+      const countryUserStats = new Map<string, Set<string>>()
       
+      // Group unique users by country
       geoSessionsWithLocation.forEach(session => {
-        if (session.geolocation?.country) {
+        if (session.geolocation?.country && session.user_id) {
           let country = session.geolocation.country
           // Normalize country names - fix Brazil/Brasil duplicates
           if (country === 'Brazil') country = 'Brasil'
-          countryStats.set(country, (countryStats.get(country) || 0) + 1)
+          
+          if (!countryUserStats.has(country)) {
+            countryUserStats.set(country, new Set())
+          }
+          countryUserStats.get(country)!.add(session.user_id)
         }
       })
       
-      geolocationStats = Array.from(countryStats.entries())
-        .map(([country, count]) => ({
+      // Calculate total unique users with geolocation
+      const totalUsersWithGeo = new Set(geoSessionsWithLocation.map(s => s.user_id)).size
+      
+      geolocationStats = Array.from(countryUserStats.entries())
+        .map(([country, userSet]) => ({
           country,
-          count,
-          percentage: total > 0 ? (count / total) * 100 : 0
+          count: userSet.size,
+          percentage: totalUsersWithGeo > 0 ? (userSet.size / totalUsersWithGeo) * 100 : 0
         }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10) // Top 10 countries
