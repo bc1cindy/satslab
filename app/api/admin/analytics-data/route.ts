@@ -128,7 +128,7 @@ export async function GET(request: Request) {
     // For other calculations, we still need the session data
     const { data: sessionData, error: sessionDataError } = await supabase
       .from('user_sessions')
-      .select('user_id, created_at, total_duration_seconds, geolocation')
+      .select('user_id, created_at, total_duration_seconds, geolocation, session_end')
       .like('user_id', 'session_%')
       .range(0, 9999) // Get sample for calculations
     
