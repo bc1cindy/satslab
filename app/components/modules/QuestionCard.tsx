@@ -65,7 +65,7 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
           {question.options.map((option, index) => (
             <div
               key={index}
-              className={`p-3 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] ${getOptionStyle(index)}`}
+              className={`p-2 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] max-w-full ${getOptionStyle(index)}`}
               onClick={() => handleAnswer(index)}
             >
               <div className="flex items-start gap-3">
@@ -78,7 +78,7 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
                 }`}>
                   {String.fromCharCode(65 + index)}
                 </div>
-                <span className="flex-1 min-w-0 text-sm sm:text-base leading-relaxed break-words">
+                <span className="flex-1 min-w-0 text-xs sm:text-base leading-relaxed break-all hyphens-auto overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere', hyphens: 'auto', wordSpacing: '-0.1em' }}>
                   {option}
                 </span>
                 {hasAnswered && (
