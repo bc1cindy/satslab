@@ -118,16 +118,24 @@ export async function GET(request: Request) {
     
     console.log('Total count from database:', totalCount)
     
-    // Supabase has a default limit of 1000 rows, let's override it
-    const { data: sessions, error: sessionsError } = await supabase
+    // Use count for total sessions instead of fetching all data
+    // This avoids the limit issue completely
+    const { count: sessionCount, error: sessionsError } = await supabase
       .from('user_sessions')
-      .select('*')
+      .select('*', { count: 'exact', head: true })
       .like('user_id', 'session_%')
-      .range(0, 9999) // Get up to 10,000 sessions
     
-    console.log(`Database returned ${sessions?.length || 0} sessions`)
-    if (sessionsError) {
-      console.error('Error fetching sessions:', sessionsError)
+    // For other calculations, we still need the session data
+    const { data: sessionData, error: sessionDataError } = await supabase
+      .from('user_sessions')
+      .select('user_id, created_at, total_duration_seconds, geolocation')
+      .like('user_id', 'session_%')
+      .range(0, 9999) // Get sample for calculations
+    
+    console.log(`Total sessions count: ${sessionCount}`)
+    console.log(`Session data returned: ${sessionData?.length || 0} sessions`)
+    if (sessionsError || sessionDataError) {
+      console.error('Error fetching sessions:', sessionsError, sessionDataError)
     }
     
     const { data: walletEvents, error: walletError } = await supabase
@@ -159,21 +167,22 @@ export async function GET(request: Request) {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     
-    const totalUsers = new Set(sessions?.map(s => s.user_id) || []).size
+    const totalUsers = new Set(sessionData?.map(s => s.user_id) || []).size
     const activeUsers24h = new Set(
-      sessions?.filter(s => new Date(s.created_at) >= oneDayAgo)
+      sessionData?.filter(s => new Date(s.created_at) >= oneDayAgo)
         .map(s => s.user_id) || []
     ).size
     const activeUsers7d = new Set(
-      sessions?.filter(s => new Date(s.created_at) >= sevenDaysAgo)
+      sessionData?.filter(s => new Date(s.created_at) >= sevenDaysAgo)
         .map(s => s.user_id) || []
     ).size
     
-    const totalSessions = sessions?.length || 0
+    // Use the accurate count instead of limited data length
+    const totalSessions = sessionCount || 0
     console.log(`Total sessions found: ${totalSessions} at ${new Date().toISOString()}`)
     
     // Calculate average session duration only for sessions with valid duration
-    const sessionsWithDuration = sessions?.filter(s => 
+    const sessionsWithDuration = sessionData?.filter(s => 
       s.total_duration_seconds && s.total_duration_seconds > 0
     ) || []
     
@@ -189,21 +198,19 @@ export async function GET(request: Request) {
       avgDurationMinutes: Math.round(avgSessionDuration / 60)
     })
     
-    const activeSessions = sessions?.filter(s => !s.session_end)?.length || 0
+    // For active sessions, we need to use the sessionData sample
+    // This might not be 100% accurate but close enough for dashboard
+    const activeSessions = sessionData?.filter(s => !s.session_end)?.length || 0
     
-    // Get geolocation stats and normalize country names
-    const { data: geoData, error: geoError } = await supabase
-      .from('user_sessions')
-      .select('geolocation')
-      .neq('geolocation', null)
-      .like('user_id', 'session_%')
-    
+    // Use geolocation data from sessionData we already fetched
     let geolocationStats: Array<{country: string, count: number, percentage: number}> = []
-    if (!geoError && geoData) {
+    const geoSessionsWithLocation = sessionData?.filter(s => s.geolocation?.country) || []
+    
+    if (geoSessionsWithLocation.length > 0) {
       const countryStats = new Map<string, number>()
-      const total = geoData.length
+      const total = geoSessionsWithLocation.length
       
-      geoData.forEach(session => {
+      geoSessionsWithLocation.forEach(session => {
         if (session.geolocation?.country) {
           let country = session.geolocation.country
           // Normalize country names - fix Brazil/Brasil duplicates
