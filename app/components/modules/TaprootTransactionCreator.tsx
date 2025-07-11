@@ -8,6 +8,7 @@ import { Label } from '@/app/components/ui/label'
 import { Alert, AlertDescription } from '@/app/components/ui/alert'
 import { Badge } from '@/app/components/ui/badge'
 import { ExternalLink, Hash, Zap } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 interface TaprootTransactionCreatorProps {
   onTransactionCreated: (hash: string, address: string) => void
@@ -16,6 +17,34 @@ interface TaprootTransactionCreatorProps {
 
 export default function TaprootTransactionCreator({ onTransactionCreated, onPrivateKeyGenerated }: TaprootTransactionCreatorProps) {
   const [step, setStep] = useState<'address' | 'transaction' | 'broadcast'>('address')
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    generateTaprootAddress: isEnglish ? 'Generate Taproot Address' : 'Gerar Endereço Taproot',
+    whatIsTaproot: isEnglish ? '🔐 What is Taproot?' : '🔐 O que é Taproot?',
+    taprootDescription: isEnglish 
+      ? 'Taproot is a Bitcoin upgrade that enables more efficient and private transactions using Schnorr signatures. Taproot addresses start with "bc1p" on mainnet or "tb1p" on testnet/signet.'
+      : 'Taproot é uma atualização do Bitcoin que permite transações mais eficientes e privadas usando assinaturas Schnorr. Endereços Taproot começam com "bc1p" na mainnet ou "tb1p" na testnet/signet.',
+    taprootAddress: isEnglish ? 'Taproot Address' : 'Endereço Taproot',
+    useThisAddress: isEnglish ? 'Use This Address' : 'Usar Este Endereço',
+    createTaprootTransaction: isEnglish ? 'Create Taproot Transaction' : 'Criar Transação Taproot',
+    destinationAddress: isEnglish ? 'Destination Address:' : 'Endereço Destino:',
+    amount: isEnglish ? 'Amount (sBTC)' : 'Valor (sBTC)',
+    amountDescription: isEnglish ? 'Amount in sBTC (Signet Bitcoin). Minimum: 0.001 sBTC' : 'Valor em sBTC (Signet Bitcoin). Mínimo: 0.001 sBTC',
+    transactionCreated: isEnglish ? 'Transaction Created!' : 'Transação Criada!',
+    transactionHexGenerated: isEnglish ? 'Transaction hex generated successfully.' : 'Hex da transação gerado com sucesso.',
+    transactionHex: isEnglish ? 'Transaction Hex:' : 'Transaction Hex:',
+    broadcastTransaction: isEnglish ? 'Broadcast Transaction' : 'Transmitir Transação',
+    broadcasting: isEnglish ? 'Broadcasting...' : 'Transmitindo...',
+    transactionBroadcast: isEnglish ? 'Transaction Broadcast Successfully!' : 'Transação Transmitida com Sucesso!',
+    transactionHash: isEnglish ? 'Transaction Hash:' : 'Hash da Transação:',
+    viewInExplorer: isEnglish ? 'View in Explorer' : 'Ver no Explorer',
+    createTransaction: isEnglish ? 'Create Transaction' : 'Criar Transação',
+    creating: isEnglish ? 'Creating...' : 'Criando...',
+    newTransaction: isEnglish ? 'New Transaction' : 'Nova Transação'
+  }
   const [taprootAddress, setTaprootAddress] = useState('')
   const [amount, setAmount] = useState('')
   const [transactionHex, setTransactionHex] = useState('')
@@ -98,21 +127,19 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
           <CardHeader>
             <CardTitle className="flex items-center">
               <Hash className="h-5 w-5 text-orange-500 mr-2" />
-              Gerar Endereço Taproot
+              {t.generateTaprootAddress}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-              <h3 className="font-semibold text-orange-400 mb-2">🔐 O que é Taproot?</h3>
+              <h3 className="font-semibold text-orange-400 mb-2">{t.whatIsTaproot}</h3>
               <p className="text-orange-300 text-sm">
-                Taproot é uma atualização do Bitcoin que permite transações mais eficientes 
-                e privadas usando assinaturas Schnorr. Endereços Taproot começam com "bc1p" na mainnet 
-                ou "tb1p" na testnet/signet.
+                {t.taprootDescription}
               </p>
             </div>
 
             <div className="space-y-3">
-              <Label>Endereço Taproot</Label>
+              <Label>{t.taprootAddress}</Label>
               {taprootAddress ? (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
@@ -128,7 +155,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                     onClick={() => setStep('transaction')}
                     className="w-full bg-orange-500 hover:bg-orange-600"
                   >
-                    Usar Este Endereço
+                    {t.useThisAddress}
                   </Button>
                 </div>
               ) : (
@@ -136,7 +163,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                   onClick={generateTaprootAddress}
                   className="w-full bg-blue-500 hover:bg-blue-600"
                 >
-                  Gerar Endereço Taproot
+                  {t.generateTaprootAddress}
                 </Button>
               )}
             </div>
@@ -150,17 +177,17 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
           <CardHeader>
             <CardTitle className="flex items-center">
               <Zap className="h-5 w-5 text-blue-500 mr-2" />
-              Criar Transação Taproot
+              {t.createTaprootTransaction}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-gray-900 p-3 rounded">
-              <Label className="text-sm text-gray-400">Endereço Destino:</Label>
+              <Label className="text-sm text-gray-400">{t.destinationAddress}</Label>
               <code className="text-xs break-all block mt-1">{taprootAddress}</code>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Valor (sBTC)</Label>
+              <Label htmlFor="amount">{t.amount}</Label>
               <Input
                 id="amount"
                 value={amount}
@@ -171,7 +198,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                 className="bg-gray-900 border-gray-600"
               />
               <p className="text-xs text-gray-500">
-                Valor em sBTC (Signet Bitcoin). Mínimo: 0.001 sBTC
+                {t.amountDescription}
               </p>
             </div>
 
@@ -179,12 +206,12 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
               <div className="space-y-3">
                 <Alert>
                   <AlertDescription>
-                    <strong>Transação Criada!</strong> Hex da transação gerado com sucesso.
+                    <strong>{t.transactionCreated}</strong> {t.transactionHexGenerated}
                   </AlertDescription>
                 </Alert>
                 
                 <div className="bg-gray-900 p-3 rounded">
-                  <Label className="text-sm text-gray-400">Transaction Hex:</Label>
+                  <Label className="text-sm text-gray-400">{t.transactionHex}</Label>
                   <textarea
                     value={transactionHex}
                     readOnly
@@ -197,7 +224,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                   disabled={isLoading}
                   className="w-full bg-green-500 hover:bg-green-600"
                 >
-                  {isLoading ? 'Transmitindo...' : 'Transmitir Transação'}
+                  {isLoading ? t.broadcasting : t.broadcastTransaction}
                 </Button>
               </div>
             ) : (
@@ -207,7 +234,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                   disabled={isLoading || !amount}
                   className="w-full bg-blue-500 hover:bg-blue-600"
                 >
-                  {isLoading ? 'Criando...' : 'Criar Transação'}
+                  {isLoading ? t.creating : t.createTransaction}
                 </Button>
                 
                 <Button 
@@ -215,7 +242,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                   onClick={() => setStep('address')}
                   className="w-full border-gray-600"
                 >
-                  Voltar
+                  {isEnglish ? 'Back' : 'Voltar'}
                 </Button>
               </div>
             )}
@@ -229,14 +256,17 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
           <CardHeader>
             <CardTitle className="flex items-center text-green-400">
               <Zap className="h-5 w-5 mr-2" />
-              Transação Transmitida com Sucesso!
+              {t.transactionBroadcast}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-              <h3 className="font-semibold text-green-400 mb-2">✅ Transação Confirmada</h3>
+              <h3 className="font-semibold text-green-400 mb-2">✅ {isEnglish ? 'Transaction Confirmed' : 'Transação Confirmada'}</h3>
               <p className="text-green-300 text-sm">
-                Sua transação Taproot foi transmitida para a rede Signet e será confirmada em breve.
+                {isEnglish 
+                  ? 'Your Taproot transaction has been broadcast to the Signet network and will be confirmed shortly.'
+                  : 'Sua transação Taproot foi transmitida para a rede Signet e será confirmada em breve.'
+                }
               </p>
             </div>
 
@@ -247,20 +277,23 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
               </div>
 
               <div className="bg-gray-900 p-3 rounded">
-                <Label className="text-sm text-gray-400">Endereço Taproot:</Label>
+                <Label className="text-sm text-gray-400">{t.taprootAddress}:</Label>
                 <code className="text-xs break-all block mt-1">{taprootAddress}</code>
               </div>
 
               <div className="bg-gray-900 p-3 rounded">
-                <Label className="text-sm text-gray-400">Valor:</Label>
+                <Label className="text-sm text-gray-400">{isEnglish ? 'Amount:' : 'Valor:'}:</Label>
                 <span className="text-sm block mt-1">{amount} sBTC</span>
               </div>
 
               <div className="bg-gray-900 p-3 rounded">
-                <Label className="text-sm text-gray-400">Chave Privada (WIF):</Label>
+                <Label className="text-sm text-gray-400">{isEnglish ? 'Private Key (WIF):' : 'Chave Privada (WIF):'}:</Label>
                 <code className="text-xs break-all block mt-1 font-mono">{privateKey}</code>
                 <p className="text-xs text-gray-500 mt-1">
-                  Use esta chave para mintar o Ordinal NFT Badge
+                  {isEnglish 
+                    ? 'Use this key to mint the Inscription NFT Badge'
+                    : 'Use esta chave para mintar o Inscrição NFT Badge'
+                  }
                 </p>
               </div>
             </div>
@@ -272,7 +305,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                 className="flex-1 border-gray-600"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Ver no Explorer
+                {t.viewInExplorer}
               </Button>
               <Button
                 onClick={() => {
@@ -285,7 +318,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
                 }}
                 className="flex-1 bg-orange-500 hover:bg-orange-600"
               >
-                Nova Transação
+                {t.newTransaction}
               </Button>
             </div>
           </CardContent>
@@ -295,7 +328,7 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
       {/* Informações sobre Taproot */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>Vantagens do Taproot</CardTitle>
+          <CardTitle>{isEnglish ? 'Taproot Advantages' : 'Vantagens do Taproot'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
