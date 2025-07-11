@@ -40,6 +40,16 @@ const PoolMiningSimulator = dynamic(
   { ssr: false }
 )
 
+const IntegratedLightningWallet = dynamic(
+  () => import('./IntegratedLightningWallet'),
+  { ssr: false }
+)
+
+const InteractiveLightningChannel = dynamic(
+  () => import('./InteractiveLightningChannel'),
+  { ssr: false }
+)
+
 interface Task {
   id: string
   title: string
@@ -466,6 +476,45 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
               <PoolMiningSimulator onRewardEarned={(reward: number) => {
                 setUserInputs(prev => ({ ...prev, [currentTask]: reward.toFixed(6) }))
               }} />
+            </div>
+          )}
+
+          {/* Integrated Lightning Wallet for Lightning tasks */}
+          {!isCompleted && (
+            (task.title.toLowerCase() === 'gerar invoice na carteira integrada') || 
+            (task.title.toLowerCase() === 'generate invoice in integrated wallet') ||
+            (task.title.toLowerCase() === 'enviar pagamento lightning') ||
+            (task.title.toLowerCase() === 'send lightning payment')
+          ) && (
+            <div className="mb-6">
+              <IntegratedLightningWallet 
+                onPaymentCompleted={(payment: any) => {
+                  setUserInputs(prev => ({ ...prev, [currentTask]: payment.hash || payment.id }))
+                }}
+                onChannelOpened={(channel: any) => {
+                  setUserInputs(prev => ({ ...prev, [currentTask]: channel.id }))
+                }}
+                onAddressGenerated={(address: string) => {
+                  setUserInputs(prev => ({ ...prev, [currentTask]: address }))
+                }}
+              />
+            </div>
+          )}
+
+          {/* Interactive Lightning Channel for Lightning channel simulation tasks */}
+          {!isCompleted && (
+            (task.title.toLowerCase() === 'simular canal lightning') || 
+            (task.title.toLowerCase() === 'simulate lightning channel')
+          ) && (
+            <div className="mb-6">
+              <InteractiveLightningChannel 
+                onChannelStateChange={(state: any) => {
+                  // Handle channel state changes if needed
+                }}
+                onTransactionCompleted={(transaction: any) => {
+                  setUserInputs(prev => ({ ...prev, [currentTask]: transaction.id }))
+                }}
+              />
             </div>
           )}
 
