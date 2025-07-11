@@ -335,7 +335,7 @@ export async function GET(request: Request) {
       if (!geoError && geoData && geoData.length > 0) {
         const totalUsersWithGeo = geoData[0].total_users_with_geo || 1
         
-        geolocationStats = geoData.map(row => {
+        geolocationStats = geoData.map((row: any) => {
           let country = row.country
           // Normalize country names
           if (country === 'Brazil') country = 'Brasil'
