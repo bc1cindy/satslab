@@ -6,6 +6,7 @@ import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Badge } from '@/app/components/ui/badge'
 import { CheckCircle, XCircle, ExternalLink, Lightbulb, Clock, Copy, AlertCircle } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
 // Dynamic import to avoid SSR issues with crypto libraries
@@ -52,6 +53,9 @@ interface TaskSystemProps {
 }
 
 export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemProps) {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+  
   const [currentTask, setCurrentTask] = useState(0)
   const [userInputs, setUserInputs] = useState<string[]>(new Array(tasks.length).fill(''))
   const [completedTasks, setCompletedTasks] = useState<boolean[]>(new Array(tasks.length).fill(false))
@@ -60,6 +64,23 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
   const [showHints, setShowHints] = useState<number[]>([])
   const [startTime, setStartTime] = useState(Date.now())
   const [attempts, setAttempts] = useState(0)
+
+  // Translations
+  const t = {
+    task: isEnglish ? 'Task' : 'Tarefa',
+    of: isEnglish ? 'of' : 'de',
+    completed: isEnglish ? 'Completed:' : 'Concluídas:',
+    instructions: isEnglish ? 'Instructions:' : 'Instruções:',
+    usefulLinks: isEnglish ? 'Useful links:' : 'Links úteis:',
+    hints: isEnglish ? 'Hints:' : 'Dicas:',
+    validating: isEnglish ? 'Validating...' : 'Validando...',
+    validate: isEnglish ? 'Validate' : 'Validar',
+    success: isEnglish ? 'Success!' : 'Sucesso!',
+    error: isEnglish ? 'Error:' : 'Erro:',
+    showNextHint: isEnglish ? 'Show next hint' : 'Mostrar próxima dica',
+    nextTask: isEnglish ? 'Next Task' : 'Próxima Tarefa',
+    completeTasks: isEnglish ? 'Complete Tasks' : 'Concluir Tarefas'
+  }
 
   const task = tasks[currentTask]
   const isCompleted = completedTasks[currentTask]
@@ -323,8 +344,8 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
     <div className="space-y-6">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-400">
-        <span>Tarefa {currentTask + 1} de {tasks.length}</span>
-        <span>Concluídas: {completedCount}/{tasks.length}</span>
+        <span>{t.task} {currentTask + 1} {t.of} {tasks.length}</span>
+        <span>{t.completed} {completedCount}/{tasks.length}</span>
       </div>
 
       {/* Progress Bar */}
@@ -351,7 +372,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
         <CardContent className="space-y-6">
           {/* Instructions */}
           <div className="space-y-3">
-            <h4 className="font-medium text-white">Instruções:</h4>
+            <h4 className="font-medium text-white">{t.instructions}</h4>
             <ol className="list-decimal list-inside space-y-2 text-sm text-gray-300">
               {task.instructions.map((instruction, index) => (
                 <li key={index}>{instruction}</li>
@@ -362,7 +383,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
           {/* External Links */}
           {task.externalLinks && task.externalLinks.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-white">Links úteis:</h4>
+              <h4 className="font-medium text-white">{t.usefulLinks}</h4>
               <div className="flex flex-wrap gap-2">
                 {task.externalLinks.map((link, index) => (
                   <Button
@@ -419,7 +440,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
             <div className="space-y-3">
               <h4 className="font-medium text-yellow-400 flex items-center">
                 <Lightbulb className="h-5 w-5 mr-2" />
-                Dicas:
+                {t.hints}
               </h4>
               {showHints.map((hintIndex) => (
                 task.hints[hintIndex] && (
@@ -454,7 +475,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
                   disabled={loading || !userInputs[currentTask].trim()}
                   className="bg-blue-500 hover:bg-blue-600"
                 >
-                  {loading ? 'Validando...' : 'Validar'}
+                  {loading ? t.validating : t.validate}
                 </Button>
               </div>
             </div>
@@ -475,7 +496,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium">
-                    {result.success ? 'Sucesso!' : 'Erro:'}
+                    {result.success ? t.success : t.error}
                   </p>
                   <p className="text-sm mt-1">{result.message}</p>
                 </div>
@@ -497,7 +518,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
               }}
             >
               <Lightbulb className="h-4 w-4 mr-2" />
-              Mostrar próxima dica
+              {t.showNextHint}
             </Button>
           )}
 
@@ -513,7 +534,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
                 }}
                 className="bg-green-500 hover:bg-green-600"
               >
-                Próxima Tarefa
+                {t.nextTask}
               </Button>
             </div>
           )}
@@ -528,7 +549,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
                 }}
                 className="bg-green-500 hover:bg-green-600"
               >
-                Concluir Tarefas
+                {t.completeTasks}
               </Button>
             </div>
           )}
