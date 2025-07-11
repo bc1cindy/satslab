@@ -9,6 +9,7 @@ import { Copy, RefreshCw, AlertTriangle, Check, Eye, EyeOff, Wallet, Key, Shield
 import { useAuth } from '@/app/components/auth/AuthProvider'
 import { createWallet } from '@/app/lib/supabase/queries'
 import { useAnalytics } from '@/app/hooks/useAnalytics'
+import { usePathname } from 'next/navigation'
 
 // Mock para ambiente educacional - gera endereços válidos para demonstração
 const generateMockWallet = () => {
@@ -56,6 +57,9 @@ interface WalletData {
 export default function WalletGeneratorEducational() {
   const { session } = useAuth()
   const { trackWalletCreated } = useAnalytics()
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+  
   const [currentStep, setCurrentStep] = useState<'intro' | 'generate' | 'backup' | 'verify' | 'complete'>('intro')
   const [wallet, setWallet] = useState<WalletData | null>(null)
   const [copied, setCopied] = useState<string>('')
@@ -63,6 +67,56 @@ export default function WalletGeneratorEducational() {
   const [userConfirmed, setUserConfirmed] = useState(false)
   const [verificationWord, setVerificationWord] = useState('')
   const [verificationError, setVerificationError] = useState(false)
+
+  // Translations
+  const t = {
+    title: isEnglish ? 'Educational Wallet Generator' : 'Gerador de Carteira Educacional',
+    description: isEnglish 
+      ? 'Let\'s create a Bitcoin wallet for the Signet network safely and educationally.'
+      : 'Vamos criar uma carteira Bitcoin para a rede Signet de forma segura e educativa.',
+    learningTitle: isEnglish ? '📚 You will learn:' : '📚 Você vai aprender:',
+    learningItems: isEnglish ? [
+      'How a seed phrase is generated',
+      'The importance of secure backup',
+      'How a Bitcoin address is derived'
+    ] : [
+      'Como é gerada uma seed phrase (frase-semente)',
+      'A importância de fazer backup seguro',
+      'Como um endereço Bitcoin é derivado'
+    ],
+    startButton: isEnglish ? 'Start Wallet Generation' : 'Iniciar Geração de Carteira',
+    seedPhraseTitle: isEnglish ? 'Step 1: Your Seed Phrase' : 'Passo 1: Sua Seed Phrase (Frase-Semente)',
+    warningTitle: isEnglish ? 'EXTREMELY IMPORTANT:' : 'EXTREMAMENTE IMPORTANTE:',
+    warningText: isEnglish 
+      ? 'This seed phrase is your wallet\'s master key. Never share it with anyone and keep it in a safe place!'
+      : 'Esta seed phrase é a chave mestra da sua carteira. Nunca compartilhe com ninguém e guarde em local seguro!',
+    showSeedPhrase: isEnglish ? 'Show Seed Phrase' : 'Mostrar Seed Phrase',
+    hideSeedPhrase: isEnglish ? 'Hide' : 'Ocultar',
+    showButton: isEnglish ? 'Show' : 'Mostrar',
+    copyButton: isEnglish ? 'Copy' : 'Copiar',
+    copiedButton: isEnglish ? 'Copied!' : 'Copiado!',
+    tipText: isEnglish 
+      ? '💡 Tip: Write down these 12 words on paper, in the correct order. Never take a photo or save in a digital file!'
+      : '💡 Dica: Anote estas 12 palavras em papel, na ordem correta. Nunca tire foto ou salve em arquivo digital!',
+    confirmBackup: isEnglish ? 'I have safely backed up my seed phrase' : 'Fiz backup seguro da minha seed phrase',
+    verificationTitle: isEnglish ? 'Step 2: Verification' : 'Passo 2: Verificação',
+    verificationText: isEnglish 
+      ? 'To ensure you wrote down the seed phrase correctly, please enter the first word:'
+      : 'Para garantir que anotou a seed phrase corretamente, digite a primeira palavra:',
+    firstWordPlaceholder: isEnglish ? 'Enter the first word' : 'Digite a primeira palavra',
+    verifyButton: isEnglish ? 'Verify' : 'Verificar',
+    verificationError: isEnglish ? 'Incorrect word. Please try again.' : 'Palavra incorreta. Tente novamente.',
+    completeTitle: isEnglish ? 'Step 3: Your Bitcoin Address' : 'Passo 3: Seu Endereço Bitcoin',
+    addressTitle: isEnglish ? '🎯 Your Signet Address:' : '🎯 Seu Endereço Signet:',
+    addressDescription: isEnglish 
+      ? 'This address was generated from your seed phrase. Use it to receive sBTC on the Signet network.'
+      : 'Este endereço foi gerado a partir da sua seed phrase. Use-o para receber sBTC na rede Signet.',
+    generateNew: isEnglish ? 'Generate New Wallet' : 'Gerar Nova Carteira',
+    congratulations: isEnglish ? '🎉 Congratulations!' : '🎉 Parabéns!',
+    successMessage: isEnglish 
+      ? 'You have successfully created your first Bitcoin wallet! Your address is ready to receive sBTC.'
+      : 'Você criou com sucesso sua primeira carteira Bitcoin! Seu endereço está pronto para receber sBTC.'
+  }
 
   const generateWallet = async () => {
     const newWallet = generateMockWallet()
@@ -128,20 +182,20 @@ export default function WalletGeneratorEducational() {
           <CardHeader>
             <CardTitle className="text-center flex items-center justify-center">
               <Wallet className="h-6 w-6 mr-2 text-orange-500" />
-              Gerador de Carteira Educacional
+              {t.title}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
               <p className="text-gray-400 mb-4">
-                Vamos criar uma carteira Bitcoin para a rede Signet de forma segura e educativa.
+                {t.description}
               </p>
               <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 text-left mb-4">
-                <h4 className="font-semibold text-orange-400 mb-2">📚 Você vai aprender:</h4>
+                <h4 className="font-semibold text-orange-400 mb-2">{t.learningTitle}</h4>
                 <ul className="list-disc list-inside space-y-1 text-sm text-orange-300">
-                  <li>Como é gerada uma seed phrase (frase-semente)</li>
-                  <li>A importância de fazer backup seguro</li>
-                  <li>Como um endereço Bitcoin é derivado</li>
+                  {t.learningItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
                 </ul>
               </div>
               <Button
@@ -150,7 +204,7 @@ export default function WalletGeneratorEducational() {
                 size="lg"
               >
                 <Key className="h-5 w-5 mr-2" />
-                Iniciar Geração de Carteira
+                {t.startButton}
               </Button>
             </div>
           </CardContent>
@@ -164,15 +218,14 @@ export default function WalletGeneratorEducational() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
                 <Shield className="h-5 w-5 mr-2 text-red-500" />
-                Passo 1: Sua Seed Phrase (Frase-Semente)
+                {t.seedPhraseTitle}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert className="bg-red-500/10 border-red-500/20">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
                 <AlertDescription className="text-red-400">
-                  <strong>EXTREMAMENTE IMPORTANTE:</strong> Esta seed phrase é a chave mestra da sua carteira. 
-                  Nunca compartilhe com ninguém e guarde em local seguro!
+                  <strong>{t.warningTitle}</strong> {t.warningText}
                 </AlertDescription>
               </Alert>
 
@@ -196,7 +249,7 @@ export default function WalletGeneratorEducational() {
                       className="bg-gray-900"
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      Mostrar Seed Phrase
+                      {t.showSeedPhrase}
                     </Button>
                   </div>
                 )}
@@ -211,12 +264,12 @@ export default function WalletGeneratorEducational() {
                   {showSeed ? (
                     <>
                       <EyeOff className="h-4 w-4 mr-2" />
-                      Ocultar
+                      {t.hideSeedPhrase}
                     </>
                   ) : (
                     <>
                       <Eye className="h-4 w-4 mr-2" />
-                      Mostrar
+                      {t.showButton}
                     </>
                   )}
                 </Button>
@@ -228,12 +281,12 @@ export default function WalletGeneratorEducational() {
                   {copied === 'seed' ? (
                     <>
                       <Check className="h-4 w-4 mr-2 text-green-500" />
-                      Copiado!
+                      {t.copiedButton}
                     </>
                   ) : (
                     <>
                       <Copy className="h-4 w-4 mr-2" />
-                      Copiar
+                      {t.copyButton}
                     </>
                   )}
                 </Button>
@@ -241,8 +294,7 @@ export default function WalletGeneratorEducational() {
 
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
                 <p className="text-sm text-blue-300">
-                  💡 <strong>Dica:</strong> Anote estas 12 palavras em papel, na ordem correta. 
-                  Nunca tire foto ou salve em arquivo digital!
+                  {t.tipText}
                 </p>
               </div>
 
@@ -250,7 +302,7 @@ export default function WalletGeneratorEducational() {
                 onClick={handleBackupConfirm}
                 className="w-full bg-orange-500 hover:bg-orange-600"
               >
-                Já Anotei as Palavras
+                {t.confirmBackup}
               </Button>
             </CardContent>
           </Card>
@@ -362,12 +414,12 @@ export default function WalletGeneratorEducational() {
                   {copied === 'address' ? (
                     <>
                       <Check className="h-4 w-4 mr-2 text-green-500" />
-                      Copiado!
+                      {t.copiedButton}
                     </>
                   ) : (
                     <>
                       <Copy className="h-4 w-4 mr-2" />
-                      Copiar Endereço
+                      {t.copyButton} Endereço
                     </>
                   )}
                 </Button>
