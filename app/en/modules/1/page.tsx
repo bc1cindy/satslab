@@ -223,56 +223,55 @@ export default function Module1EN() {
 
         {/* Completion Section */}
         {currentSection === 'completed' && (
-          <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-blue-900 to-purple-900 border-blue-500">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <Award className="h-16 w-16 text-yellow-500" />
+          <Card className="bg-gradient-to-br from-blue-900 to-purple-900 border-blue-500 text-center mx-auto max-w-2xl">
+            <CardHeader className="px-4 sm:px-6">
+              <div className="flex justify-center mb-4">
+                <Award className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500" />
+              </div>
+              <CardTitle className="text-xl sm:text-2xl text-white">Congratulations! Module Completed</CardTitle>
+              <CardDescription className="text-blue-200 text-sm sm:text-base">
+                You have successfully completed Module 1
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+              <div className="bg-black/20 p-3 sm:p-4 rounded-lg">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">🏆 Badge Earned:</h3>
+                <div className="flex items-center justify-center space-x-3">
+                  <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
+                  <span className="text-lg sm:text-xl font-bold text-yellow-400">Beginner Explorer</span>
                 </div>
-                <CardTitle className="text-2xl text-white">Congratulations! Module Completed</CardTitle>
-                <CardDescription className="text-blue-200">
-                  You have successfully completed Module 1
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <div className="bg-black/20 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-white mb-2">🏆 Badge Earned:</h3>
-                  <div className="flex items-center justify-center space-x-3">
-                    <Trophy className="h-8 w-8 text-yellow-500" />
-                    <span className="text-xl font-bold text-yellow-400">Beginner Explorer</span>
-                  </div>
-                  <p className="text-blue-200 text-sm mt-2">
-                    Completed Bitcoin introduction and explored your first transaction on Signet
-                  </p>
-                </div>
+                <p className="text-blue-200 text-xs sm:text-sm mt-2 leading-relaxed">
+                  Completed Bitcoin introduction and explored your first transaction on Signet
+                </p>
+              </div>
 
-                <div className="bg-black/20 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-white mb-2">📚 What you learned:</h3>
-                  <ul className="text-blue-200 text-sm space-y-1">
-                    <li>• Understanding of blockchain technology</li>
-                    <li>• Difference between Bitcoin networks</li>
-                    <li>• How to explore Bitcoin transactions</li>
-                    <li>• Reading transaction data and outputs</li>
-                    <li>• Using the Signet test network safely</li>
-                  </ul>
-                </div>
+              <div className="bg-black/20 p-3 sm:p-4 rounded-lg">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">📚 What you learned:</h3>
+                <ul className="text-blue-200 text-xs sm:text-sm space-y-1 text-left">
+                  <li>• Understanding of blockchain technology</li>
+                  <li>• Difference between Bitcoin networks</li>
+                  <li>• How to explore Bitcoin transactions</li>
+                  <li>• Reading transaction data and outputs</li>
+                  <li>• Using the Signet test network safely</li>
+                </ul>
+              </div>
 
-                <div className="flex justify-center space-x-4 pt-4">
-                  <Link href="/en">
-                    <Button variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-500/10">
-                      Back to Modules
-                    </Button>
-                  </Link>
-                  <Link href="/en/modules/2">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      Next Module: Security and Wallets
-                      <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                <Link href="/en" className="flex-1 sm:flex-initial">
+                  <Button variant="outline" className="w-full sm:w-auto border-blue-500 text-blue-400 hover:bg-blue-500/10 text-sm sm:text-base py-2 sm:py-3">
+                    Back to Modules
+                  </Button>
+                </Link>
+                <Link href="/en/modules/2" className="flex-1">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base py-2 sm:py-3">
+                    Next Module: Security and Wallets
+                    <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Navigation */}
