@@ -403,8 +403,15 @@ export default function Module7() {
                   <Button 
                     className="w-full bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 py-3"
                     onClick={() => {
-                      const tweetText = "🎆 Acabei de completar o Curso Bitcoin da SatsLab! 🎆\n\n🚀 Dominei todos os 7 módulos cobrindo:\n• Fundamentos e economia do Bitcoin\n• Segurança e gerenciamento de carteiras\n• Transações e dinâmica de taxas\n• Mineração e proof-of-work\n• Lightning Network\n• Taproot e Inscrições NFTs\n• Segurança multisig avançada\n\n🏆 Conquistei o badge 'Mestre Multisig'!\n\n#Bitcoin #Aprendizado #SatsLab #Blockchain"
-                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank')
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 7, 
+                          moduleName: 'Módulo 7', 
+                          isEnglish: false, 
+                          isCompleted: true 
+                        })
+                        shareToTwitter(message)
+                      })
                     }}
                   >
                     🎆 Compartilhar Conquista
