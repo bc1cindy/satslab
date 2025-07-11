@@ -189,8 +189,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                           maxWidth: '100%',
                           wordWrap: 'break-word',
                           wordBreak: 'break-word', 
-                          overflowWrap: 'break-word',
-                          WebkitLineBreak: 'after-white-space'
+                          overflowWrap: 'break-word'
                         }}>
                           {option}
                         </span>

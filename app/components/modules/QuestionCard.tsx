@@ -84,8 +84,7 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
                       maxWidth: '100%',
                       wordWrap: 'break-word',
                       wordBreak: 'break-word', 
-                      overflowWrap: 'break-word',
-                      WebkitLineBreak: 'after-white-space'
+                      overflowWrap: 'break-word'
                     }}>
                       {option}
                     </span>
