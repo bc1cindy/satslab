@@ -686,65 +686,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Real-time Status */}
-        <Card className="bg-gray-900 border-gray-800 mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Activity className="h-5 w-5 text-green-500 mr-2" />
-              {t('platformStatus')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-1">
-                  {realtimeData?.active_users || 0}
-                </div>
-                <p className="text-sm text-gray-400">{t('activeUsers')}</p>
-                <div className="h-1 bg-gray-700 rounded-full mt-2">
-                  <div className="h-1 bg-green-500 rounded-full w-3/4"></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400 mb-1">
-                  {realtimeData?.active_sessions || 0}
-                </div>
-                <p className="text-sm text-gray-400">{t('activeSessions')}</p>
-                <div className="h-1 bg-gray-700 rounded-full mt-2">
-                  <div className="h-1 bg-blue-500 rounded-full w-1/2"></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400 mb-1">
-                  {realtimeData?.weekly_active_users || 0}
-                </div>
-                <p className="text-sm text-gray-400">{t('active7Days')}</p>
-                <div className="h-1 bg-gray-700 rounded-full mt-2">
-                  <div className="h-1 bg-purple-500 rounded-full w-2/3"></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-400 mb-1">
-                  {formatDuration(realtimeData?.avg_session_duration || 0)}
-                </div>
-                <p className="text-sm text-gray-400">{t('avgTime')}</p>
-                <div className="h-1 bg-gray-700 rounded-full mt-2">
-                  <div className="h-1 bg-orange-500 rounded-full w-5/6"></div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-gray-800">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">{t('systemWorking')}</span>
-                <div className="flex items-center space-x-2">
-                  <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-400">{t('online')}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">

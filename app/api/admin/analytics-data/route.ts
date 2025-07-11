@@ -290,22 +290,46 @@ export async function GET(request: Request) {
     const totalSessions = sessionCount || 0
     console.log(`Total sessions found: ${totalSessions} at ${new Date().toISOString()}`)
     
-    // Calculate average session duration only for sessions with valid duration
-    const sessionsWithDuration = sessionData?.filter(s => 
-      s.total_duration_seconds && s.total_duration_seconds > 0
-    ) || []
+    // Calculate average session duration from ALL sessions (not just sample)
+    let avgSessionDuration = 0
     
-    const avgSessionDuration = sessionsWithDuration.length > 0
-      ? sessionsWithDuration.reduce((sum, s) => sum + s.total_duration_seconds, 0) / sessionsWithDuration.length
-      : 0
-    
-    // Log for debugging
-    console.log('Session duration calculation:', {
-      totalSessions: sessionData?.length || 0,
-      sessionsWithDuration: sessionsWithDuration.length,
-      avgDurationSeconds: Math.round(avgSessionDuration),
-      avgDurationMinutes: Math.round(avgSessionDuration / 60)
-    })
+    try {
+      // Get ALL sessions with duration data for accurate average
+      const { data: allSessionsWithDuration, error: durationError } = await supabase
+        .from('user_sessions')
+        .select('total_duration_seconds')
+        .not('total_duration_seconds', 'is', null)
+        .gt('total_duration_seconds', 0)
+      
+      if (!durationError && allSessionsWithDuration && allSessionsWithDuration.length > 0) {
+        const totalDuration = allSessionsWithDuration.reduce((sum, s) => sum + s.total_duration_seconds, 0)
+        avgSessionDuration = totalDuration / allSessionsWithDuration.length
+        
+        console.log('Session duration from ALL data:', {
+          totalSessionsWithDuration: allSessionsWithDuration.length,
+          avgDurationSeconds: Math.round(avgSessionDuration),
+          avgDurationMinutes: Math.round(avgSessionDuration / 60)
+        })
+      } else {
+        // Fallback to sample data
+        const sessionsWithDuration = sessionData?.filter(s => 
+          s.total_duration_seconds && s.total_duration_seconds > 0
+        ) || []
+        
+        avgSessionDuration = sessionsWithDuration.length > 0
+          ? sessionsWithDuration.reduce((sum, s) => sum + s.total_duration_seconds, 0) / sessionsWithDuration.length
+          : 0
+        
+        console.log('Session duration from sample fallback:', {
+          sessionsWithDuration: sessionsWithDuration.length,
+          avgDurationSeconds: Math.round(avgSessionDuration),
+          avgDurationMinutes: Math.round(avgSessionDuration / 60)
+        })
+      }
+    } catch (e) {
+      console.log('Failed to get duration data, using sample fallback')
+      avgSessionDuration = 0
+    }
     
     // For active sessions, we need to use the sessionData sample
     // This might not be 100% accurate but close enough for dashboard
