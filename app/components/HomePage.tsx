@@ -271,7 +271,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-4 text-white">
-              {isEnglish ? 'Meet the Creator' : 'Conheça a Criadora'}
+              {isEnglish ? 'Meet SatsLab Creator' : 'Conheça a Criadora do SatsLab'}
             </h2>
             <p className="text-gray-300 mb-6">
               {isEnglish 
