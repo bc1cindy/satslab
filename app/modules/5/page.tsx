@@ -11,8 +11,6 @@ import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
-import IntegratedLightningWallet from '@/app/components/modules/IntegratedLightningWallet'
-import InteractiveLightningChannel from '@/app/components/modules/InteractiveLightningChannel'
 import { module5Questions, module5Tasks, module5Badge } from './data'
 
 // Types
@@ -207,60 +205,6 @@ export default function Module5() {
                   Use uma carteira Lightning completa integrada ao site
                 </CardDescription>
               </CardHeader>
-            </Card>
-            
-            {/* Integrated Lightning Wallet */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg">⚡ Carteira Lightning Integrada</CardTitle>
-                <CardDescription>
-                  Carteira Lightning completa com canais, pagamentos e histórico
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <IntegratedLightningWallet 
-                  onAddressGenerated={(address) => {
-                    setLightningResults(prev => ({ ...prev, walletAddress: address }))
-                  }}
-                  onPaymentCompleted={(payment) => {
-                    setLightningResults(prev => ({ 
-                      ...prev, 
-                      paymentHash: payment.preimage || payment.id,
-                      completedPayments: (prev.completedPayments || 0) + 1
-                    }))
-                  }}
-                  onChannelOpened={(channel) => {
-                    setLightningResults(prev => ({ 
-                      ...prev, 
-                      channelsOpened: (prev.channelsOpened || 0) + 1
-                    }))
-                  }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Interactive Lightning Channel */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg">🔗 Simulador de Canais Lightning</CardTitle>
-                <CardDescription>
-                  Aprenda como funcionam os canais Lightning na prática
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <InteractiveLightningChannel 
-                  onChannelStateChange={(state) => {
-                    const estimatedClosingFee = Math.floor(state.capacity * 0.001)
-                    setLightningResults(prev => ({ ...prev, channelFee: estimatedClosingFee }))
-                  }}
-                  onTransactionCompleted={(transaction) => {
-                    setLightningResults(prev => ({ 
-                      ...prev, 
-                      completedPayments: (prev.completedPayments || 0) + 1
-                    }))
-                  }}
-                />
-              </CardContent>
             </Card>
             
             <TaskSystem 

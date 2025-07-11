@@ -422,7 +422,10 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
           )}
 
           {/* Wallet Generator for specific tasks */}
-          {!isCompleted && (task.title.toLowerCase().includes('gerar carteira') || task.title.toLowerCase().includes('generate') && task.title.toLowerCase().includes('wallet')) && (
+          {!isCompleted && (
+            task.title.toLowerCase().includes('gerar carteira') || 
+            (task.title.toLowerCase().includes('generate') && task.title.toLowerCase().includes('wallet') && !task.title.toLowerCase().includes('invoice') && !task.title.toLowerCase().includes('lightning'))
+          ) && (
             <div className="mb-6">
               <WalletGeneratorEducational />
             </div>
@@ -489,7 +492,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
             <div className="mb-6">
               <IntegratedLightningWallet 
                 onPaymentCompleted={(payment: any) => {
-                  setUserInputs(prev => ({ ...prev, [currentTask]: payment.hash || payment.id }))
+                  setUserInputs(prev => ({ ...prev, [currentTask]: payment.preimage || payment.id }))
                 }}
                 onChannelOpened={(channel: any) => {
                   setUserInputs(prev => ({ ...prev, [currentTask]: channel.id }))
