@@ -142,28 +142,27 @@ export async function GET(request: Request) {
     // Fallback: use SQL to count distinct users directly
     if (uniqueUserCount === null) {
       try {
-        // First, let's see what user_id patterns we have
+        // Count ALL unique users who ever used the platform (since beginning)
+        // This gives us the historical total of unique visitors who consented to analytics
         const { data: patternCheck, error: patternError } = await supabase
           .rpc('exec_sql', { 
             sql: `
               SELECT 
-                COUNT(DISTINCT user_id) as session_users,
-                (SELECT COUNT(DISTINCT user_id) FROM user_sessions) as all_users,
-                (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE user_id NOT LIKE 'session_%') as non_session_users
+                COUNT(DISTINCT user_id) as total_unique_users_ever,
+                COUNT(DISTINCT CASE WHEN user_id LIKE 'session_%' THEN user_id END) as session_pattern_users,
+                COUNT(DISTINCT CASE WHEN created_at >= NOW() - INTERVAL '24 hours' THEN user_id END) as users_24h,
+                COUNT(DISTINCT CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN user_id END) as users_7d
+              FROM user_sessions
             ` 
           })
         
         if (!patternError && patternCheck && patternCheck.length > 0) {
-          console.log('User ID patterns:', patternCheck[0])
+          console.log('Historical user analytics:', patternCheck[0])
           
-          // Use all users if non-session users exist, otherwise use session users
-          const sessionUsers = patternCheck[0].session_users || 0
-          const allUsers = patternCheck[0].all_users || 0
-          const nonSessionUsers = patternCheck[0].non_session_users || 0
+          // Total unique users since the beginning (everyone who ever accepted analytics)
+          uniqueUserCount = patternCheck[0].total_unique_users_ever || 0
           
-          // If we have significant non-session users, count all users
-          uniqueUserCount = nonSessionUsers > 0 ? allUsers : sessionUsers
-          console.log('Unique users selected:', uniqueUserCount)
+          console.log('Total unique users since beginning:', uniqueUserCount)
         } else {
           // Fallback to session-only count
           const { data: sqlResult, error: sqlError } = await supabase
@@ -239,6 +238,46 @@ export async function GET(request: Request) {
     // Use the accurate unique users count from our calculation
     const totalUsers = uniqueUserCount || new Set(sessionData?.map(s => s.user_id) || []).size
     
+    // For 24h and 7d active users, try to use SQL data if available
+    let activeUsers24h = 0
+    let activeUsers7d = 0
+    
+    // Try to get accurate 24h/7d counts from our SQL query
+    if (uniqueUserCount !== null) {
+      try {
+        const { data: activityData, error: activityError } = await supabase
+          .rpc('exec_sql', { 
+            sql: `
+              SELECT 
+                COUNT(DISTINCT CASE WHEN created_at >= NOW() - INTERVAL '24 hours' THEN user_id END) as users_24h,
+                COUNT(DISTINCT CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN user_id END) as users_7d
+              FROM user_sessions
+            ` 
+          })
+        
+        if (!activityError && activityData && activityData.length > 0) {
+          activeUsers24h = activityData[0].users_24h || 0
+          activeUsers7d = activityData[0].users_7d || 0
+          console.log('Activity from SQL:', { activeUsers24h, activeUsers7d })
+        }
+      } catch (e) {
+        console.log('Failed to get activity data from SQL, using fallback')
+      }
+    }
+    
+    // Fallback to session data sample if SQL failed
+    if (activeUsers24h === 0 && activeUsers7d === 0) {
+      activeUsers24h = new Set(
+        sessionData?.filter(s => new Date(s.created_at) >= oneDayAgo)
+          .map(s => s.user_id) || []
+      ).size
+      activeUsers7d = new Set(
+        sessionData?.filter(s => new Date(s.created_at) >= sevenDaysAgo)
+          .map(s => s.user_id) || []
+      ).size
+      console.log('Activity from sample data:', { activeUsers24h, activeUsers7d })
+    }
+    
     // Debug logging
     console.log('Final user count calculation:', {
       uniqueUserCountFromRPC: uniqueUserCount,
@@ -246,14 +285,6 @@ export async function GET(request: Request) {
       finalTotalUsers: totalUsers,
       moduleUniqueUsers: moduleAnalytics.reduce((sum, m) => sum + m.unique_users, 0)
     })
-    const activeUsers24h = new Set(
-      sessionData?.filter(s => new Date(s.created_at) >= oneDayAgo)
-        .map(s => s.user_id) || []
-    ).size
-    const activeUsers7d = new Set(
-      sessionData?.filter(s => new Date(s.created_at) >= sevenDaysAgo)
-        .map(s => s.user_id) || []
-    ).size
     
     // Use the accurate count instead of limited data length
     const totalSessions = sessionCount || 0
