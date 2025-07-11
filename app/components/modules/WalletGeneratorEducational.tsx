@@ -115,7 +115,32 @@ export default function WalletGeneratorEducational() {
     congratulations: isEnglish ? '🎉 Congratulations!' : '🎉 Parabéns!',
     successMessage: isEnglish 
       ? 'You have successfully created your first Bitcoin wallet! Your address is ready to receive sBTC.'
-      : 'Você criou com sucesso sua primeira carteira Bitcoin! Seu endereço está pronto para receber sBTC.'
+      : 'Você criou com sucesso sua primeira carteira Bitcoin! Seu endereço está pronto para receber sBTC.',
+    backupStep: isEnglish ? 'Excellent! Now let\'s verify that you wrote it down correctly.' : 'Excelente! Agora vamos verificar se você anotou corretamente.',
+    securityQuestion: isEnglish ? 'For security, please answer:' : 'Por segurança, responda:',
+    firstWordQuestion: isEnglish ? 'What is the first word of your seed phrase?' : 'Qual é a primeira palavra da sua seed phrase?',
+    firstWordHint: isEnglish ? '(This confirms you have access to the backup)' : '(Isso confirma que você tem acesso ao backup)',
+    firstWordPlaceholder: isEnglish ? 'Enter the first word...' : 'Digite a primeira palavra...',
+    incorrectWord: isEnglish ? '❌ Incorrect word. Check your notes.' : '❌ Palavra incorreta. Verifique suas anotações.',
+    confirmCheckbox: isEnglish ? 'I confirm that I have written down all 12 words in order and stored them in a safe place' : 'Confirmo que anotei todas as 12 palavras em ordem e guardei em local seguro',
+    verifyAndContinue: isEnglish ? 'Verify and Continue' : 'Verificar e Continuar',
+    enterFirstWord: isEnglish ? 'Enter the first word to continue' : 'Digite a primeira palavra para continuar',
+    walletCreatedSuccess: isEnglish ? '🎉 Step 3: Wallet Created Successfully!' : '🎉 Passo 3: Carteira Criada com Sucesso!',
+    congratsMessage: isEnglish ? 'Congratulations! You have created your Bitcoin wallet safely. Now you have an address to receive sBTC!' : 'Parabéns! Você criou sua carteira Bitcoin de forma segura. Agora você tem um endereço para receber sBTC!',
+    copyAddress: isEnglish ? 'Copy Address' : 'Copiar Endereço',
+    learnedTitle: isEnglish ? '📖 What you learned:' : '📖 O que você aprendeu:',
+    learnedItems: isEnglish ? [
+      'The seed phrase generates all wallet keys',
+      'The address is mathematically derived from the seed',
+      'Signet addresses start with "tb1"',
+      'You can have infinite addresses with the same seed'
+    ] : [
+      'A seed phrase gera todas as chaves da carteira',
+      'O endereço é derivado matematicamente da seed',
+      'Endereços Signet começam com "tb1"',
+      'Você pode ter infinitos endereços com a mesma seed'
+    ],
+    useAddressMessage: isEnglish ? 'Now use this address to receive sBTC from the faucet!' : 'Agora use este endereço para receber sBTC do faucet!'
   }
 
   const generateWallet = async () => {
@@ -314,20 +339,20 @@ export default function WalletGeneratorEducational() {
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
             <CardTitle className="text-lg">
-              ✅ Passo 2: Verificar Backup
+              ✅ {t.verificationTitle}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-gray-400">
-              Excelente! Agora vamos verificar se você anotou corretamente.
+              {t.backupStep}
             </p>
             
             <div className="bg-gray-800 rounded-lg p-4 space-y-3">
               <div>
-                <p className="text-sm mb-2">Por segurança, responda:</p>
-                <p className="font-medium">Qual é a primeira palavra da sua seed phrase?</p>
+                <p className="text-sm mb-2">{t.securityQuestion}</p>
+                <p className="font-medium">{t.firstWordQuestion}</p>
                 <p className="text-xs text-gray-500 mt-1">
-                  (Isso confirma que você tem acesso ao backup)
+                  {t.firstWordHint}
                 </p>
               </div>
               
@@ -337,7 +362,7 @@ export default function WalletGeneratorEducational() {
                   setVerificationWord(e.target.value)
                   setVerificationError(false)
                 }}
-                placeholder="Digite a primeira palavra..."
+                placeholder={t.firstWordPlaceholder}
                 className="bg-gray-700 border-gray-600 text-white"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter' && userConfirmed) {
@@ -348,7 +373,7 @@ export default function WalletGeneratorEducational() {
               
               {verificationError && (
                 <p className="text-sm text-red-400">
-                  ❌ Palavra incorreta. Verifique suas anotações.
+                  {t.incorrectWord}
                 </p>
               )}
             </div>
@@ -361,7 +386,7 @@ export default function WalletGeneratorEducational() {
                 className="rounded bg-gray-700 border-gray-600 mt-1"
               />
               <span className="text-sm">
-                Confirmo que anotei todas as 12 palavras em ordem e guardei em local seguro
+                {t.confirmCheckbox}
               </span>
             </label>
 
@@ -370,12 +395,12 @@ export default function WalletGeneratorEducational() {
               disabled={!userConfirmed || !verificationWord.trim()}
               className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50"
             >
-              Verificar e Continuar
+              {t.verifyAndContinue}
             </Button>
             
             {!verificationWord.trim() && userConfirmed && (
               <p className="text-xs text-center text-gray-500">
-                Digite a primeira palavra para continuar
+                {t.enterFirstWord}
               </p>
             )}
           </CardContent>
@@ -388,20 +413,19 @@ export default function WalletGeneratorEducational() {
           <Card className="bg-gray-900 border-gray-800">
             <CardHeader>
               <CardTitle className="text-lg text-green-400">
-                🎉 Passo 3: Carteira Criada com Sucesso!
+                {t.walletCreatedSuccess}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
                 <p className="text-green-400 text-sm">
-                  Parabéns! Você criou sua carteira Bitcoin de forma segura. 
-                  Agora você tem um endereço para receber sBTC!
+                  {t.congratsMessage}
                 </p>
               </div>
 
               {/* Address */}
               <div>
-                <h4 className="font-medium text-white mb-2">Seu Endereço Signet:</h4>
+                <h4 className="font-medium text-white mb-2">{t.addressTitle}</h4>
                 <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm break-all">
                   {wallet.address}
                 </div>
@@ -419,25 +443,24 @@ export default function WalletGeneratorEducational() {
                   ) : (
                     <>
                       <Copy className="h-4 w-4 mr-2" />
-                      {t.copyButton} Endereço
+                      {t.copyAddress}
                     </>
                   )}
                 </Button>
               </div>
 
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                <h4 className="font-medium text-blue-400 mb-2">📖 O que você aprendeu:</h4>
+                <h4 className="font-medium text-blue-400 mb-2">{t.learnedTitle}</h4>
                 <ul className="list-disc list-inside space-y-1 text-sm text-blue-300">
-                  <li>A seed phrase gera todas as chaves da carteira</li>
-                  <li>O endereço é derivado matematicamente da seed</li>
-                  <li>Endereços Signet começam com "tb1"</li>
-                  <li>Você pode ter infinitos endereços com a mesma seed</li>
+                  {t.learnedItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
                 </ul>
               </div>
 
               <div className="text-center">
                 <p className="text-sm text-gray-400 mb-3">
-                  Agora use este endereço para receber sBTC do faucet!
+                  {t.useAddressMessage}
                 </p>
                 <Button
                   onClick={() => {
@@ -451,7 +474,7 @@ export default function WalletGeneratorEducational() {
                   className="border-gray-600"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Gerar Nova Carteira
+                  {t.generateNew}
                 </Button>
               </div>
             </CardContent>
