@@ -247,16 +247,16 @@ export default function Module5EN() {
                   </ul>
                 </div>
 
-                <div className="flex justify-center space-x-4 pt-4">
-                  <Link href="/en">
-                    <Button variant="outline" className="border-yellow-500 text-yellow-400 hover:bg-yellow-500/10">
-                      Back to Modules
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:space-x-4 pt-4">
+                  <Link href="/en/modules/6" className="w-full sm:w-auto">
+                    <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
+                      Next Module: Taproot and Inscriptions
+                      <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
                     </Button>
                   </Link>
-                  <Link href="/en/modules/6">
-                    <Button className="bg-yellow-600 hover:bg-yellow-700">
-                      Next Module: DeFi on Bitcoin
-                      <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
+                  <Link href="/en" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full border-yellow-500 text-yellow-400 hover:bg-yellow-500/10">
+                      Back to Modules
                     </Button>
                   </Link>
                 </div>
