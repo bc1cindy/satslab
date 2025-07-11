@@ -18,6 +18,7 @@ import {
   Copy,
   Check
 } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 interface TransactionSimulatorProps {
   onTransactionSent?: (txid: string) => void
@@ -40,58 +41,63 @@ interface FeeLevel {
   icon: React.ReactNode
 }
 
-const mockProducts: Product[] = [
+const getMockProducts = (isEnglish: boolean): Product[] => [
   {
     id: '1',
-    name: 'Café Premium ☕',
-    description: 'Café especial torrado na hora',
+    name: isEnglish ? 'Premium Coffee ☕' : 'Café Premium ☕',
+    description: isEnglish ? 'Freshly roasted specialty coffee' : 'Café especial torrado na hora',
     price: 0.005,
     image: '☕'
   },
   {
     id: '2', 
-    name: 'eBook Bitcoin 📖',
-    description: 'Guia completo sobre Bitcoin',
+    name: isEnglish ? 'Bitcoin eBook 📖' : 'eBook Bitcoin 📖',
+    description: isEnglish ? 'Complete guide about Bitcoin' : 'Guia completo sobre Bitcoin',
     price: 0.0025,
     image: '📖'
   },
   {
     id: '3',
-    name: 'Adesivo Bitcoin 🏷️',
-    description: 'Adesivo para notebook',
+    name: isEnglish ? 'Bitcoin Sticker 🏷️' : 'Adesivo Bitcoin 🏷️',
+    description: isEnglish ? 'Laptop sticker' : 'Adesivo para notebook',
     price: 0.001,
     image: '🏷️'
   }
 ]
 
-const feeOptions: FeeLevel[] = [
+const getFeeOptions = (isEnglish: boolean): FeeLevel[] => [
   {
     level: 'low',
-    label: 'Baixa',
+    label: isEnglish ? 'Low' : 'Baixa',
     satPerVB: 2,
-    estimatedTime: '~2 horas',
+    estimatedTime: isEnglish ? '~2 hours' : '~2 horas',
     color: 'text-blue-400',
     icon: <TrendingDown className="h-4 w-4" />
   },
   {
     level: 'medium',
-    label: 'Média',
+    label: isEnglish ? 'Medium' : 'Média',
     satPerVB: 5,
-    estimatedTime: '~30 minutos',
+    estimatedTime: isEnglish ? '~30 minutes' : '~30 minutos',
     color: 'text-yellow-400',
     icon: <TrendingUp className="h-4 w-4" />
   },
   {
     level: 'high',
-    label: 'Alta',
+    label: isEnglish ? 'High' : 'Alta',
     satPerVB: 10,
-    estimatedTime: '~10 minutos',
+    estimatedTime: isEnglish ? '~10 minutes' : '~10 minutos',
     color: 'text-orange-400',
     icon: <Zap className="h-4 w-4" />
   }
 ]
 
 export default function TransactionSimulator({ onTransactionSent }: TransactionSimulatorProps) {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+  const feeOptions = getFeeOptions(isEnglish)
+  const mockProducts = getMockProducts(isEnglish)
+  
   const [currentStep, setCurrentStep] = useState<'shop' | 'checkout' | 'payment' | 'confirming' | 'complete'>('shop')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedFee, setSelectedFee] = useState<FeeLevel>(feeOptions[1]) // Default to medium
@@ -100,6 +106,47 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
   const [transactionId, setTransactionId] = useState('')
   const [copied, setCopied] = useState(false)
   const [hasStoredWallet, setHasStoredWallet] = useState(false)
+
+  // Translations
+  const t = {
+    title: isEnglish ? 'Bitcoin Purchase Simulator' : 'Simulador de Compra Bitcoin',
+    selectProduct: isEnglish ? 'Select a product to buy with Bitcoin:' : 'Escolha um produto para comprar com Bitcoin:',
+    select: isEnglish ? 'Select' : 'Selecionar',
+    shoppingCart: isEnglish ? '🛒 Shopping Cart' : '🛒 Carrinho de Compras',
+    total: isEnglish ? 'Total:' : 'Total:',
+    back: isEnglish ? 'Back' : 'Voltar',
+    payWithBitcoin: isEnglish ? 'Pay with Bitcoin' : 'Pagar com Bitcoin',
+    paymentConfig: isEnglish ? '💳 Payment Configuration' : '💳 Configurar Pagamento',
+    destinationAddress: isEnglish ? 'Destination Address:' : 'Endereço de Destino:',
+    storeAddress: isEnglish ? 'Store address (provided automatically)' : 'Endereço da loja (fornecido automaticamente)',
+    yourWalletAddress: isEnglish ? 'Your Wallet Address (source of funds):' : 'Seu Endereço de Carteira (origem dos fundos):',
+    walletPlaceholder: isEnglish ? 'Paste your Signet wallet address (tb1...)' : 'Cole o endereço da sua carteira Signet (tb1...)',
+    addressRecovered: isEnglish ? '✓ Address recovered from wallet you created in Module 2' : '✓ Endereço recuperado da carteira que você criou no Módulo 2',
+    noWalletFound: isEnglish ? 'We did not find a saved wallet. Use the address of the wallet you created in Module 2.' : 'Não encontramos uma carteira salva. Use o endereço da carteira que você criou no Módulo 2.',
+    createWallet: isEnglish ? 'Create Wallet' : 'Criar Carteira',
+    transactionFees: isEnglish ? 'Transaction Fees:' : 'Taxas de Transação:',
+    confirmPayment: isEnglish ? 'Confirm Payment' : 'Confirmar Pagamento',
+    processing: isEnglish ? 'Processing Transaction...' : 'Processando Transação...',
+    processingDesc: isEnglish ? 'Your transaction is being processed on the Signet network.' : 'Sua transação está sendo processada na rede Signet.',
+    success: isEnglish ? '🎉 Transaction Successful!' : '🎉 Transação Realizada com Sucesso!',
+    successDesc: isEnglish ? 'Your Bitcoin transaction was completed successfully!' : 'Sua transação Bitcoin foi concluída com sucesso!',
+    transactionId: isEnglish ? 'Transaction ID:' : 'ID da Transação:',
+    copied: isEnglish ? 'Copied!' : 'Copiado!',
+    copy: isEnglish ? 'Copy' : 'Copiar',
+    newTransaction: isEnglish ? 'New Transaction' : 'Nova Transação',
+    enterWallet: isEnglish ? 'Please enter your wallet address' : 'Por favor, insira o endereço da sua carteira',
+    confirmationTime: isEnglish ? 'Estimated confirmation time:' : 'Tempo estimado de confirmação:',
+    summary: isEnglish ? 'Transaction Summary:' : 'Resumo da Transação:',
+    educationalSimulation: isEnglish ? '💡 Educational Simulation: This is a simulated purchasing experience for you to practice sending Bitcoin transactions with different fee levels.' : '💡 Simulação Educativa: Esta é uma experiência de compra simulada para você praticar envio de transações Bitcoin com diferentes níveis de taxa.',
+    chooseProduct: isEnglish ? '🛍️ Choose a product:' : '🛍️ Escolha um produto:',
+    feeLevel: isEnglish ? 'Fee Level (affects confirmation speed):' : 'Nível de Taxa (afeta velocidade de confirmação):',
+    feeTip: isEnglish ? '💡 Tip: During high demand periods, low fees may take much longer' : '💡 Dica: Em períodos de alta demanda, taxas baixas podem demorar muito mais',
+    product: isEnglish ? 'Product:' : 'Produto:',
+    amount: isEnglish ? 'Amount:' : 'Valor:',
+    estimatedFee: isEnglish ? 'Estimated fee:' : 'Taxa estimada:',
+    totalApprox: isEnglish ? 'Approximate total:' : 'Total aproximado:',
+    sendTransaction: isEnglish ? 'Send Transaction' : 'Enviar Transação'
+  }
 
   // Busca o endereço salvo do módulo anterior quando o componente monta
   React.useEffect(() => {
@@ -130,7 +177,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
 
   const handlePayment = async () => {
     if (!walletAddress.trim()) {
-      alert('Por favor, insira o endereço da sua carteira')
+      alert(t.enterWallet)
       return
     }
 
@@ -171,21 +218,20 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
         <CardHeader>
           <CardTitle className="flex items-center text-xl">
             <ShoppingCart className="h-6 w-6 mr-3 text-orange-500" />
-            Simulador de Compra Bitcoin
+            {t.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
             <p className="text-blue-300 text-sm">
-              💡 <strong>Simulação Educativa:</strong> Esta é uma experiência de compra simulada para você 
-              praticar envio de transações Bitcoin com diferentes níveis de taxa.
+              {t.educationalSimulation}
             </p>
           </div>
 
           {/* Step 1: Product Selection */}
           {currentStep === 'shop' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4">🛍️ Escolha um produto:</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">{t.chooseProduct}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {mockProducts.map((product) => (
                   <Card key={product.id} className="bg-gray-800 border-gray-700 cursor-pointer hover:border-orange-500 transition-colors">
@@ -201,7 +247,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                         className="w-full bg-orange-500 hover:bg-orange-600"
                         size="sm"
                       >
-                        Selecionar
+                        {t.select}
                       </Button>
                     </CardContent>
                   </Card>
@@ -213,7 +259,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
           {/* Step 2: Checkout */}
           {currentStep === 'checkout' && selectedProduct && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4">🛒 Carrinho de Compras</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">{t.shoppingCart}</h3>
               
               <div className="bg-gray-800 rounded-lg p-4">
                 <div className="flex items-center justify-between">
@@ -231,7 +277,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
               </div>
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-700">
-                <span className="text-white font-medium">Total:</span>
+                <span className="text-white font-medium">{t.total}</span>
                 <span className="text-xl font-bold text-orange-400">{selectedProduct.price} sBTC</span>
               </div>
 
@@ -241,13 +287,13 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                   variant="outline"
                   className="border-gray-600"
                 >
-                  Voltar
+                  {t.back}
                 </Button>
                 <Button
                   onClick={handleCheckout}
                   className="flex-1 bg-orange-500 hover:bg-orange-600"
                 >
-                  Pagar com Bitcoin
+                  {t.payWithBitcoin}
                   <CreditCard className="h-4 w-4 ml-2" />
                 </Button>
               </div>
@@ -257,28 +303,28 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
           {/* Step 3: Payment Configuration */}
           {currentStep === 'payment' && selectedProduct && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-white mb-4">💳 Configurar Pagamento</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">{t.paymentConfig}</h3>
               
               {/* Destination Address */}
-              <div className="bg-gray-800 rounded-lg p-4">
-                <h4 className="font-medium text-white mb-2">Endereço de Destino:</h4>
-                <p className="font-mono text-sm text-gray-300 bg-gray-700 p-2 rounded">
+              <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
+                <h4 className="font-medium text-white mb-2">{t.destinationAddress}</h4>
+                <div className="font-mono text-xs sm:text-sm text-gray-300 bg-gray-700 p-2 rounded break-all overflow-wrap-anywhere">
                   tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Endereço da loja (fornecido automaticamente)</p>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{t.storeAddress}</p>
               </div>
 
               {/* Your Wallet Address */}
               <div>
                 <label className="block text-sm font-medium text-white mb-2">
-                  Seu Endereço de Carteira (origem dos fundos):
+                  {t.yourWalletAddress}
                 </label>
                 <div className="relative">
                   <Input
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
-                    placeholder="Cole o endereço da sua carteira Signet (tb1...)"
-                    className="bg-gray-800 border-gray-700 text-white pr-10"
+                    placeholder={t.walletPlaceholder}
+                    className="bg-gray-800 border-gray-700 text-white pr-10 text-xs sm:text-sm font-mono break-all"
                   />
                   {hasStoredWallet && (
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -288,21 +334,21 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                 </div>
                 {hasStoredWallet ? (
                   <p className="text-xs text-green-400 mt-1">
-                    ✓ Endereço recuperado da carteira que você criou no Módulo 2
+                    {t.addressRecovered}
                   </p>
                 ) : (
                   <div className="mt-2">
                     <p className="text-xs text-gray-500 mb-1">
-                      Não encontramos uma carteira salva. Use o endereço da carteira que você criou no Módulo 2.
+                      {t.noWalletFound}
                     </p>
                     <Button
-                      onClick={() => window.open('/modules/2', '_blank')}
+                      onClick={() => window.open(isEnglish ? '/en/modules/2' : '/modules/2', '_blank')}
                       variant="outline"
                       size="sm"
-                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 text-xs sm:text-sm whitespace-normal text-center py-2"
                     >
                       <AlertTriangle className="h-4 w-4 mr-2" />
-                      Voltar ao Módulo 2 para criar carteira
+                      {t.createWallet}
                     </Button>
                   </div>
                 )}
@@ -311,7 +357,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
               {/* Fee Selection */}
               <div>
                 <label className="block text-sm font-medium text-white mb-3">
-                  Nível de Taxa (afeta velocidade de confirmação):
+                  {t.feeLevel}
                 </label>
                 <div className="bg-gray-800 rounded-lg p-1 grid grid-cols-3">
                   {feeOptions.map((fee) => (
@@ -351,33 +397,33 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                   ))}
                 </div>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  💡 Dica: Em períodos de alta demanda, taxas baixas podem demorar muito mais
+                  {t.feeTip}
                 </p>
               </div>
 
               {/* Transaction Summary */}
               <div className="bg-gray-800 rounded-lg p-4">
-                <h4 className="font-medium text-white mb-3">Resumo da Transação:</h4>
+                <h4 className="font-medium text-white mb-3">{t.summary}</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Produto:</span>
+                    <span className="text-gray-400">{t.product}</span>
                     <span className="text-white">{selectedProduct.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Valor:</span>
+                    <span className="text-gray-400">{t.amount}</span>
                     <span className="text-white">{selectedProduct.price} sBTC</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Taxa estimada:</span>
+                    <span className="text-gray-400">{t.estimatedFee}</span>
                     <span className="text-white">~0.0001 sBTC ({selectedFee.satPerVB} sat/vB)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Tempo estimado:</span>
+                    <span className="text-gray-400">{t.confirmationTime}</span>
                     <span className={selectedFee.color}>{selectedFee.estimatedTime}</span>
                   </div>
                   <hr className="border-gray-700" />
                   <div className="flex justify-between font-medium">
-                    <span className="text-white">Total aproximado:</span>
+                    <span className="text-white">{t.totalApprox}</span>
                     <span className="text-orange-400">{(selectedProduct.price + 0.0001).toFixed(4)} sBTC</span>
                   </div>
                 </div>
@@ -389,14 +435,14 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                   variant="outline"
                   className="border-gray-600"
                 >
-                  Voltar
+                  {t.back}
                 </Button>
                 <Button
                   onClick={handlePayment}
                   disabled={!walletAddress.trim() || isProcessing}
                   className="flex-1 bg-orange-500 hover:bg-orange-600"
                 >
-                  Enviar Transação
+                  {t.sendTransaction}
                   <CreditCard className="h-4 w-4 ml-2" />
                 </Button>
               </div>
@@ -408,14 +454,14 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
             <div className="text-center space-y-4">
               <div className="flex items-center justify-center">
                 <Clock className="h-8 w-8 text-blue-500 animate-spin mr-3" />
-                <h3 className="text-lg font-semibold text-white">Processando Transação...</h3>
+                <h3 className="text-lg font-semibold text-white">{t.processing}</h3>
               </div>
               <p className="text-gray-400">
-                Sua transação está sendo criada e enviada para a rede Signet.
+                {t.processingDesc}
               </p>
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
                 <p className="text-blue-300 text-sm">
-                  ⏱️ Tempo estimado de confirmação: {selectedFee.estimatedTime}
+                  ⏱️ {t.confirmationTime} {selectedFee.estimatedTime}
                 </p>
               </div>
             </div>
@@ -427,33 +473,33 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
               <Alert className="bg-green-500/10 border-green-500/20">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <AlertDescription className="text-green-400">
-                  <strong>Pagamento Enviado!</strong> Sua transação foi criada com sucesso.
+                  <strong>{t.success}</strong> {t.successDesc}
                 </AlertDescription>
               </Alert>
 
               <div className="bg-gray-800 rounded-lg p-4 space-y-3">
-                <h4 className="font-medium text-white">📄 Comprovante da Transação</h4>
+                <h4 className="font-medium text-white">📄 {isEnglish ? 'Transaction Receipt' : 'Comprovante da Transação'}</h4>
                 
                 <div className="space-y-2">
                   <div>
-                    <span className="text-sm text-gray-400">Produto:</span>
+                    <span className="text-sm text-gray-400">{t.product}</span>
                     <p className="font-medium text-white">{selectedProduct?.name}</p>
                   </div>
 
                   <div>
-                    <span className="text-sm text-gray-400">Valor Enviado:</span>
+                    <span className="text-sm text-gray-400">{isEnglish ? 'Amount Sent:' : 'Valor Enviado:'}</span>
                     <p className="font-mono text-orange-400">{selectedProduct?.price} sBTC</p>
                   </div>
 
                   <div>
-                    <span className="text-sm text-gray-400">Nível de Taxa:</span>
+                    <span className="text-sm text-gray-400">{isEnglish ? 'Fee Level:' : 'Nível de Taxa:'}</span>
                     <Badge className={`${selectedFee.color} bg-transparent border`}>
                       {selectedFee.label} ({selectedFee.satPerVB} sat/vB)
                     </Badge>
                   </div>
 
                   <div>
-                    <span className="text-sm text-gray-400">ID da Transação (TXID):</span>
+                    <span className="text-sm text-gray-400">{t.transactionId}</span>
                     <div className="bg-gray-700 rounded p-2 mt-1">
                       <p className="font-mono text-xs break-all text-white">{transactionId}</p>
                     </div>
@@ -466,12 +512,12 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                       {copied ? (
                         <>
                           <Check className="h-4 w-4 mr-2 text-green-500" />
-                          Copiado!
+                          {t.copied}
                         </>
                       ) : (
                         <>
                           <Copy className="h-4 w-4 mr-2" />
-                          Copiar TXID
+                          {isEnglish ? 'Copy TXID' : 'Copiar TXID'}
                         </>
                       )}
                     </Button>
@@ -481,8 +527,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
 
               <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
                 <p className="text-orange-300 text-sm">
-                  🎯 <strong>Sucesso!</strong> O TXID foi automaticamente preenchido no campo da tarefa. 
-                  Agora você pode validar a transação!
+                  🎯 <strong>{isEnglish ? 'Success!' : 'Sucesso!'}</strong> {isEnglish ? 'The TXID has been automatically filled in the task field. Now you can validate the transaction!' : 'O TXID foi automaticamente preenchido no campo da tarefa. Agora você pode validar a transação!'}
                 </p>
               </div>
 
@@ -491,7 +536,7 @@ export default function TransactionSimulator({ onTransactionSent }: TransactionS
                 variant="outline"
                 className="w-full border-gray-600"
               >
-                Fazer Nova Compra
+                {t.newTransaction}
               </Button>
             </div>
           )}
