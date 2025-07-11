@@ -21,8 +21,10 @@ export function ModuleLayout({ children }: ModuleLayoutProps) {
   return (
     <div className="flex min-h-screen bg-black">
       <Sidebar />
-      <main className="flex-1 p-6">
-        {children}
+      <main className="flex-1 p-4 lg:p-6 w-full min-w-0">
+        <div className="max-w-full overflow-hidden">
+          {children}
+        </div>
       </main>
     </div>
   )

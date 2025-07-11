@@ -23,6 +23,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
@@ -33,7 +36,7 @@ export default function RootLayout({
           <SessionProvider>
             <AuthProvider>
               <AnalyticsWrapper>
-                <div className="min-h-screen bg-background">
+                <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
                   {children}
                   <CookieBanner />
                 </div>

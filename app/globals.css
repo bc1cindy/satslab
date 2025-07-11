@@ -33,4 +33,23 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Prevent horizontal overflow on mobile */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Ensure all containers respect viewport width */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Prevent text overflow */
+  .prevent-overflow {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+  }
 }

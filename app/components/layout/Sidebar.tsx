@@ -22,7 +22,7 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-80 bg-gray-900 border-r border-gray-800 p-6 overflow-y-auto">
+    <aside className="hidden lg:block w-80 bg-gray-900 border-r border-gray-800 p-6 overflow-y-auto">
       <div className="space-y-6">
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
