@@ -299,9 +299,6 @@ export default function Module3EN() {
               Back
             </Button>
             
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <Clock className="h-4 w-4" />
-            </div>
           </div>
         )}
       </main>
