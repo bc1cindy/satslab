@@ -12,14 +12,14 @@ import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
 import TaprootTransactionCreator from '@/app/components/modules/TaprootTransactionCreator'
-import OrdinalsCreator from '@/app/components/modules/OrdinalsCreator'
+import InscriptionsCreator from '@/app/components/modules/InscriptionsCreator'
 import { module6Questions, module6Tasks, module6Badge } from './data'
 
 // Types
 interface TaprootResults {
   taprootAddress?: string
   transactionHash?: string
-  ordinalId?: string
+  inscriptionId?: string
 }
 
 // Use imported data - converting format
@@ -37,7 +37,7 @@ const moduleTasks = module6Tasks.map(t => ({
   title: t.title,
   description: t.description,
   instructions: t.instructions,
-  inputLabel: t.validation.type === 'hash' ? (t.validation.expectedLength === 66 ? 'ID do Ordinal' : 'Hash da Transação') : 'Resposta',
+  inputLabel: t.validation.type === 'hash' ? (t.validation.expectedLength === 66 ? 'ID da Inscrição' : 'Hash da Transação') : 'Resposta',
   inputPlaceholder: t.validation.placeholder || '',
   validationType: 'custom' as const,
   hints: t.hints || [],
@@ -55,25 +55,36 @@ export default function Module6() {
     moduleId: 6
   })
   useModuleAnalytics(6) // Track module start
-  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
+  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'taproot-task' | 'inscriptions-task' | 'completed'>('intro')
   const [taprootResults, setTaprootResults] = useState<TaprootResults>({})
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
     await handleQuestionsComplete(score, total)
-    // Auto advance to tasks after 2 seconds
+    // Auto advance to taproot task after 2 seconds
     setTimeout(() => {
-      setCurrentSection('tasks')
+      setCurrentSection('taproot-task')
     }, 2000)
   }
 
-  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
-    await handleTasksComplete(completedTasks, totalTasks)
-    
-    if (completedTasks === totalTasks && progress.questionsCompleted) {
-      setTimeout(() => {
-        setCurrentSection('completed')
-      }, 2000)
-    }
+  const handleTaprootTaskComplete = (hash: string, address: string) => {
+    setTaprootResults(prev => ({ 
+      ...prev, 
+      transactionHash: hash,
+      taprootAddress: address 
+    }))
+    // Auto advance to inscriptions task after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('inscriptions-task')
+    }, 2000)
+  }
+
+  const handleInscriptionsTaskComplete = (inscriptionId: string) => {
+    setTaprootResults(prev => ({ ...prev, inscriptionId }))
+    // Complete tasks and advance to completion
+    handleTasksComplete(2, 2)
+    setTimeout(() => {
+      setCurrentSection('completed')
+    }, 2000)
   }
 
   // Calculate overall progress
@@ -113,7 +124,7 @@ export default function Module6() {
           <div className="flex items-center justify-center mb-4">
             <Palette className="h-12 w-12 text-pink-500 mr-4" />
             <div>
-              <h1 className="text-3xl font-bold">Taproot e Ordinals</h1>
+              <h1 className="text-3xl font-bold">Taproot e Inscrições</h1>
               <p className="text-gray-400 mt-2">Tecnologias avançadas do Bitcoin</p>
             </div>
           </div>
@@ -138,7 +149,7 @@ export default function Module6() {
                   Bem-vindo ao futuro do Bitcoin!
                 </CardTitle>
                 <CardDescription>
-                  Explore Taproot para privacidade e Ordinals para NFTs nativos do Bitcoin
+                  Explore Taproot para privacidade e Inscrições para NFTs nativos do Bitcoin
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -146,7 +157,7 @@ export default function Module6() {
                   <h3 className="font-semibold text-white mb-2">O que você vai aprender:</h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm">
                     <li>Compreender o protocolo Taproot e suas vantagens</li>
-                    <li>Aprender sobre Ordinals e como funcionam os NFTs em Bitcoin</li>
+                    <li>Aprender sobre Inscrições e como funcionam os NFTs em Bitcoin</li>
                     <li>Criar transações Taproot na rede Signet</li>
                     <li>Mintar um Ordinal NFT Badge</li>
                     <li>Analisar o impacto das taxas em transações com dados</li>
@@ -182,7 +193,7 @@ export default function Module6() {
               <CardHeader>
                 <CardTitle className="text-xl text-center">📚 Perguntas Teóricas</CardTitle>
                 <CardDescription className="text-center">
-                  Teste seus conhecimentos sobre Taproot e Ordinals
+                  Teste seus conhecimentos sobre Taproot e Inscrições
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -195,61 +206,41 @@ export default function Module6() {
           </div>
         )}
 
-        {/* Tasks Section */}
-        {currentSection === 'tasks' && (
+        {/* Taproot Task Section */}
+        {currentSection === 'taproot-task' && (
           <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-xl text-center">🎯 Tarefas Práticas</CardTitle>
+                <CardTitle className="text-xl text-center">🔐 Tarefa 1: Transações Taproot</CardTitle>
                 <CardDescription className="text-center">
-                  Crie transações Taproot e minte seu NFT Badge
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            
-            {/* Taproot Transaction Creator */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg">🔐 Criador de Transações Taproot</CardTitle>
-                <CardDescription>
                   Crie uma transação usando endereço Taproot na rede Signet
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <TaprootTransactionCreator 
-                  onTransactionCreated={(hash, address) => {
-                    setTaprootResults(prev => ({ 
-                      ...prev, 
-                      transactionHash: hash,
-                      taprootAddress: address 
-                    }))
-                  }}
+                  onTransactionCreated={handleTaprootTaskComplete}
                 />
               </CardContent>
             </Card>
+          </div>
+        )}
 
-            {/* Ordinals Creator */}
+        {/* Inscriptions Task Section */}
+        {currentSection === 'inscriptions-task' && (
+          <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">🎨 Criador de Ordinals NFT</CardTitle>
-                <CardDescription>
-                  Minte seu Badge como um Ordinal NFT no Bitcoin
+                <CardTitle className="text-xl text-center">🎨 Tarefa 2: Criador de Inscrições NFT</CardTitle>
+                <CardDescription className="text-center">
+                  Minte seu Badge como uma Inscrição NFT no Bitcoin
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <OrdinalsCreator 
-                  onOrdinalCreated={(ordinalId) => {
-                    setTaprootResults(prev => ({ ...prev, ordinalId }))
-                  }}
+                <InscriptionsCreator 
+                  onInscriptionCreated={handleInscriptionsTaskComplete}
                 />
               </CardContent>
             </Card>
-            
-            <TaskSystem 
-              tasks={moduleTasks}
-              onComplete={handleTasksCompleteWithAdvance}
-              moduleId={6}
-            />
           </div>
         )}
 
@@ -262,26 +253,26 @@ export default function Module6() {
                 <span className="text-center">Parabéns! Módulo Concluído</span>
               </CardTitle>
               <CardDescription className="text-sm sm:text-base">
-                Você completou com sucesso o Módulo 6 - Taproot e Ordinals
+                Você completou com sucesso o Módulo 6 - Taproot e Inscrições
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
               {progress.badgeEarned && (
                 <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 sm:p-6">
                   <div className="text-3xl sm:text-4xl mb-2">🏆</div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-green-400 mb-2">Ordinal NFT Badge Conquistado!</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-green-400 mb-2">Inscrição NFT Badge Conquistado!</h3>
                   <Badge className="bg-pink-500/20 text-pink-400 text-sm sm:text-lg px-3 sm:px-4 py-1 sm:py-2">
                     <Award className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     {module6Badge.name}
                   </Badge>
                   <p className="text-xs sm:text-sm text-gray-400 mt-2 leading-relaxed">
-                    Você dominou Taproot e criou seu primeiro Ordinal NFT Badge no Bitcoin
+                    Você dominou Taproot e criou seu primeiro Inscrição NFT Badge no Bitcoin
                   </p>
-                  {taprootResults.ordinalId && (
+                  {taprootResults.inscriptionId && (
                     <div className="mt-4 p-3 bg-gray-800 rounded">
-                      <p className="text-xs text-gray-400">Seu Ordinal NFT:</p>
+                      <p className="text-xs text-gray-400">Sua Inscrição NFT:</p>
                       <code className="text-xs font-mono text-pink-400 break-all">
-                        {taprootResults.ordinalId}
+                        {taprootResults.inscriptionId}
                       </code>
                     </div>
                   )}
@@ -305,7 +296,7 @@ export default function Module6() {
               </div>
 
               {/* Taproot Results */}
-              {(taprootResults.taprootAddress || taprootResults.transactionHash || taprootResults.ordinalId) && (
+              {(taprootResults.taprootAddress || taprootResults.transactionHash || taprootResults.inscriptionId) && (
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-3">🎨 Seus Resultados Taproot:</h3>
                   <div className="space-y-2 text-sm text-gray-300">
@@ -325,11 +316,11 @@ export default function Module6() {
                         </div>
                       </div>
                     )}
-                    {taprootResults.ordinalId && (
+                    {taprootResults.inscriptionId && (
                       <div>
-                        <span className="font-medium">Ordinal NFT Badge:</span>
+                        <span className="font-medium">Inscrição NFT Badge:</span>
                         <div className="font-mono text-xs bg-pink-900/50 p-2 rounded mt-1 break-all">
-                          {taprootResults.ordinalId}
+                          {taprootResults.inscriptionId}
                         </div>
                         <p className="text-xs text-pink-400 mt-1">
                           ✨ Este é seu NFT Badge permanente na blockchain Bitcoin!
@@ -345,7 +336,7 @@ export default function Module6() {
                 <h3 className="font-semibold text-white mb-3 text-sm sm:text-base">🎓 O que você aprendeu:</h3>
                 <ul className="list-disc list-inside space-y-1 text-gray-300 text-xs sm:text-sm text-left">
                   <li>Taproot melhora privacidade e eficiência usando assinaturas Schnorr</li>
-                  <li>Ordinals são NFTs únicos criados em satoshis individuais</li>
+                  <li>Inscrições são NFTs únicos criados em satoshis individuais</li>
                   <li>Transações com dados maiores resultam em taxas mais altas</li>
                   <li>Taproot permite contratos inteligentes mais complexos</li>
                   <li>Bitcoin pode hospedar NFTs nativos sem tokens separados</li>
@@ -383,7 +374,8 @@ export default function Module6() {
             <Button 
               variant="outline" 
               onClick={() => {
-                if (currentSection === 'tasks') setCurrentSection('questions')
+                if (currentSection === 'inscriptions-task') setCurrentSection('taproot-task')
+                if (currentSection === 'taproot-task') setCurrentSection('questions')
                 if (currentSection === 'questions') setCurrentSection('intro')
               }}
               className="border-gray-600 text-gray-300"
@@ -394,10 +386,19 @@ export default function Module6() {
             
             {currentSection === 'questions' && progress.questionsCompleted && (
               <Button 
-                onClick={() => setCurrentSection('tasks')}
+                onClick={() => setCurrentSection('taproot-task')}
                 className="bg-pink-500 hover:bg-pink-600"
               >
-                Ir para Tarefas Práticas
+                Ir para Tarefa Taproot
+              </Button>
+            )}
+            
+            {currentSection === 'taproot-task' && taprootResults.transactionHash && (
+              <Button 
+                onClick={() => setCurrentSection('inscriptions-task')}
+                className="bg-pink-500 hover:bg-pink-600"
+              >
+                Ir para Tarefa Inscrições
               </Button>
             )}
           </div>

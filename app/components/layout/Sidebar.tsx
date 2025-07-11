@@ -13,7 +13,7 @@ const modules = [
   { id: 3, title: "Transações na Signet", icon: "💸", requiresLogin: true },
   { id: 4, title: "Mineração no Bitcoin", icon: "⛏️", requiresLogin: true },
   { id: 5, title: "Lightning Network", icon: "⚡", requiresLogin: true },
-  { id: 6, title: "Taproot e Ordinals", icon: "🎨", requiresLogin: true },
+  { id: 6, title: "Taproot e Inscrições", icon: "🎨", requiresLogin: true },
   { id: 7, title: "Carteiras Multisig", icon: "🔧", requiresLogin: true },
 ]
 

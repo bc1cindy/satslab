@@ -11,13 +11,14 @@ import { Badge } from '@/app/components/ui/badge'
 import { OrdinalsService, BadgeNFT, OrdinalUTXO } from '@/app/lib/bitcoin/ordinals-service'
 import { SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { useToast } from '@/app/hooks/use-toast'
+import { usePathname } from 'next/navigation'
 
-interface OrdinalsCreatorProps {
+interface InscriptionsCreatorProps {
   userPublicKey?: string
-  onOrdinalCreated?: (inscriptionId: string) => void
+  onInscriptionCreated?: (inscriptionId: string) => void
 }
 
-export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: OrdinalsCreatorProps) {
+export default function InscriptionsCreator({ userPublicKey, onInscriptionCreated }: InscriptionsCreatorProps) {
   const [jsonContent, setJsonContent] = useState('')
   const [privateKey, setPrivateKey] = useState('')
   const [generatedAddress, setGeneratedAddress] = useState('')
@@ -29,6 +30,53 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
   
   const { toast } = useToast()
   const ordinalsService = useMemo(() => new OrdinalsService(SIGNET_NETWORK), [])
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    title: isEnglish ? 'Inscriptions Creator' : 'Criador de Inscrições',
+    description: isEnglish 
+      ? 'Create Inscriptions (NFTs) by inscribing data on individual satoshis'
+      : 'Crie Inscrições (NFTs) inscrevendo dados em satoshis individuais',
+    taprootAddressGenerated: isEnglish ? 'Taproot address generated' : 'Endereço Taproot gerado',
+    newAddress: isEnglish ? 'New address' : 'Novo endereço',
+    errorGeneratingAddress: isEnglish ? 'Error generating address' : 'Erro ao gerar endereço',
+    unknownError: isEnglish ? 'Unknown error' : 'Erro desconhecido',
+    jsonContent: isEnglish ? 'JSON Content' : 'Conteúdo JSON',
+    privateKeyWIF: isEnglish ? 'Private Key (WIF)' : 'Chave Privada (WIF)',
+    generate: isEnglish ? 'Generate' : 'Gerar',
+    addressGenerated: isEnglish ? 'Address generated' : 'Endereço gerado',
+    feeRate: isEnglish ? 'Fee Rate (sats/vB)' : 'Taxa (sats/vB)',
+    estimatedFee: isEnglish ? 'Estimated fee' : 'Taxa estimada',
+    createInscription: isEnglish ? 'Create Inscription' : 'Criar Inscrição',
+    creating: isEnglish ? 'Creating...' : 'Criando...',
+    error: isEnglish ? 'Error' : 'Erro',
+    fillJsonContent: isEnglish ? 'Fill in JSON content' : 'Preencha o conteúdo JSON',
+    generateOrEnterPrivateKey: isEnglish ? 'Generate or enter a private key' : 'Gere ou insira uma chave privada',
+    inscriptionCreated: isEnglish ? 'Inscription Created!' : 'Inscrição Criada!',
+    inscriptionId: isEnglish ? 'Inscription ID' : 'ID da Inscrição',
+    errorCreatingInscription: isEnglish ? 'Error creating inscription' : 'Erro ao criar inscrição',
+    publicAndPrivateKeysRequired: isEnglish 
+      ? 'Public and private keys are required to mint badge'
+      : 'Chave pública e privada são necessárias para mintar badge',
+    badgeNFTMinted: isEnglish ? 'Badge NFT Minted!' : 'Badge NFT Mintado!',
+    badgeCreatedSuccessfully: isEnglish ? 'Badge "{0}" created successfully' : 'Badge "{0}" criado com sucesso',
+    errorMintingBadge: isEnglish ? 'Error minting badge' : 'Erro ao mintar badge',
+    generateJsonTaprootPioneer: isEnglish ? 'Generate JSON: Taproot Pioneer' : 'Gerar JSON: Pioneiro Taproot',
+    mintBadge: isEnglish ? 'Mint Badge' : 'Mintar Badge',
+    minting: isEnglish ? 'Minting...' : 'Mintando...',
+    generateJsonMultisigMaster: isEnglish ? 'Generate JSON: Multisig Master' : 'Gerar JSON: Mestre Multisig',
+    usingPublicKey: isEnglish ? 'Using public key' : 'Usando chave pública',
+    contentPreview: isEnglish ? 'Content Preview' : 'Preview do Conteúdo',
+    noValidContentForPreview: isEnglish ? 'No valid content for preview' : 'Nenhum conteúdo válido para preview',
+    badgeNFTPreview: isEnglish ? 'Badge NFT Preview' : 'Badge NFT Preview',
+    user: isEnglish ? 'User' : 'User',
+    network: isEnglish ? 'Network' : 'Network',
+    contentSize: isEnglish ? 'Content Size' : 'Tamanho do Conteúdo',
+    lastInscriptionCreated: isEnglish ? 'Last inscription created' : 'Última inscrição criada',
+    viewInExplorer: isEnglish ? 'View in Explorer' : 'Ver no Explorer'
+  }
 
   // Gera nova chave privada e endereço Taproot
   const generateTaprootAddress = useCallback(async () => {
@@ -41,17 +89,17 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
       setGeneratedAddress(result.address)
       
       toast({
-        title: "Endereço Taproot gerado",
-        description: `Novo endereço: ${result.address}`,
+        title: t.taprootAddressGenerated,
+        description: `${t.newAddress}: ${result.address}`,
       })
     } catch (error) {
       toast({
-        title: "Erro ao gerar endereço",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorGeneratingAddress,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     }
-  }, [toast])
+  }, [toast, t])
 
   // Calcula taxa estimada quando o conteúdo muda
   const calculateEstimatedFee = useCallback(() => {
@@ -84,8 +132,8 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
   const generateBadgeJSON = (badgeType: string) => {
     if (!userPublicKey) {
       toast({
-        title: "Erro",
-        description: "Chave pública do usuário não disponível",
+        title: t.error,
+        description: t.publicAndPrivateKeysRequired,
         variant: "destructive",
       })
       return
@@ -125,11 +173,11 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
     }
   }
 
-  const handleCreateOrdinal = async () => {
+  const handleCreateInscription = async () => {
     if (!jsonContent) {
       toast({
-        title: "Erro",
-        description: "Preencha o conteúdo JSON",
+        title: t.error,
+        description: t.fillJsonContent,
         variant: "destructive",
       })
       return
@@ -137,8 +185,8 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
 
     if (!privateKey) {
       toast({
-        title: "Erro",
-        description: "Gere ou insira uma chave privada",
+        title: t.error,
+        description: t.generateOrEnterPrivateKey,
         variant: "destructive",
       })
       return
@@ -147,7 +195,7 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
     setIsCreating(true)
 
     try {
-      // Simular criação de ordinal para fins educacionais
+      // Simular criação de inscrição para fins educacionais
       const inscriptionId = 'i' + Math.random().toString(36).substr(2, 9)
       
       // Simular delay da inscrição
@@ -156,18 +204,18 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
       setLastInscriptionId(inscriptionId)
       
       toast({
-        title: "Ordinal Criado!",
-        description: `Inscription ID: ${inscriptionId}`,
+        title: t.inscriptionCreated,
+        description: `${t.inscriptionId}: ${inscriptionId}`,
       })
 
-      if (onOrdinalCreated) {
-        onOrdinalCreated(inscriptionId)
+      if (onInscriptionCreated) {
+        onInscriptionCreated(inscriptionId)
       }
 
     } catch (error) {
       toast({
-        title: "Erro ao criar Ordinal",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorCreatingInscription,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     } finally {
@@ -178,8 +226,8 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
   const handleMintBadge = async (badgeType: string) => {
     if (!userPublicKey || !privateKey) {
       toast({
-        title: "Erro",
-        description: "Chave pública e privada são necessárias para mintar badge",
+        title: t.error,
+        description: t.publicAndPrivateKeysRequired,
         variant: "destructive",
       })
       return
@@ -213,18 +261,18 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
       setLastInscriptionId(inscription.inscriptionId)
       
       toast({
-        title: "Badge NFT Mintado!",
-        description: `Badge "${badgeType}" criado com sucesso`,
+        title: t.badgeNFTMinted,
+        description: t.badgeCreatedSuccessfully.replace('{0}', badgeType),
       })
 
-      if (onOrdinalCreated) {
-        onOrdinalCreated(inscription.inscriptionId)
+      if (onInscriptionCreated) {
+        onInscriptionCreated(inscription.inscriptionId)
       }
 
     } catch (error) {
       toast({
-        title: "Erro ao mintar badge",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorMintingBadge,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     } finally {
@@ -236,9 +284,9 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Ordinals Creator</CardTitle>
+          <CardTitle>{t.title}</CardTitle>
           <CardDescription>
-            Crie Ordinals (NFTs) inscrevendo dados em satoshis individuais
+            {t.description}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -251,7 +299,7 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
             
             <TabsContent value="custom" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="json-content">Conteúdo JSON</Label>
+                <Label htmlFor="json-content">{t.jsonContent}</Label>
                 <textarea
                   id="json-content"
                   value={jsonContent}
@@ -262,7 +310,7 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="private-key">Chave Privada (WIF)</Label>
+                <Label htmlFor="private-key">{t.privateKeyWIF}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="private-key"
@@ -277,18 +325,18 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
                     variant="outline"
                     type="button"
                   >
-                    Gerar
+                    {t.generate}
                   </Button>
                 </div>
                 {generatedAddress && (
                   <p className="text-xs text-green-600">
-                    Endereço gerado: {generatedAddress}
+                    {t.addressGenerated}: {generatedAddress}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="fee-rate">Taxa (sats/vB)</Label>
+                <Label htmlFor="fee-rate">{t.feeRate}</Label>
                 <Input
                   id="fee-rate"
                   type="number"
@@ -300,17 +348,17 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
 
               <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-600">
-                  Taxa estimada: {estimatedFee} sats
+                  {t.estimatedFee}: {estimatedFee} sats
                 </div>
-                <Button onClick={handleCreateOrdinal} disabled={isCreating}>
-                  {isCreating ? 'Criando...' : 'Criar Ordinal'}
+                <Button onClick={handleCreateInscription} disabled={isCreating}>
+                  {isCreating ? t.creating : t.createInscription}
                 </Button>
               </div>
             </TabsContent>
             
             <TabsContent value="badges" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="badge-private-key">Chave Privada (WIF)</Label>
+                <Label htmlFor="badge-private-key">{t.privateKeyWIF}</Label>
                 <Input
                   id="badge-private-key"
                   type="password"
@@ -322,38 +370,38 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
 
               <div className="grid grid-cols-2 gap-4">
                 <Button
-                  onClick={() => generateBadgeJSON("Pioneiro Taproot")}
+                  onClick={() => generateBadgeJSON(isEnglish ? "Taproot Pioneer" : "Pioneiro Taproot")}
                   variant="outline"
                 >
-                  Gerar JSON: Pioneiro Taproot
+                  {t.generateJsonTaprootPioneer}
                 </Button>
                 <Button
-                  onClick={() => handleMintBadge("Pioneiro Taproot")}
+                  onClick={() => handleMintBadge(isEnglish ? "Taproot Pioneer" : "Pioneiro Taproot")}
                   disabled={isCreating || !privateKey}
                 >
-                  {isCreating ? 'Mintando...' : 'Mintar Badge'}
+                  {isCreating ? t.minting : t.mintBadge}
                 </Button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <Button
-                  onClick={() => generateBadgeJSON("Mestre Multisig")}
+                  onClick={() => generateBadgeJSON(isEnglish ? "Multisig Master" : "Mestre Multisig")}
                   variant="outline"
                 >
-                  Gerar JSON: Mestre Multisig
+                  {t.generateJsonMultisigMaster}
                 </Button>
                 <Button
-                  onClick={() => handleMintBadge("Mestre Multisig")}
+                  onClick={() => handleMintBadge(isEnglish ? "Multisig Master" : "Mestre Multisig")}
                   disabled={isCreating || !privateKey}
                 >
-                  {isCreating ? 'Mintando...' : 'Mintar Badge'}
+                  {isCreating ? t.minting : t.mintBadge}
                 </Button>
               </div>
 
               {userPublicKey && (
                 <Alert>
                   <AlertDescription>
-                    Usando chave pública: {userPublicKey.substring(0, 20)}...
+                    {t.usingPublicKey}: {userPublicKey.substring(0, 20)}...
                   </AlertDescription>
                 </Alert>
               )}
@@ -362,21 +410,21 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
             <TabsContent value="preview" className="space-y-4">
               <div className="space-y-4">
                 <div>
-                  <Label>Preview do Conteúdo</Label>
+                  <Label>{t.contentPreview}</Label>
                   <div className="mt-2 p-4 bg-gray-50 rounded-lg border">
                     {previewData ? (
                       <pre className="text-sm overflow-x-auto">
                         {JSON.stringify(previewData, null, 2)}
                       </pre>
                     ) : (
-                      <p className="text-gray-500">Nenhum conteúdo válido para preview</p>
+                      <p className="text-gray-500">{t.noValidContentForPreview}</p>
                     )}
                   </div>
                 </div>
 
                 {previewData?.badge && (
                   <div>
-                    <Label>Badge NFT Preview</Label>
+                    <Label>{t.badgeNFTPreview}</Label>
                     <div className="mt-2 p-4 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg border">
                       <div className="flex items-center space-x-4">
                         <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
@@ -385,10 +433,10 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
                         <div>
                           <h3 className="font-semibold">{previewData.badge}</h3>
                           <p className="text-sm text-gray-600">
-                            User: {previewData.user_id?.substring(0, 10)}...
+                            {t.user}: {previewData.user_id?.substring(0, 10)}...
                           </p>
                           <p className="text-xs text-gray-500">
-                            Network: {previewData.network}
+                            {t.network}: {previewData.network}
                           </p>
                         </div>
                       </div>
@@ -398,13 +446,13 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label>Tamanho do Conteúdo</Label>
+                    <Label>{t.contentSize}</Label>
                     <div className="mt-1 p-2 bg-gray-50 rounded">
                       {jsonContent.length} bytes
                     </div>
                   </div>
                   <div>
-                    <Label>Taxa Estimada</Label>
+                    <Label>{t.estimatedFee}</Label>
                     <div className="mt-1 p-2 bg-gray-50 rounded">
                       {estimatedFee} sats
                     </div>
@@ -417,7 +465,7 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
           {lastInscriptionId && (
             <Alert className="mt-4">
               <AlertDescription>
-                <strong>Último Ordinal criado:</strong>
+                <strong>{t.lastInscriptionCreated}:</strong>
                 <br />
                 <code className="text-sm">{lastInscriptionId}</code>
                 <br />
@@ -427,7 +475,7 @@ export default function OrdinalsCreator({ userPublicKey, onOrdinalCreated }: Ord
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
                 >
-                  Ver no Explorer
+                  {t.viewInExplorer}
                 </a>
               </AlertDescription>
             </Alert>

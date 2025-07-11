@@ -51,11 +51,11 @@ const BADGE_TEMPLATES: BadgeTemplate[] = [
   },
   {
     id: 'explorador-ordinals',
-    name: 'Explorador Ordinals',
+    name: 'Explorador Inscrições',
     description: 'Pioneiro na criação de NFTs nativos do Bitcoin',
     color: 'from-purple-400 to-purple-600',
     icon: '🎨',
-    requirements: ['Criar Ordinal', 'Verificar propriedade'],
+    requirements: ['Criar Inscrição', 'Verificar propriedade'],
     rarity: 'rare'
   },
   {
@@ -215,7 +215,7 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated, multisi
     if (!userPublicKey) return false
 
     try {
-      // Em um ambiente real, isso consultaria um indexador de Ordinals
+      // Em um ambiente real, isso consultaria um indexador de Inscrições
       const isValid = await ordinalsService.verifyOrdinalOwnership(badgeId, userPublicKey)
       
       toast({
@@ -250,7 +250,7 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated, multisi
         <CardHeader>
           <CardTitle>Badge NFT Creator</CardTitle>
           <CardDescription>
-            Crie badges NFT como Ordinals para certificar conquistas e habilidades
+            Crie badges NFT como Inscrições para certificar conquistas e habilidades
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -491,14 +491,14 @@ export default function BadgeNFTCreator({ userPublicKey, onBadgeCreated, multisi
             <div>
               <h4 className="font-semibold">O que são Badge NFTs?</h4>
               <p className="text-sm text-gray-600">
-                Badge NFTs são certificados digitais únicos criados como Ordinals no Bitcoin. 
+                Badge NFTs são certificados digitais únicos criados como Inscrições no Bitcoin. 
                 Cada badge representa uma conquista ou habilidade específica, provando conhecimento 
                 e experiência em diferentes aspectos do protocolo Bitcoin.
               </p>
             </div>
             
             <div>
-              <h4 className="font-semibold">Vantagens dos Ordinals</h4>
+              <h4 className="font-semibold">Vantagens das Inscrições</h4>
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Nativos do Bitcoin - sem sidechains ou tokens</li>
                 <li>• Imutáveis e permanentes na blockchain</li>

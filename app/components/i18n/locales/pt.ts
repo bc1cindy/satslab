@@ -45,7 +45,7 @@ export const pt = {
         description: 'Pagamentos instantâneos com Bitcoin'
       },
       6: {
-        title: 'Taproot e Ordinals',
+        title: 'Taproot e Inscrições',
         description: 'Funcionalidades avançadas do Bitcoin'
       },
       7: {

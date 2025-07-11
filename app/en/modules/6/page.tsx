@@ -11,6 +11,8 @@ import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
+import TaprootTransactionCreator from '@/app/components/modules/TaprootTransactionCreator'
+import InscriptionsCreator from '@/app/components/modules/InscriptionsCreator'
 import { LanguageSelector } from '@/app/components/i18n/LanguageSelector'
 import { module6Questions, module6Tasks, module6Badge } from './data'
 
@@ -28,7 +30,7 @@ const moduleTasks = module6Tasks.map(t => ({
   title: t.title,
   description: t.description,
   instructions: t.instructions,
-  inputLabel: t.validation.type === 'hash' ? 'Transaction Hash / Ordinal ID' : 'Value',
+  inputLabel: t.validation.type === 'hash' ? 'Transaction Hash / Inscription ID' : 'Value',
   inputPlaceholder: t.validation.placeholder || '',
   validationType: 'transaction' as 'transaction' | 'amount' | 'address' | 'custom',
   hints: t.hints || [],
@@ -46,19 +48,34 @@ export default function Module6EN() {
     moduleId: 6
   })
   useModuleAnalytics(6)
-  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
+  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'taproot-task' | 'inscriptions-task' | 'completed'>('intro')
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
     await handleQuestionsComplete(score, total)
-    setCurrentSection('tasks')
+    setCurrentSection('taproot-task')
   }
 
-  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
-    await handleTasksComplete(completedTasks, totalTasks)
-    
-    if (completedTasks === totalTasks && progress.questionsCompleted) {
+  const [taprootResults, setTaprootResults] = useState<{transactionHash?: string, taprootAddress?: string, inscriptionId?: string}>({})
+  
+  const handleTaprootTaskComplete = (hash: string, address: string) => {
+    setTaprootResults(prev => ({ 
+      ...prev, 
+      transactionHash: hash,
+      taprootAddress: address 
+    }))
+    // Auto advance to inscriptions task after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('inscriptions-task')
+    }, 2000)
+  }
+
+  const handleInscriptionsTaskComplete = (inscriptionId: string) => {
+    setTaprootResults(prev => ({ ...prev, inscriptionId }))
+    // Complete tasks and advance to completion
+    handleTasksComplete(2, 2)
+    setTimeout(() => {
       setCurrentSection('completed')
-    }
+    }, 2000)
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :
@@ -88,7 +105,7 @@ export default function Module6EN() {
           <div className="flex items-center justify-center mb-4">
             <Shield className="h-12 w-12 text-purple-500 mr-4" />
             <div>
-              <h1 className="text-3xl font-bold">Taproot and Ordinals</h1>
+              <h1 className="text-3xl font-bold">Taproot and Inscriptions</h1>
               <p className="text-gray-400 mt-2">Explore advanced Bitcoin features: privacy upgrades and native NFTs</p>
             </div>
           </div>
@@ -108,7 +125,7 @@ export default function Module6EN() {
               <CardHeader>
                 <CardTitle className="flex items-center text-xl">
                   <Shield className="h-6 w-6 text-purple-500 mr-3" />
-                  Advanced Bitcoin: Taproot & Ordinals
+                  Advanced Bitcoin: Taproot & Inscriptions
                 </CardTitle>
                 <CardDescription>
                   Dive into cutting-edge Bitcoin technology
@@ -121,9 +138,9 @@ export default function Module6EN() {
                     <ul className="text-sm text-gray-300 space-y-1">
                       <li>• Understand Taproot protocol improvements</li>
                       <li>• Learn about Schnorr signatures and privacy</li>
-                      <li>• Explore Ordinals and Bitcoin-native NFTs</li>
+                      <li>• Explore Inscriptions and Bitcoin-native NFTs</li>
                       <li>• Create Taproot transactions</li>
-                      <li>• Mint your first Ordinal NFT Badge</li>
+                      <li>• Mint your first Inscription NFT Badge</li>
                     </ul>
                   </div>
                   <div className="bg-gray-800 p-4 rounded-lg">
@@ -146,10 +163,10 @@ export default function Module6EN() {
                 </div>
 
                 <div className="bg-orange-900/20 border border-orange-800 p-4 rounded-lg">
-                  <h4 className="font-semibold text-orange-300 mb-2">🎨 About Ordinals</h4>
+                  <h4 className="font-semibold text-orange-300 mb-2">🎨 About Inscriptions</h4>
                   <p className="text-gray-300 text-sm">
-                    Ordinals revolutionize Bitcoin by enabling NFTs directly on the base layer. 
-                    By inscribing data onto individual satoshis, Ordinals create unique, immutable digital artifacts 
+                    Inscriptions revolutionize Bitcoin by enabling NFTs directly on the base layer. 
+                    By inscribing data onto individual satoshis, Inscriptions create unique, immutable digital artifacts 
                     without requiring any additional tokens or layers - pure Bitcoin NFTs!
                   </p>
                 </div>
@@ -185,7 +202,7 @@ export default function Module6EN() {
                   Advanced Bitcoin Knowledge Test
                 </CardTitle>
                 <CardDescription>
-                  Test your understanding of Taproot and Ordinals
+                  Test your understanding of Taproot and Inscriptions
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -199,23 +216,38 @@ export default function Module6EN() {
           </div>
         )}
 
-        {currentSection === 'tasks' && (
+        {/* Taproot Task Section */}
+        {currentSection === 'taproot-task' && (
           <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center text-xl">
-                  <CheckCircle className="h-6 w-6 text-purple-500 mr-3" />
-                  Advanced Practical Tasks
-                </CardTitle>
-                <CardDescription>
-                  Hands-on experience with Taproot and Ordinals
+                <CardTitle className="text-xl text-center">🔐 Task 1: Taproot Transactions</CardTitle>
+                <CardDescription className="text-center">
+                  Create a transaction using Taproot address on Signet network
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <TaskSystem 
-                  tasks={moduleTasks}
-                  onComplete={handleTasksCompleteWithAdvance}
-                  moduleId={6}
+                <TaprootTransactionCreator 
+                  onTransactionCreated={handleTaprootTaskComplete}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Inscriptions Task Section */}
+        {currentSection === 'inscriptions-task' && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">🎨 Task 2: Inscriptions NFT Creator</CardTitle>
+                <CardDescription className="text-center">
+                  Mint your Badge as an Inscription NFT on Bitcoin
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InscriptionsCreator 
+                  onInscriptionCreated={handleInscriptionsTaskComplete}
                 />
               </CardContent>
             </Card>
@@ -242,7 +274,7 @@ export default function Module6EN() {
                     <span className="text-xl font-bold text-yellow-400">Taproot Pioneer</span>
                   </div>
                   <p className="text-purple-200 text-sm mt-2">
-                    Mastered Taproot and created your first Ordinal NFT Badge on Bitcoin
+                    Mastered Taproot and created your first Inscription NFT Badge on Bitcoin
                   </p>
                 </div>
 
@@ -251,7 +283,7 @@ export default function Module6EN() {
                   <ul className="text-purple-200 text-sm space-y-1">
                     <li>• How Taproot enhances Bitcoin privacy and efficiency</li>
                     <li>• The power of Schnorr signatures</li>
-                    <li>• Creating and understanding Ordinals NFTs</li>
+                    <li>• Creating and understanding Inscriptions NFTs</li>
                     <li>• Advanced transaction creation on Bitcoin</li>
                     <li>• The relationship between data size and transaction fees</li>
                   </ul>
@@ -280,14 +312,33 @@ export default function Module6EN() {
             <Button 
               variant="outline" 
               onClick={() => {
-                if (currentSection === 'tasks') setCurrentSection('questions')
-                else if (currentSection === 'questions') setCurrentSection('intro')
+                if (currentSection === 'inscriptions-task') setCurrentSection('taproot-task')
+                if (currentSection === 'taproot-task') setCurrentSection('questions')
+                if (currentSection === 'questions') setCurrentSection('intro')
               }}
               className="border-gray-600 text-gray-300"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
+            
+            {currentSection === 'questions' && progress.questionsCompleted && (
+              <Button 
+                onClick={() => setCurrentSection('taproot-task')}
+                className="bg-purple-500 hover:bg-purple-600"
+              >
+                Go to Taproot Task
+              </Button>
+            )}
+            
+            {currentSection === 'taproot-task' && taprootResults.transactionHash && (
+              <Button 
+                onClick={() => setCurrentSection('inscriptions-task')}
+                className="bg-purple-500 hover:bg-purple-600"
+              >
+                Go to Inscriptions Task
+              </Button>
+            )}
             
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <Clock className="h-4 w-4" />

@@ -377,7 +377,7 @@ export default function TaprootTransactions({ onTransactionCreated }: TaprootTra
                     <li>• Transações complexas parecem transações simples</li>
                     <li>• Melhor privacidade para contratos inteligentes</li>
                     <li>• Taxas menores para transações multisig</li>
-                    <li>• Habilita Ordinals e outros protocolos</li>
+                    <li>• Habilita Inscrições e outros protocolos</li>
                   </ul>
                 </div>
               </div>
@@ -414,9 +414,9 @@ export default function TaprootTransactions({ onTransactionCreated }: TaprootTra
                   </div>
 
                   <div>
-                    <h4 className="font-medium">Ordinals e Inscriptions</h4>
+                    <h4 className="font-medium">Inscrições e Inscriptions</h4>
                     <p className="text-sm text-gray-700 mt-1">
-                      Taproot habilita protocolos como Ordinals, que permitem criar NFTs 
+                      Taproot habilita protocolos como Inscrições, que permitem criar NFTs 
                       nativos do Bitcoin inscrevendo dados diretamente em satoshis.
                     </p>
                   </div>

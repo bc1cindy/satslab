@@ -62,9 +62,9 @@ export default function Module5() {
 
   // Translations
   const t = {
-    nextModule: isEnglish ? 'Next Module: Taproot and Ordinals' : 'Próximo Módulo: Taproot e Ordinals',
+    nextModule: isEnglish ? 'Next Module: Taproot and Inscriptions' : 'Próximo Módulo: Taproot e Inscrições',
     backToHome: isEnglish ? 'Back to Home' : 'Voltar ao Início',
-    continueJourney: isEnglish ? 'Excellent! Now you have practical experience with Lightning Network using a fully integrated wallet. Continue your journey exploring Taproot and Ordinals.' : 'Excelente! Agora você tem experiência prática com Lightning Network usando uma carteira totalmente integrada. Continue sua jornada explorando Taproot e Ordinals.'
+    continueJourney: isEnglish ? 'Excellent! Now you have practical experience with Lightning Network using a fully integrated wallet. Continue your journey exploring Taproot and Inscriptions.' : 'Excelente! Agora você tem experiência prática com Lightning Network usando uma carteira totalmente integrada. Continue sua jornada explorando Taproot e Inscrições.'
   }
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {

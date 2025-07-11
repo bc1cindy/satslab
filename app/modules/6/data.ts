@@ -2,13 +2,13 @@ import { Question } from '@/app/types'
 
 export const module6Data = {
   id: 6,
-  title: "Taproot e Ordinals",
-  description: "Explore as funcionalidades avançadas do Bitcoin: Taproot para privacidade e Ordinals para NFTs",
+  title: "Taproot e Inscrições",
+  description: "Explore as funcionalidades avançadas do Bitcoin: Taproot para privacidade e Inscrições para NFTs",
   objectives: [
     "Compreender o protocolo Taproot e suas vantagens",
-    "Aprender sobre Ordinals e como funcionam os NFTs em Bitcoin",
+    "Aprender sobre Inscrições e como funcionam os NFTs em Bitcoin",
     "Criar transações Taproot na rede Signet",
-    "Mintar um Ordinal NFT Badge",
+    "Mintar uma Inscrição NFT Badge",
     "Analisar o impacto das taxas em transações com dados"
   ],
   requiresLogin: true,
@@ -30,7 +30,7 @@ export const module6Questions: Question[] = [
   },
   {
     id: 2,
-    question: "O que são Ordinals?",
+    question: "O que são Inscrições?",
     options: [
       "Transações Bitcoin normais",
       "NFTs criados em satoshis individuais usando o protocolo Taproot",
@@ -38,19 +38,19 @@ export const module6Questions: Question[] = [
       "Tokens fungíveis no Bitcoin"
     ],
     correctAnswer: 1,
-    explanation: "Ordinals são NFTs únicos criados inscrevendo dados em satoshis individuais. Cada satoshi pode carregar dados arbitrários (imagens, texto, código) tornando-se um token não-fungível nativo do Bitcoin."
+    explanation: "Inscrições são NFTs únicos criados inscrevendo dados em satoshis individuais. Cada satoshi pode carregar dados arbitrários (imagens, texto, código) tornando-se um token não-fungível nativo do Bitcoin."
   },
   {
     id: 3,
-    question: "Como as taxas afetam transações com Ordinals?",
+    question: "Como as taxas afetam transações com Inscrições?",
     options: [
-      "Ordinals não pagam taxas",
+      "Inscrições não pagam taxas",
       "As taxas são fixas independente do tamanho",
-      "As taxas dependem do tamanho dos dados inscritos no Ordinal",
-      "Ordinals têm taxas mais baixas que transações normais"
+      "As taxas dependem do tamanho dos dados inscritos na Inscrição",
+      "Inscrições têm taxas mais baixas que transações normais"
     ],
     correctAnswer: 2,
-    explanation: "As taxas para Ordinals dependem diretamente do tamanho dos dados inscritos. Quanto maior o arquivo (imagem, JSON, etc.), maior será a taxa necessária para incluir a transação no bloco."
+    explanation: "As taxas para Inscrições dependem diretamente do tamanho dos dados inscritos. Quanto maior o arquivo (imagem, JSON, etc.), maior será a taxa necessária para incluir a transação no bloco."
   }
 ]
 
@@ -79,22 +79,22 @@ export const module6Tasks = [
   },
   {
     id: 2,
-    title: "Mintar Badge Ordinal",
-    description: "Crie um Ordinal NFT Badge com seus dados usando o protocolo Ordinals",
+    title: "Mintar Badge Inscrição",
+    description: "Crie um Inscrição NFT Badge com seus dados usando o protocolo Inscrições",
     instructions: [
-      "Use o OrdinalsCreator para criar um NFT Badge",
+      "Use o InscriptionsCreator para criar um NFT Badge",
       "Insira o JSON: {\"badge\": \"Pioneiro Taproot\", \"user_id\": \"sua_chave_publica\"}",
       "Confirme o mint na rede Signet",
-      "Copie o ID do Ordinal criado"
+      "Copie o ID da Inscrição criada"
     ],
-    type: "ordinal" as const,
+    type: "inscription" as const,
     validation: {
       type: "hash" as const,
-      placeholder: "Cole o ID do Ordinal (inscription ID)",
+      placeholder: "Cole o ID da Inscrição (inscription ID)",
       expectedLength: 66
     },
     hints: [
-      "O ID do Ordinal é formato: txid:vout (ex: abc123...def:0)",
+      "O ID da Inscrição é formato: txid:vout (ex: abc123...def:0)",
       "Use exatamente o JSON fornecido nas instruções",
       "Aguarde a confirmação no mempool antes de submeter"
     ]
@@ -103,7 +103,7 @@ export const module6Tasks = [
 
 export const module6Badge = {
   name: "Pioneiro Taproot",
-  description: "Dominou Taproot e criou seu primeiro Ordinal NFT Badge no Bitcoin",
+  description: "Dominou Taproot e criou seu primeiro Inscrição NFT Badge no Bitcoin",
   type: "ordinal" as const,
   moduleId: 6,
   imageUrl: "/badges/taproot-pioneer.png"

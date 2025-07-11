@@ -125,7 +125,7 @@ export default function Module7EN() {
                       <li>• Learn different multisig types (P2SH, P2WSH, P2TR)</li>
                       <li>• Create and manage 2-of-3 multisig wallets</li>
                       <li>• Sign collaborative transactions</li>
-                      <li>• Combine multisig with Ordinals NFTs</li>
+                      <li>• Combine multisig with Inscriptions NFTs</li>
                     </ul>
                   </div>
                   <div className="bg-gray-800 p-4 rounded-lg">
@@ -259,7 +259,7 @@ export default function Module7EN() {
                     <li>• Created transactions and understood fee dynamics</li>
                     <li>• Explored mining and proof-of-work consensus</li>
                     <li>• Experienced Lightning Network instant payments</li>
-                    <li>• Worked with Taproot and Ordinals NFTs</li>
+                    <li>• Worked with Taproot and Inscriptions NFTs</li>
                     <li>• Mastered advanced multisig security</li>
                   </ul>
                 </div>

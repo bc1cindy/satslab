@@ -45,8 +45,8 @@ export const en = {
         description: 'Learn about the Lightning Network and make instant Bitcoin transactions'
       },
       6: {
-        title: 'Taproot and Ordinals',
-        description: 'Explore advanced Bitcoin features: Taproot for privacy and Ordinals for NFTs'
+        title: 'Taproot and Inscriptions',
+        description: 'Explore advanced Bitcoin features: Taproot for privacy and Inscriptions for NFTs'
       },
       7: {
         title: 'Multisig Wallets',

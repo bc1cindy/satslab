@@ -56,7 +56,7 @@ export default function BadgesPage() {
     { id: 3, name: "Mensageiro da Blockchain", description: "Dominou transações na Signet", moduleId: 3, icon: "💸", color: "purple" },
     { id: 4, name: "Minerador Aprendiz", description: "Compreendeu a mineração Bitcoin", moduleId: 4, icon: "⛏️", color: "orange" },
     { id: 5, name: "Raio Rápido", description: "Explorou a Lightning Network", moduleId: 5, icon: "⚡", color: "yellow" },
-    { id: 6, name: "Pioneiro Taproot", description: "Descobriu Taproot e Ordinals", moduleId: 6, icon: "🎨", color: "pink" },
+    { id: 6, name: "Pioneiro Taproot", description: "Descobriu Taproot e Inscrições", moduleId: 6, icon: "🎨", color: "pink" },
     { id: 7, name: "Mestre Multisig", description: "Dominou carteiras multi-assinatura", moduleId: 7, icon: "🔒", color: "indigo" },
   ]
 
