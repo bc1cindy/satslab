@@ -95,7 +95,8 @@ export async function getUserProgress(userId: string): Promise<ModuleProgress[]>
       currentTask: item.current_task,
       completedTasks: item.completed_tasks || [],
       score: item.score || 0,
-      completedAt: item.completed_at
+      completedAt: item.completed_at,
+      metadata: item.metadata || null
     })) || []
   } catch (error) {
     console.error('Database connection error:', error)
@@ -120,7 +121,9 @@ export async function updateModuleProgress(
       completed_tasks: progress.completedTasks || [],
       score: progress.score || 0,
       completed_at: progress.completed ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      // Store detailed progress metadata if available
+      metadata: (progress as any).metadata || null
     })
   
   if (error) {

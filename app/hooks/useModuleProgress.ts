@@ -3,12 +3,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth, getUserIdentifier } from '@/app/components/auth/AuthProvider'
 import { useSession } from '@/app/lib/session/session-provider'
-import { updateModuleProgress, awardBadge } from '@/app/lib/supabase/queries'
+import { updateModuleProgress, awardBadge, getUserProgress } from '@/app/lib/supabase/queries'
 import { analyticsService } from '@/app/lib/supabase/analytics-service'
 import { Badge } from '@/app/types'
 
 interface ModuleProgressState {
-  timeSpent: number
   questionsCompleted: boolean
   questionsScore: number
   tasksCompleted: boolean
@@ -21,7 +20,6 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
   const { session } = useAuth()
   const { sessionId } = useSession()
   const [progress, setProgress] = useState<ModuleProgressState>({
-    timeSpent: 0,
     questionsCompleted: false,
     questionsScore: 0,
     tasksCompleted: false,
@@ -29,19 +27,64 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
     badgeEarned: false,
     completed: false
   })
-  const [startTime] = useState(Date.now())
+  const [progressLoaded, setProgressLoaded] = useState(false)
 
-  // Timer effect
+  // Load saved progress on mount
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => ({
-        ...prev,
-        timeSpent: Math.floor((Date.now() - startTime) / 1000)
-      }))
-    }, 1000)
+    const loadSavedProgress = async () => {
+      if (!session?.user.id) {
+        setProgressLoaded(true)
+        return
+      }
 
-    return () => clearInterval(interval)
-  }, [startTime])
+      try {
+        const savedProgress = await getUserProgress(session.user.id)
+        const moduleProgress = savedProgress.find(p => p.moduleId === moduleId)
+        
+        if (moduleProgress) {
+          // Use metadata if available (more accurate), otherwise fallback to estimation
+          const metadata = (moduleProgress as any).metadata
+          let questionsScore = 0
+          let tasksScore = 0
+          let questionsCompleted = false
+          let tasksCompleted = false
+          
+          if (metadata && typeof metadata === 'object') {
+            // Use stored metadata (accurate)
+            questionsScore = metadata.questionsScore || 0
+            tasksScore = metadata.tasksScore || 0
+            questionsCompleted = metadata.questionsCompleted || false
+            tasksCompleted = metadata.tasksCompleted || false
+          } else {
+            // Fallback to estimation from legacy data
+            const totalScore = moduleProgress.score || 0
+            const completedTasksCount = moduleProgress.completedTasks.length || 0
+            questionsScore = moduleProgress.completed ? Math.ceil(totalScore / 2) : 0
+            tasksScore = completedTasksCount
+            questionsCompleted = moduleProgress.completed || totalScore > 0
+            tasksCompleted = completedTasksCount > 0
+          }
+          
+          setProgress(prev => ({
+            ...prev,
+            questionsCompleted,
+            questionsScore,
+            tasksCompleted,
+            tasksScore,
+            badgeEarned: moduleProgress.completed,
+            completed: moduleProgress.completed
+          }))
+        }
+      } catch (error) {
+        console.error('Error loading saved progress:', error)
+      } finally {
+        setProgressLoaded(true)
+      }
+    }
+
+    loadSavedProgress()
+  }, [session?.user.id, moduleId])
+
 
   // Save progress to database
   const saveProgress = useCallback(async (progressData?: ModuleProgressState) => {
@@ -53,12 +96,19 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
     const dataToSave = progressData || progress
     
     try {
-      // Save module progress
+      // Save module progress with more detailed data
       const success = await updateModuleProgress(session.user.id, moduleId, {
         completed: dataToSave.completed,
         score: dataToSave.questionsScore + dataToSave.tasksScore,
-        completedTasks: dataToSave.completed ? Array.from({length: 10}, (_, i) => i + 1) : [],
-        currentTask: dataToSave.tasksScore
+        completedTasks: dataToSave.tasksCompleted ? Array.from({length: dataToSave.tasksScore}, (_, i) => i + 1) : [],
+        currentTask: dataToSave.tasksScore,
+        // Store individual scores in a JSON field if available
+        metadata: {
+          questionsScore: dataToSave.questionsScore,
+          tasksScore: dataToSave.tasksScore,
+          questionsCompleted: dataToSave.questionsCompleted,
+          tasksCompleted: dataToSave.tasksCompleted
+        }
       })
 
       if (!success) {
@@ -160,7 +210,6 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
             { 
               moduleId,
               finalScore: newProgress.questionsScore + newProgress.tasksScore,
-              timeSpent: newProgress.timeSpent,
               completedAt: new Date().toISOString()
             },
             moduleId
@@ -195,6 +244,7 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
     handleQuestionsComplete,
     handleTasksComplete,
     saveProgress,
-    isAuthenticated: !!session
+    isAuthenticated: !!session,
+    progressLoaded
   }
 }

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/ca
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Badge } from '@/app/components/ui/badge'
-import { CheckCircle, XCircle, ExternalLink, Lightbulb, Clock, Copy, AlertCircle } from 'lucide-react'
+import { CheckCircle, XCircle, ExternalLink, Lightbulb, Copy, AlertCircle } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
@@ -380,11 +380,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <CardTitle className="text-xl text-white flex items-center">
-            {isCompleted ? (
-              <CheckCircle className="h-6 w-6 text-green-500 mr-3" />
-            ) : (
-              <Clock className="h-6 w-6 text-blue-500 mr-3" />
-            )}
+            <CheckCircle className="h-6 w-6 text-green-500 mr-3" />
             {task.title}
           </CardTitle>
           <p className="text-gray-400">{task.description}</p>

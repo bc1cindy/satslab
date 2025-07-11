@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { Progress } from '@/app/components/ui/progress'
-import { ArrowLeft, CheckCircle, Clock, Trophy, Users, Award } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Trophy, Users, Award } from 'lucide-react'
 import Link from 'next/link'
 import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import { useModuleAnalytics } from '@/app/hooks/useAnalytics'

@@ -105,9 +105,6 @@ export default function Module5() {
               <span>Voltar</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-400">
-                Tempo: {Math.floor(progress.timeSpent / 60)}m {progress.timeSpent % 60}s
-              </div>
               <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
                 Módulo 5
               </Badge>
@@ -264,8 +261,8 @@ export default function Module5() {
                   <div className="text-xs sm:text-sm text-gray-400">Tarefas Concluídas</div>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xl sm:text-2xl font-bold text-purple-400">{Math.floor(progress.timeSpent / 60)}m</div>
-                  <div className="text-xs sm:text-sm text-gray-400">Tempo Total</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-400">100%</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Progresso</div>
                 </div>
               </div>
 

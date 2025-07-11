@@ -82,9 +82,6 @@ export default function Module1() {
               <span>Voltar</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-400">
-                Tempo: {Math.floor(progress.timeSpent / 60)}m {progress.timeSpent % 60}s
-              </div>
               <Badge variant="secondary" className="bg-blue-500/20 text-blue-400">
                 Módulo 1
               </Badge>
@@ -230,7 +227,7 @@ export default function Module1() {
               {/* Summary - Responsive Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xl sm:text-2xl font-bold text-blue-400">{progress.questionsScore}/3</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-400">{progress.questionsScore}/4</div>
                   <div className="text-xs sm:text-sm text-gray-400">Perguntas Corretas</div>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
@@ -238,8 +235,8 @@ export default function Module1() {
                   <div className="text-xs sm:text-sm text-gray-400">Tarefas Concluídas</div>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xl sm:text-2xl font-bold text-purple-400">{Math.floor(progress.timeSpent / 60)}m</div>
-                  <div className="text-xs sm:text-sm text-gray-400">Tempo Total</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-400">100%</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Progresso</div>
                 </div>
               </div>
 
