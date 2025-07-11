@@ -15,6 +15,12 @@ export interface ModuleProgress {
   completedTasks: number[]
   score: number
   completedAt?: string
+  metadata?: {
+    questionsScore?: number
+    tasksScore?: number
+    questionsCompleted?: boolean
+    tasksCompleted?: boolean
+  }
 }
 
 export interface Badge {
