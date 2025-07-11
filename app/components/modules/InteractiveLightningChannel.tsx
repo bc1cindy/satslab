@@ -92,7 +92,7 @@ export default function InteractiveLightningChannel({
     aliceContribution: isEnglish ? 'Alice Contribution (sats)' : 'Contribuição de Alice (sats)',
     fundDistribution: isEnglish ? 'Fund Distribution' : 'Distribuição de Fundos',
     performTransaction: isEnglish ? 'Perform Transaction' : 'Realizar Transação',
-    description: isEnglish ? 'Description' : 'Descrição',
+    transactionDescription: isEnglish ? 'Description' : 'Descrição',
     testPayment: isEnglish ? 'Test payment' : 'Pagamento de teste',
     processing: isEnglish ? 'Processing...' : 'Processando...',
     availableBalance: isEnglish ? 'Available balance' : 'Saldo disponível',
@@ -498,7 +498,7 @@ export default function InteractiveLightningChannel({
                 />
               </div>
               <div>
-                <Label htmlFor="description" className="text-gray-300">{t.description}</Label>
+                <Label htmlFor="description" className="text-gray-300">{t.transactionDescription}</Label>
                 <Input
                   id="description"
                   value={transactionDescription}
