@@ -271,17 +271,19 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="setup" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="setup">{t.setup}</TabsTrigger>
-              <TabsTrigger value="keys">{t.keys}</TabsTrigger>
-              <TabsTrigger value="transaction">{t.transaction}</TabsTrigger>
-              <TabsTrigger value="signing">{isEnglish ? 'Signing' : 'Assinatura'}</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+              <TabsTrigger value="setup" className="text-xs sm:text-sm">{t.setup}</TabsTrigger>
+              <TabsTrigger value="keys" className="text-xs sm:text-sm">{t.keys}</TabsTrigger>
+              <TabsTrigger value="transaction" className="text-xs sm:text-sm">{t.transaction}</TabsTrigger>
+              <TabsTrigger value="signing" className="text-xs sm:text-sm">{isEnglish ? 'Signing' : 'Assinatura'}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="setup" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="m-value">M ({t.requiredSignatures})</Label>
+                  <Label htmlFor="m-value" className="text-sm font-medium">
+                    M ({t.requiredSignatures})
+                  </Label>
                   <Input
                     id="m-value"
                     type="number"
@@ -289,10 +291,13 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                     onChange={(e) => setM(Number(e.target.value))}
                     min="1"
                     max="15"
+                    className="text-center"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="n-value">N ({t.totalKeys})</Label>
+                  <Label htmlFor="n-value" className="text-sm font-medium">
+                    N ({t.totalKeys})
+                  </Label>
                   <Input
                     id="n-value"
                     type="number"
@@ -300,61 +305,86 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                     onChange={(e) => setN(Number(e.target.value))}
                     min="1"
                     max="15"
+                    className="text-center"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>{t.walletType}</Label>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">{t.walletType}</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Button
                     variant={walletType === 'p2sh' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2sh')}
+                    className="text-xs sm:text-sm h-10 sm:h-9"
                   >
-                    P2SH (Legacy)
+                    <span className="block">
+                      <span className="font-semibold">P2SH</span>
+                      <span className="block text-xs opacity-75">(Legacy)</span>
+                    </span>
                   </Button>
                   <Button
                     variant={walletType === 'p2wsh' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2wsh')}
+                    className="text-xs sm:text-sm h-10 sm:h-9"
                   >
-                    P2WSH (SegWit)
+                    <span className="block">
+                      <span className="font-semibold">P2WSH</span>
+                      <span className="block text-xs opacity-75">(SegWit)</span>
+                    </span>
                   </Button>
                   <Button
                     variant={walletType === 'p2tr' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2tr')}
+                    className="text-xs sm:text-sm h-10 sm:h-9"
                   >
-                    P2TR (Taproot)
+                    <span className="block">
+                      <span className="font-semibold">P2TR</span>
+                      <span className="block text-xs opacity-75">(Taproot)</span>
+                    </span>
                   </Button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Button onClick={generateMultisigKeys} className="w-full">
+              <div className="space-y-3">
+                <Button 
+                  onClick={generateMultisigKeys} 
+                  className="w-full h-11 text-sm"
+                >
                   {t.generateKeys.replace('{0}', n.toString())}
                 </Button>
                 <Button 
                   onClick={createMultisigWallet} 
                   disabled={multisigKeys.length !== n}
-                  className="w-full"
+                  className="w-full h-11 text-sm"
                 >
                   {t.createWallet.replace('{0}', m.toString()).replace('{1}', n.toString())}
                 </Button>
               </div>
 
               {multisigWallet && (
-                <Alert>
+                <Alert className="bg-green-500/10 border-green-500/20">
                   <AlertDescription>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div>
-                        <strong>{t.multisigAddress}:</strong>
-                        <br />
-                        <code className="text-sm break-all">{multisigWallet.address}</code>
+                        <strong className="text-green-400">{t.multisigAddress}:</strong>
+                        <code className="block text-xs sm:text-sm break-all bg-gray-800 p-2 rounded mt-1 font-mono">
+                          {multisigWallet.address}
+                        </code>
                       </div>
-                      <div>
-                        <strong>{t.type}:</strong> {multisigWallet.type.toUpperCase()}
-                      </div>
-                      <div>
-                        <strong>{t.configuration}:</strong> {multisigWallet.m}-{isEnglish ? 'of' : 'de'}-{multisigWallet.n}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <strong className="text-green-400">{t.type}:</strong>
+                          <Badge className="ml-2 bg-blue-500/20 text-blue-400">
+                            {multisigWallet.type.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div>
+                          <strong className="text-green-400">{t.configuration}:</strong>
+                          <Badge className="ml-2 bg-purple-500/20 text-purple-400">
+                            {multisigWallet.m}-{isEnglish ? 'of' : 'de'}-{multisigWallet.n}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </AlertDescription>
@@ -375,29 +405,32 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                 ) : (
                   <div className="space-y-3">
                     {multisigKeys.map((key, index) => (
-                      <Card key={index} className="p-3">
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <Badge variant="secondary">{t.key} {index + 1}</Badge>
+                      <Card key={index} className="p-3 sm:p-4">
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <Badge variant="secondary" className="self-start">{t.key} {index + 1}</Badge>
                             <Button
                               size="sm"
                               onClick={() => setSigningKeyIndex(index)}
                               variant={signingKeyIndex === index ? 'default' : 'outline'}
+                              className="text-xs sm:text-sm"
                             >
                               {t.select}
                             </Button>
                           </div>
-                          <div>
-                            <Label className="text-xs">{t.publicKey}:</Label>
-                            <code className="text-xs break-all block bg-gray-50 p-1 rounded">
-                              {key.publicKey}
-                            </code>
-                          </div>
-                          <div>
-                            <Label className="text-xs">{t.privateKey}:</Label>
-                            <code className="text-xs break-all block bg-gray-50 p-1 rounded">
-                              {key.wif}
-                            </code>
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs font-medium text-gray-400">{t.publicKey}:</Label>
+                              <code className="text-xs break-all block bg-gray-800 p-2 rounded mt-1 font-mono">
+                                {key.publicKey}
+                              </code>
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-400">{t.privateKey}:</Label>
+                              <code className="text-xs break-all block bg-gray-800 p-2 rounded mt-1 font-mono">
+                                {key.wif}
+                              </code>
+                            </div>
                           </div>
                         </div>
                       </Card>
@@ -418,48 +451,54 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="recipient-multisig">{t.recipientAddress}</Label>
+                  <Label htmlFor="recipient-multisig" className="text-sm font-medium">{t.recipientAddress}</Label>
                   <Input
                     id="recipient-multisig"
                     value={recipientAddress}
                     onChange={(e) => setRecipientAddress(e.target.value)}
                     placeholder="tb1q... ou bc1q..."
                     disabled={!multisigWallet}
+                    className="text-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="amount-multisig">{t.amount}</Label>
-                  <Input
-                    id="amount-multisig"
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
-                    placeholder="100000"
-                    min="546"
-                    disabled={!multisigWallet}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="amount-multisig" className="text-sm font-medium">{t.amount}</Label>
+                    <Input
+                      id="amount-multisig"
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(Number(e.target.value))}
+                      placeholder="100000"
+                      min="546"
+                      disabled={!multisigWallet}
+                      className="text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fee-rate-multisig" className="text-sm font-medium">{t.feeRate}</Label>
+                    <Input
+                      id="fee-rate-multisig"
+                      type="number"
+                      value={feeRate}
+                      onChange={(e) => setFeeRate(Number(e.target.value))}
+                      min="1"
+                      disabled={!multisigWallet}
+                      className="text-sm"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="fee-rate-multisig">{t.feeRate}</Label>
-                  <Input
-                    id="fee-rate-multisig"
-                    type="number"
-                    value={feeRate}
-                    onChange={(e) => setFeeRate(Number(e.target.value))}
-                    min="1"
-                    disabled={!multisigWallet}
-                  />
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-600">
-                    {t.estimatedFee}: {estimateMultisigFee()} sats
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <div className="text-sm text-gray-400">
+                    {t.estimatedFee}: <span className="font-mono font-semibold">{estimateMultisigFee()} sats</span>
                   </div>
                   <Button 
                     onClick={createMultisigTransaction} 
                     disabled={isCreating || !multisigWallet}
+                    className="w-full sm:w-auto"
                   >
                     {isCreating ? t.creating : t.createTransaction}
                   </Button>
@@ -473,18 +512,26 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                       <div>
                         <strong>{t.multisigTransactionCreated2}</strong>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                         <div>
-                          <strong>{t.signatures}:</strong> {currentTransaction.signatures.size}/{currentTransaction.requiredSignatures}
+                          <strong className="text-gray-300">{t.signatures}:</strong> 
+                          <span className="ml-1 font-mono">{currentTransaction.signatures.size}/{currentTransaction.requiredSignatures}</span>
                         </div>
                         <div>
-                          <strong>{t.status}:</strong> {currentTransaction.isComplete ? t.complete : t.pending}
+                          <strong className="text-gray-300">{t.status}:</strong> 
+                          <Badge className={`ml-1 ${currentTransaction.isComplete ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                            {currentTransaction.isComplete ? t.complete : t.pending}
+                          </Badge>
                         </div>
                         <div>
-                          <strong>{t.fee}:</strong> {currentTransaction.fee} sats
+                          <strong className="text-gray-300">{t.fee}:</strong> 
+                          <span className="ml-1 font-mono">{currentTransaction.fee} sats</span>
                         </div>
-                        <div>
-                          <strong>{t.txId}:</strong> {currentTransaction.txId || t.pending}
+                        <div className="sm:col-span-2">
+                          <strong className="text-gray-300">{t.txId}:</strong>
+                          <code className="block text-xs font-mono bg-gray-800 p-1 rounded mt-1 break-all">
+                            {currentTransaction.txId || t.pending}
+                          </code>
                         </div>
                       </div>
                     </div>
@@ -507,27 +554,27 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                 
                 {currentTransaction && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <Label>{t.signatureProgress}</Label>
+                        <Label className="text-sm font-medium">{t.signatureProgress}</Label>
                         <div className="mt-2 flex items-center space-x-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div className="flex-1 bg-gray-700 rounded-full h-2">
                             <div
-                              className="bg-blue-600 h-2 rounded-full transition-all"
+                              className="bg-blue-500 h-2 rounded-full transition-all"
                               style={{
                                 width: `${(currentTransaction.signatures.size / currentTransaction.requiredSignatures) * 100}%`
                               }}
                             />
                           </div>
-                          <span className="text-sm">
+                          <span className="text-sm font-mono font-semibold">
                             {currentTransaction.signatures.size}/{currentTransaction.requiredSignatures}
                           </span>
                         </div>
                       </div>
                       <div>
-                        <Label>{t.status}</Label>
+                        <Label className="text-sm font-medium">{t.status}</Label>
                         <div className="mt-2">
-                          <Badge variant={currentTransaction.isComplete ? 'default' : 'secondary'}>
+                          <Badge className={currentTransaction.isComplete ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}>
                             {currentTransaction.isComplete ? t.complete : t.pending}
                           </Badge>
                         </div>
@@ -538,19 +585,24 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
 
                     <div className="space-y-3">
                       <Label>{t.signWithKeys}</Label>
-                      <div className="grid grid-cols-1 gap-2">
+                      <div className="grid grid-cols-1 gap-3">
                         {multisigKeys.map((key, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 border rounded">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline">{t.key} {index + 1}</Badge>
-                              <code className="text-xs">
-                                {key.publicKey.substring(0, 20)}...
+                          <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border border-gray-700 rounded-lg gap-2">
+                            <div className="flex items-center space-x-2 min-w-0">
+                              <Badge variant="outline" className="shrink-0">{t.key} {index + 1}</Badge>
+                              <code className="text-xs font-mono truncate">
+                                {key.publicKey.substring(0, 16)}...
                               </code>
                             </div>
                             <Button
                               size="sm"
                               onClick={() => signTransaction(index)}
                               disabled={currentTransaction.signatures.has(index) || currentTransaction.isComplete}
+                              className={`shrink-0 text-xs ${
+                                currentTransaction.signatures.has(index) 
+                                  ? 'bg-green-500/20 text-green-400 border-green-500/30' 
+                                  : ''
+                              }`}
                             >
                               {currentTransaction.signatures.has(index) ? t.signed : t.sign}
                             </Button>
@@ -564,21 +616,22 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                         <AlertDescription>
                           <div className="space-y-2">
                             <div>
-                              <strong>{t.transactionComplete}</strong>
+                              <strong className="text-green-400">{t.transactionComplete}</strong>
                             </div>
                             <div>
-                              <strong>{t.txId}:</strong>
-                              <br />
-                              <code className="text-sm">{currentTransaction.txId}</code>
+                              <strong className="text-gray-300">{t.txId}:</strong>
+                              <code className="block text-xs font-mono bg-gray-800 p-2 rounded mt-1 break-all">
+                                {currentTransaction.txId}
+                              </code>
                             </div>
-                            <a
-                              href={`https://mempool.space/signet/tx/${currentTransaction.txId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`https://mempool.space/signet/tx/${currentTransaction.txId}`, '_blank')}
+                              className="w-full sm:w-auto border-blue-500 text-blue-400 hover:bg-blue-500/10"
                             >
                               {t.viewOnExplorer}
-                            </a>
+                            </Button>
                           </div>
                         </AlertDescription>
                       </Alert>
@@ -596,28 +649,40 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
           <CardTitle>{t.multisigUseCases}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h4 className="font-semibold">{t.corporateSecurity}</h4>
-              <p className="text-sm text-gray-600">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg">
+              <h4 className="font-semibold text-blue-400 flex items-center">
+                <span className="mr-2">🏢</span>
+                {t.corporateSecurity}
+              </h4>
+              <p className="text-sm text-gray-300 leading-relaxed">
                 {t.corporateSecurityDesc}
               </p>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold">{t.personalCustody}</h4>
-              <p className="text-sm text-gray-600">
+            <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg">
+              <h4 className="font-semibold text-green-400 flex items-center">
+                <span className="mr-2">🔐</span>
+                {t.personalCustody}
+              </h4>
+              <p className="text-sm text-gray-300 leading-relaxed">
                 {t.personalCustodyDesc}
               </p>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold">{t.escrowServices}</h4>
-              <p className="text-sm text-gray-600">
+            <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg">
+              <h4 className="font-semibold text-purple-400 flex items-center">
+                <span className="mr-2">🤝</span>
+                {t.escrowServices}
+              </h4>
+              <p className="text-sm text-gray-300 leading-relaxed">
                 {t.escrowServicesDesc}
               </p>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold">{t.inheritance}</h4>
-              <p className="text-sm text-gray-600">
+            <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg">
+              <h4 className="font-semibold text-orange-400 flex items-center">
+                <span className="mr-2">👨‍👩‍👧‍👦</span>
+                {t.inheritance}
+              </h4>
+              <p className="text-sm text-gray-300 leading-relaxed">
                 {t.inheritanceDesc}
               </p>
             </div>
