@@ -311,81 +311,97 @@ export async function GET(request: Request) {
     // This might not be 100% accurate but close enough for dashboard
     const activeSessions = sessionData?.filter(s => !s.session_end)?.length || 0
     
-    // Get accurate geolocation data using SQL to avoid sample limitations
+    // Get ALL session data with geolocation to get accurate counts
     let geolocationStats: Array<{country: string, count: number, percentage: number}> = []
     
-    try {
-      const { data: geoData, error: geoError } = await supabase
-        .rpc('exec_sql', { 
-          sql: `
-            SELECT 
-              COALESCE(geolocation->>'country', 'Unknown') as country,
-              COUNT(DISTINCT user_id) as user_count,
-              (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE geolocation IS NOT NULL) as total_users_with_geo
-            FROM user_sessions 
-            WHERE geolocation IS NOT NULL 
-              AND geolocation->>'country' IS NOT NULL
-              AND geolocation->>'country' != ''
-            GROUP BY geolocation->>'country'
-            ORDER BY user_count DESC
-            LIMIT 10
-          ` 
-        })
+    console.log('Fetching ALL geolocation data...')
+    
+    // Get ALL sessions with geolocation data (not limited sample)
+    const { data: allGeoSessions, error: allGeoError } = await supabase
+      .from('user_sessions')
+      .select('user_id, geolocation')
+      .not('geolocation', 'is', null)
+    
+    console.log('All geo sessions fetched:', {
+      count: allGeoSessions?.length || 0,
+      error: allGeoError
+    })
+    
+    if (!allGeoError && allGeoSessions && allGeoSessions.length > 0) {
+      const countryUserStats = new Map<string, Set<string>>()
       
-      if (!geoError && geoData && geoData.length > 0) {
-        const totalUsersWithGeo = geoData[0].total_users_with_geo || 1
-        
-        geolocationStats = geoData.map((row: any) => {
-          let country = row.country
+      // Process ALL geolocation data
+      allGeoSessions.forEach(session => {
+        if (session.geolocation?.country && session.user_id) {
+          let country = session.geolocation.country
           // Normalize country names
           if (country === 'Brazil') country = 'Brasil'
           
-          return {
-            country,
-            count: row.user_count,
-            percentage: (row.user_count / totalUsersWithGeo) * 100
+          if (!countryUserStats.has(country)) {
+            countryUserStats.set(country, new Set())
+          }
+          countryUserStats.get(country)!.add(session.user_id)
+        }
+      })
+      
+      // Calculate total unique users with geolocation
+      const totalUsersWithGeo = new Set(
+        allGeoSessions
+          .filter(s => s.geolocation?.country)
+          .map(s => s.user_id)
+      ).size
+      
+      geolocationStats = Array.from(countryUserStats.entries())
+        .map(([country, userSet]) => ({
+          country,
+          count: userSet.size,
+          percentage: totalUsersWithGeo > 0 ? (userSet.size / totalUsersWithGeo) * 100 : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+      
+      console.log('Geolocation from ALL data:', {
+        totalWithGeo: totalUsersWithGeo,
+        totalSessions: allGeoSessions.length,
+        countries: geolocationStats.length,
+        topCountries: geolocationStats.slice(0, 3)
+      })
+    } else {
+      console.log('Failed to get ALL geolocation data, using sample fallback')
+      // Fallback to limited session data
+      const geoSessionsWithLocation = sessionData?.filter(s => s.geolocation?.country) || []
+      
+      if (geoSessionsWithLocation.length > 0) {
+        const countryUserStats = new Map<string, Set<string>>()
+        
+        geoSessionsWithLocation.forEach(session => {
+          if (session.geolocation?.country && session.user_id) {
+            let country = session.geolocation.country
+            if (country === 'Brazil') country = 'Brasil'
+            
+            if (!countryUserStats.has(country)) {
+              countryUserStats.set(country, new Set())
+            }
+            countryUserStats.get(country)!.add(session.user_id)
           }
         })
         
-        console.log('Geolocation from SQL:', {
-          totalWithGeo: totalUsersWithGeo,
-          countries: geolocationStats.length,
-          topCountries: geolocationStats.slice(0, 3)
-        })
-      } else {
-        console.log('Failed to get geolocation from SQL, using fallback')
-        // Fallback to session data (limited but better than nothing)
-        const geoSessionsWithLocation = sessionData?.filter(s => s.geolocation?.country) || []
+        const totalUsersWithGeo = new Set(geoSessionsWithLocation.map(s => s.user_id)).size
         
-        if (geoSessionsWithLocation.length > 0) {
-          const countryUserStats = new Map<string, Set<string>>()
-          
-          geoSessionsWithLocation.forEach(session => {
-            if (session.geolocation?.country && session.user_id) {
-              let country = session.geolocation.country
-              if (country === 'Brazil') country = 'Brasil'
-              
-              if (!countryUserStats.has(country)) {
-                countryUserStats.set(country, new Set())
-              }
-              countryUserStats.get(country)!.add(session.user_id)
-            }
-          })
-          
-          const totalUsersWithGeo = new Set(geoSessionsWithLocation.map(s => s.user_id)).size
-          
-          geolocationStats = Array.from(countryUserStats.entries())
-            .map(([country, userSet]) => ({
-              country,
-              count: userSet.size,
-              percentage: totalUsersWithGeo > 0 ? (userSet.size / totalUsersWithGeo) * 100 : 0
-            }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 10)
-        }
+        geolocationStats = Array.from(countryUserStats.entries())
+          .map(([country, userSet]) => ({
+            country,
+            count: userSet.size,
+            percentage: totalUsersWithGeo > 0 ? (userSet.size / totalUsersWithGeo) * 100 : 0
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10)
+        
+        console.log('Geolocation from sample fallback:', {
+          totalWithGeo: totalUsersWithGeo,
+          countries: geolocationStats.length
+        })
       }
-    } catch (e) {
-      console.log('Geolocation SQL failed, using session data fallback')
     }
     
     // Log wallet events for debugging
