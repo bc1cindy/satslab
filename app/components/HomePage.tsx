@@ -175,22 +175,11 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+      </main>
 
-        {/* Portuguese Video Lessons Section */}
-        {!isEnglish && (
-          <section className="mb-16">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">
-                Bitcoin 4 All Classes
-              </h2>
-            </div>
-            
-            <RealVideoPlayer />
-          </section>
-        )}
-
-        {/* Donation Section */}
-        <section className="mb-16 mt-16 text-center border-t border-gray-800 pt-16">
+      {/* Donation Section - Full Width */}
+      <section className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-16">
+        <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">
               {isEnglish ? 'Support SatsLab' : 'Apoie o SatsLab'}
@@ -203,11 +192,26 @@ export default function HomePage() {
             </p>
           </div>
           <DonationButton storeId="ChfbUhF85cr8ngfnkLAMMHHkfidTa8y2fsSrrnqwjCPN" />
-        </section>
+        </div>
+      </section>
+
+      <main className="container mx-auto px-4 py-12">
+        {/* Portuguese Video Lessons Section */}
+        {!isEnglish && (
+          <section className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Bitcoin 4 All Classes
+              </h2>
+            </div>
+            
+            <RealVideoPlayer />
+          </section>
+        )}
       </main>
 
       {/* Partners Section - Full Width */}
-      <section className="text-center bg-gradient-to-b from-blue-900/20 to-blue-950/20 py-12">
+      <section className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-12">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-white">
             {isEnglish ? 'Buy Bitcoin KYC-Free' : 'Compre Bitcoin sem KYC'}
@@ -353,9 +357,11 @@ export default function HomePage() {
       </section>
 
       <main className="container mx-auto px-4 py-12">
+      </main>
 
-        {/* Features Section */}
-        <section className="mb-16">
+      {/* Features Section - Full Width */}
+      <section className="bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-16">
+        <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">
             {t('homepage.features.title')}
           </h2>
@@ -394,8 +400,8 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-gray-800 bg-black py-12">
