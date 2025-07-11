@@ -355,8 +355,7 @@ export default function Module7EN() {
                         const message = generateShareMessage({ 
                           moduleId: 7, 
                           moduleName: 'Module 7', 
-                          isEnglish: true, 
-                          isCompleted: true 
+                          isEnglish: true
                         })
                         shareToTwitter(message)
                       })

@@ -139,16 +139,58 @@ export async function GET(request: Request) {
       console.log('RPC function not available, using fallback method')
     }
     
-    // Fallback: count unique users from all events
+    // Fallback: use SQL to count distinct users directly
     if (uniqueUserCount === null) {
-      const { data: allUserEvents, error: allUsersError } = await supabase
-        .from('user_events')
-        .select('user_id')
-        .like('user_id', 'session_%')
+      try {
+        // First, let's see what user_id patterns we have
+        const { data: patternCheck, error: patternError } = await supabase
+          .rpc('exec_sql', { 
+            sql: `
+              SELECT 
+                COUNT(DISTINCT user_id) as session_users,
+                (SELECT COUNT(DISTINCT user_id) FROM user_sessions) as all_users,
+                (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE user_id NOT LIKE 'session_%') as non_session_users
+            ` 
+          })
+        
+        if (!patternError && patternCheck && patternCheck.length > 0) {
+          console.log('User ID patterns:', patternCheck[0])
+          
+          // Use all users if non-session users exist, otherwise use session users
+          const sessionUsers = patternCheck[0].session_users || 0
+          const allUsers = patternCheck[0].all_users || 0
+          const nonSessionUsers = patternCheck[0].non_session_users || 0
+          
+          // If we have significant non-session users, count all users
+          uniqueUserCount = nonSessionUsers > 0 ? allUsers : sessionUsers
+          console.log('Unique users selected:', uniqueUserCount)
+        } else {
+          // Fallback to session-only count
+          const { data: sqlResult, error: sqlError } = await supabase
+            .rpc('exec_sql', { 
+              sql: "SELECT COUNT(DISTINCT user_id) as count FROM user_sessions WHERE user_id LIKE 'session_%'" 
+            })
+          
+          if (!sqlError && sqlResult && sqlResult.length > 0) {
+            uniqueUserCount = sqlResult[0].count
+            console.log('Unique users from SQL count (fallback):', uniqueUserCount)
+          }
+        }
+      } catch (e) {
+        console.log('SQL count failed, using data fetch fallback')
+      }
       
-      if (!allUsersError && allUserEvents) {
-        uniqueUserCount = new Set(allUserEvents.map(e => e.user_id)).size
-        console.log('Unique users from events:', uniqueUserCount)
+      // If SQL fails, try fetching data (less reliable due to limits)
+      if (uniqueUserCount === null) {
+        const { data: allSessions, error: allSessionsError } = await supabase
+          .from('user_sessions')
+          .select('user_id')
+          .like('user_id', 'session_%')
+        
+        if (!allSessionsError && allSessions) {
+          uniqueUserCount = new Set(allSessions.map(s => s.user_id)).size
+          console.log('Unique users from sessions data (may be limited):', uniqueUserCount)
+        }
       }
     }
     
@@ -196,6 +238,14 @@ export async function GET(request: Request) {
     
     // Use the accurate unique users count from our calculation
     const totalUsers = uniqueUserCount || new Set(sessionData?.map(s => s.user_id) || []).size
+    
+    // Debug logging
+    console.log('Final user count calculation:', {
+      uniqueUserCountFromRPC: uniqueUserCount,
+      sessionDataSample: sessionData?.length || 0,
+      finalTotalUsers: totalUsers,
+      moduleUniqueUsers: moduleAnalytics.reduce((sum, m) => sum + m.unique_users, 0)
+    })
     const activeUsers24h = new Set(
       sessionData?.filter(s => new Date(s.created_at) >= oneDayAgo)
         .map(s => s.user_id) || []

@@ -5,16 +5,11 @@ interface ShareAchievementProps {
   moduleId: number
   moduleName: string
   isEnglish: boolean
-  isCompleted?: boolean
 }
 
-export function generateShareMessage({ moduleId, moduleName, isEnglish, isCompleted = false }: ShareAchievementProps): string {
-  if (moduleId === 7 && isCompleted) {
-    // Mensagem especial para conclusão completa do curso
-    return isEnglish 
-      ? "Just completed all 7 SatsLab Bitcoin modules! Learned about fundamentals, Lightning Network, Taproot, and advanced Multisig security for free. Earned the Multisig Master badge! Learn Bitcoin at https://satslab.org/"
-      : "Completei todos os 7 módulos Bitcoin da SatsLab! Aprendi gratuitamente sobre fundamentos, Lightning Network, Taproot e segurança Multisig avançada. Conquistei o badge Mestre Multisig! Aprenda Bitcoin em https://satslab.org/"
-  }
+export function generateShareMessage({ moduleId, moduleName, isEnglish }: ShareAchievementProps): string {
+  // Remover verificação especial para módulo 7 com isCompleted
+  // A mensagem deve refletir apenas a conclusão do módulo 7, não de todos os módulos
 
   // Mensagens específicas por módulo (máximo 270 caracteres)
   const messages = {
@@ -61,11 +56,6 @@ export function generateShareMessage({ moduleId, moduleName, isEnglish, isComple
 
 function isMobile(): boolean {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-}
-
-function hasTwitterApp(): boolean {
-  // Detecta se o app do X/Twitter está instalado no mobile
-  return isMobile() && /Twitter|X/i.test(navigator.userAgent)
 }
 
 export function shareToTwitter(message: string) {
