@@ -223,55 +223,57 @@ export default function Module1EN() {
 
         {/* Completion Section */}
         {currentSection === 'completed' && (
-          <Card className="bg-gradient-to-br from-blue-900 to-purple-900 border-blue-500 text-center mx-auto max-w-2xl">
-            <CardHeader className="px-4 sm:px-6">
-              <div className="flex justify-center mb-4">
-                <Award className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500" />
-              </div>
-              <CardTitle className="text-xl sm:text-2xl text-white">Congratulations! Module Completed</CardTitle>
-              <CardDescription className="text-blue-200 text-sm sm:text-base">
-                You have successfully completed Module 1
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
-              <div className="bg-black/20 p-3 sm:p-4 rounded-lg">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">🏆 Badge Earned:</h3>
-                <div className="flex items-center justify-center space-x-3">
-                  <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
-                  <span className="text-lg sm:text-xl font-bold text-yellow-400">Beginner Explorer</span>
+          <div className="w-full flex justify-center px-4 sm:px-0">
+            <Card className="bg-gradient-to-br from-blue-900 to-purple-900 border-blue-500 text-center w-full max-w-2xl">
+              <CardHeader className="px-4 sm:px-6 py-6">
+                <div className="flex justify-center mb-4">
+                  <Award className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500" />
                 </div>
-                <p className="text-blue-200 text-xs sm:text-sm mt-2 leading-relaxed">
-                  Completed Bitcoin introduction and explored your first transaction on Signet
-                </p>
-              </div>
+                <CardTitle className="text-xl sm:text-2xl text-white px-2">Congratulations! Module Completed</CardTitle>
+                <CardDescription className="text-blue-200 text-sm sm:text-base px-2">
+                  You have successfully completed Module 1
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pb-6">
+                <div className="bg-black/20 p-4 sm:p-4 rounded-lg">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-3">🏆 Badge Earned:</h3>
+                  <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                    <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
+                    <span className="text-lg sm:text-xl font-bold text-yellow-400 text-center">Beginner Explorer</span>
+                  </div>
+                  <p className="text-blue-200 text-xs sm:text-sm mt-3 leading-relaxed">
+                    Completed Bitcoin introduction and explored your first transaction on Signet
+                  </p>
+                </div>
 
-              <div className="bg-black/20 p-3 sm:p-4 rounded-lg">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">📚 What you learned:</h3>
-                <ul className="text-blue-200 text-xs sm:text-sm space-y-1 text-left">
-                  <li>• Understanding of blockchain technology</li>
-                  <li>• Difference between Bitcoin networks</li>
-                  <li>• How to explore Bitcoin transactions</li>
-                  <li>• Reading transaction data and outputs</li>
-                  <li>• Using the Signet test network safely</li>
-                </ul>
-              </div>
+                <div className="bg-black/20 p-4 sm:p-4 rounded-lg">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-3 text-center sm:text-left">📚 What you learned:</h3>
+                  <ul className="text-blue-200 text-xs sm:text-sm space-y-2 text-left list-none">
+                    <li className="flex items-start"><span className="mr-2">•</span><span>Understanding of blockchain technology</span></li>
+                    <li className="flex items-start"><span className="mr-2">•</span><span>Difference between Bitcoin networks</span></li>
+                    <li className="flex items-start"><span className="mr-2">•</span><span>How to explore Bitcoin transactions</span></li>
+                    <li className="flex items-start"><span className="mr-2">•</span><span>Reading transaction data and outputs</span></li>
+                    <li className="flex items-start"><span className="mr-2">•</span><span>Using the Signet test network safely</span></li>
+                  </ul>
+                </div>
 
-              {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-                <Link href="/en" className="flex-1 sm:flex-initial">
-                  <Button variant="outline" className="w-full sm:w-auto border-blue-500 text-blue-400 hover:bg-blue-500/10 text-sm sm:text-base py-2 sm:py-3">
-                    Back to Modules
-                  </Button>
-                </Link>
-                <Link href="/en/modules/2" className="flex-1">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base py-2 sm:py-3">
-                    Next Module: Security and Wallets
-                    <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                  <Link href="/en" className="w-full sm:flex-1">
+                    <Button variant="outline" className="w-full border-blue-500 text-blue-400 hover:bg-blue-500/10 text-sm sm:text-base py-3 px-4">
+                      Back to Modules
+                    </Button>
+                  </Link>
+                  <Link href="/en/modules/2" className="w-full sm:flex-1">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base py-3 px-4">
+                      Next Module: Security and Wallets
+                      <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Navigation */}
