@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
@@ -48,6 +49,9 @@ const moduleTasks = module5Tasks.map(t => ({
 }))
 
 export default function Module5() {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+  
   const { progress, handleQuestionsComplete, handleTasksComplete } = useModuleProgress(5, {
     ...module5Badge,
     moduleId: 5
@@ -55,6 +59,13 @@ export default function Module5() {
   useModuleAnalytics(5) // Track module start
   const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
   const [lightningResults, setLightningResults] = useState<LightningResults>({})
+
+  // Translations
+  const t = {
+    nextModule: isEnglish ? 'Next Module: Taproot and Ordinals' : 'Próximo Módulo: Taproot e Ordinals',
+    backToHome: isEnglish ? 'Back to Home' : 'Voltar ao Início',
+    continueJourney: isEnglish ? 'Excellent! Now you have practical experience with Lightning Network using a fully integrated wallet. Continue your journey exploring Taproot and Ordinals.' : 'Excelente! Agora você tem experiência prática com Lightning Network usando uma carteira totalmente integrada. Continue sua jornada explorando Taproot e Ordinals.'
+  }
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
     await handleQuestionsComplete(score, total)
@@ -324,20 +335,19 @@ export default function Module5() {
               {/* Next Steps */}
               <div className="space-y-4">
                 <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                  Excelente! Agora você tem experiência prática com Lightning Network usando 
-                  uma carteira totalmente integrada. Continue sua jornada explorando Taproot e Ordinals.
+                  {t.continueJourney}
                 </p>
                 
                 {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Link href="/modules/6" className="flex-1">
+                <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                  <Link href="/modules/6" className="w-full sm:flex-1">
                     <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-sm sm:text-base py-2 sm:py-3">
-                      Próximo Módulo: Taproot e Ordinals
+                      {t.nextModule}
                     </Button>
                   </Link>
-                  <Link href="/" className="flex-1 sm:flex-initial">
+                  <Link href="/" className="w-full sm:flex-initial">
                     <Button variant="outline" className="w-full sm:w-auto border-gray-600 text-gray-300 text-sm sm:text-base py-2 sm:py-3">
-                      Voltar ao Início
+                      {t.backToHome}
                     </Button>
                   </Link>
                 </div>
