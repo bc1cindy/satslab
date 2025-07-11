@@ -177,12 +177,12 @@ export default function WalletGeneratorEducational() {
               </Alert>
 
               <div className="relative">
-                <div className={`bg-gray-800 rounded-lg p-6 ${!showSeed ? 'filter blur-lg select-none' : ''}`}>
-                  <div className="grid grid-cols-3 gap-3">
+                <div className={`bg-gray-800 rounded-lg p-3 sm:p-6 ${!showSeed ? 'filter blur-lg select-none' : ''}`}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                     {wallet.mnemonic.split(' ').map((word, index) => (
-                      <div key={index} className="bg-gray-700 rounded px-3 py-2 text-center">
+                      <div key={index} className="bg-gray-700 rounded px-2 sm:px-3 py-2 text-center min-w-0">
                         <span className="text-xs text-gray-400">{index + 1}.</span>
-                        <span className="ml-1 font-mono text-sm">{word}</span>
+                        <span className="ml-1 font-mono text-xs sm:text-sm break-words overflow-wrap-anywhere whitespace-normal">{word}</span>
                       </div>
                     ))}
                   </div>

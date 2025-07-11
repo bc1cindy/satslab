@@ -381,14 +381,14 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
           )}
 
           {/* Wallet Generator for specific tasks */}
-          {!isCompleted && task.title.toLowerCase().includes('gerar carteira') && (
+          {!isCompleted && (task.title.toLowerCase().includes('gerar carteira') || task.title.toLowerCase().includes('generate') && task.title.toLowerCase().includes('wallet')) && (
             <div className="mb-6">
               <WalletGeneratorEducational />
             </div>
           )}
 
           {/* Faucet for transaction verification tasks */}
-          {!isCompleted && task.title.toLowerCase().includes('verificar transação') && (
+          {!isCompleted && (task.title.toLowerCase().includes('verificar transação') || task.title.toLowerCase().includes('verify') && task.title.toLowerCase().includes('transaction')) && (
             <div className="mb-6">
               <SignetFaucet onTransactionGenerated={(txid: string) => {
                 setUserInputs(prev => ({ ...prev, [currentTask]: txid }))
@@ -397,7 +397,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
           )}
 
           {/* Transaction Simulator for sending transaction tasks */}
-          {!isCompleted && task.title.toLowerCase().includes('enviar transação') && (
+          {!isCompleted && (task.title.toLowerCase().includes('enviar transação') || (task.title.toLowerCase().includes('send') && task.title.toLowerCase().includes('transaction'))) && (
             <div className="mb-6">
               <TransactionSimulator onTransactionSent={(txid: string) => {
                 setUserInputs(prev => ({ ...prev, [currentTask]: txid }))

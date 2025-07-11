@@ -12,7 +12,6 @@ export const module5Data = {
     "Analisar diferenças entre taxas on-chain e Lightning"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutos",
   difficulty: "Intermediário"
 }
 

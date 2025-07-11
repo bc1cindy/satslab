@@ -12,7 +12,6 @@ export const module6Data = {
     "Analyze the impact of fees on data-heavy transactions"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutes",
   difficulty: "Advanced"
 }
 

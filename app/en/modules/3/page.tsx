@@ -129,7 +129,6 @@ export default function Module3EN() {
                   <div className="bg-gray-800 p-4 rounded-lg">
                     <h4 className="font-semibold text-orange-400 mb-2">⏱️ Module Details:</h4>
                     <ul className="text-sm text-gray-300 space-y-1">
-                      <li>• <strong>Duration:</strong> 60 minutes</li>
                       <li>• <strong>Difficulty:</strong> Intermediate</li>
                       <li>• <strong>Prerequisites:</strong> Module 2</li>
                       <li>• <strong>Badge:</strong> Blockchain Messenger</li>
@@ -284,7 +283,6 @@ export default function Module3EN() {
             
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <Clock className="h-4 w-4" />
-              <span>Estimated time: 60 minutes</span>
             </div>
           </div>
         )}

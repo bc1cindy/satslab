@@ -12,7 +12,6 @@ export const module2Data = {
     "Praticar boas práticas de segurança"
   ],
   requiresLogin: true,
-  estimatedTime: "45 minutos",
   difficulty: "Iniciante"
 }
 

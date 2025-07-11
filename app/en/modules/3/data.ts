@@ -12,7 +12,6 @@ export const module3Data = {
     "Create your first transaction with custom data"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutes",
   difficulty: "Intermediate"
 }
 

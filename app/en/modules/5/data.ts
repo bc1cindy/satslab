@@ -12,7 +12,6 @@ export const module5Data = {
     "Analyze differences between on-chain and Lightning fees"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutes",
   difficulty: "Intermediate"
 }
 

@@ -12,7 +12,6 @@ export const module1Data = {
     "Understand the role of faucets in the Signet network"
   ],
   requiresLogin: false,
-  estimatedTime: "30 minutes",
   difficulty: "Beginner"
 }
 

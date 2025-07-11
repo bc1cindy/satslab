@@ -12,7 +12,6 @@ export const module4Data = {
     "Analisar a relação entre dificuldade e tempo de bloco"
   ],
   requiresLogin: true,
-  estimatedTime: "45 minutos",
   difficulty: "Intermediário"
 }
 

@@ -12,7 +12,6 @@ export const module7Data = {
     "Mintar um Ordinal NFT Badge usando multisig"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutos",
   difficulty: "Avançado"
 }
 

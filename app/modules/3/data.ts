@@ -12,7 +12,6 @@ export const module3Data = {
     "Criar sua primeira transação com dados personalizados"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutos",
   difficulty: "Intermediário"
 }
 

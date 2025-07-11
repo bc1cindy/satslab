@@ -12,7 +12,6 @@ export const module6Data = {
     "Analisar o impacto das taxas em transações com dados"
   ],
   requiresLogin: true,
-  estimatedTime: "60 minutos",
   difficulty: "Avançado"
 }
 

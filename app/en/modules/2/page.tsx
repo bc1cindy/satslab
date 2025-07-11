@@ -130,7 +130,6 @@ export default function Module2EN() {
                   <div className="bg-gray-800 p-4 rounded-lg">
                     <h4 className="font-semibold text-yellow-400 mb-2">⏱️ Module Details:</h4>
                     <ul className="text-sm text-gray-300 space-y-1">
-                      <li>• <strong>Duration:</strong> 45 minutes</li>
                       <li>• <strong>Difficulty:</strong> Beginner</li>
                       <li>• <strong>Prerequisites:</strong> Module 1</li>
                       <li>• <strong>Badge:</strong> Key Guardian</li>
@@ -289,7 +288,6 @@ export default function Module2EN() {
             
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <Clock className="h-4 w-4" />
-              <span>Estimated time: 45 minutes</span>
             </div>
           </div>
         )}

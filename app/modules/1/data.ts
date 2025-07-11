@@ -12,7 +12,6 @@ export const module1Data = {
     "Compreender o papel de faucets na rede Signet"
   ],
   requiresLogin: false,
-  estimatedTime: "30 minutos",
   difficulty: "Iniciante"
 }
 
