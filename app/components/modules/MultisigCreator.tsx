@@ -279,13 +279,12 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
             </TabsList>
             
             <TabsContent value="setup" className="space-y-6">
-              {/* Configuração M e N */}
-              <div className="bg-gray-800/50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium mb-3 text-gray-300">{isEnglish ? 'Multisig Configuration' : 'Configuração Multisig'}</h4>
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <Label htmlFor="m-value" className="text-sm font-medium block mb-2">
-                      M - {isEnglish ? 'Required Signatures' : 'Assinaturas Necessárias'}
+              {/* Configuração M e N - Alinhamento Perfeito */}
+              <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div style={{width: '50%'}}>
+                    <Label htmlFor="m-value" className="text-xs sm:text-sm font-medium block mb-2 text-gray-300">
+                      M ({isEnglish ? 'Req' : 'Nec'})
                     </Label>
                     <Input
                       id="m-value"
@@ -294,12 +293,12 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                       onChange={(e) => setM(Number(e.target.value))}
                       min="1"
                       max="15"
-                      className="text-center h-12 text-lg font-semibold"
+                      className="text-center h-10 sm:h-12 text-base sm:text-lg font-bold border-2"
                     />
                   </div>
-                  <div className="flex-1">
-                    <Label htmlFor="n-value" className="text-sm font-medium block mb-2">
-                      N - {isEnglish ? 'Total Keys' : 'Total de Chaves'}
+                  <div style={{width: '50%'}}>
+                    <Label htmlFor="n-value" className="text-xs sm:text-sm font-medium block mb-2 text-gray-300">
+                      N ({isEnglish ? 'Total' : 'Total'})
                     </Label>
                     <Input
                       id="n-value"
@@ -308,39 +307,39 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                       onChange={(e) => setN(Number(e.target.value))}
                       min="1"
                       max="15"
-                      className="text-center h-12 text-lg font-semibold"
+                      className="text-center h-10 sm:h-12 text-base sm:text-lg font-bold border-2"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Tipo de Carteira */}
-              <div className="bg-gray-800/50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium mb-3 text-gray-300">{t.walletType}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Tipo de Carteira - Sem Overflow */}
+              <div className="bg-gray-800/50 p-3 sm:p-4 rounded-lg">
+                <h4 className="text-xs sm:text-sm font-medium mb-2 text-gray-300">{t.walletType}</h4>
+                <div className="grid grid-cols-3 gap-1 sm:gap-2">
                   <Button
                     variant={walletType === 'p2sh' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2sh')}
-                    className="h-16 flex flex-col justify-center items-center p-3"
+                    className="h-14 sm:h-16 flex flex-col justify-center items-center p-1 sm:p-2 text-center overflow-hidden"
                   >
-                    <div className="font-bold text-sm">P2SH</div>
-                    <div className="text-xs opacity-75 mt-1">(Legacy)</div>
+                    <div className="font-bold text-xs sm:text-sm leading-none">P2SH</div>
+                    <div className="text-[9px] sm:text-xs opacity-75 leading-none mt-0.5">(Legacy)</div>
                   </Button>
                   <Button
                     variant={walletType === 'p2wsh' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2wsh')}
-                    className="h-16 flex flex-col justify-center items-center p-3"
+                    className="h-14 sm:h-16 flex flex-col justify-center items-center p-1 sm:p-2 text-center overflow-hidden"
                   >
-                    <div className="font-bold text-sm">P2WSH</div>
-                    <div className="text-xs opacity-75 mt-1">(SegWit)</div>
+                    <div className="font-bold text-xs sm:text-sm leading-none">P2WSH</div>
+                    <div className="text-[9px] sm:text-xs opacity-75 leading-none mt-0.5">(SegWit)</div>
                   </Button>
                   <Button
                     variant={walletType === 'p2tr' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2tr')}
-                    className="h-16 flex flex-col justify-center items-center p-3"
+                    className="h-14 sm:h-16 flex flex-col justify-center items-center p-1 sm:p-2 text-center overflow-hidden"
                   >
-                    <div className="font-bold text-sm">P2TR</div>
-                    <div className="text-xs opacity-75 mt-1">(Taproot)</div>
+                    <div className="font-bold text-xs sm:text-sm leading-none">P2TR</div>
+                    <div className="text-[9px] sm:text-xs opacity-75 leading-none mt-0.5">(Taproot)</div>
                   </Button>
                 </div>
               </div>
