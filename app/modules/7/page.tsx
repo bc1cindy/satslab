@@ -20,7 +20,7 @@ import { module7Questions, module7Tasks, module7Badge } from './data'
 interface MultisigResults {
   walletAddress?: string
   transactionHash?: string
-  ordinalId?: string
+  inscriptionId?: string
   multisigKeys?: any[]
   multisigWallet?: any
   taprootPrivateKey?: string
@@ -43,7 +43,7 @@ const moduleTasks = module7Tasks.map(t => ({
   instructions: t.instructions,
   inputLabel: t.validation.type === 'address' ? 'Endereço da Carteira' :
               t.validation.type === 'hash' && t.type === 'transaction' ? 'Hash da Transação' :
-              t.validation.type === 'hash' && t.type === 'ordinal' ? 'ID do Ordinal' :
+              t.validation.type === 'hash' && t.type === 'ordinal' ? 'ID da Inscrição' :
               'Resposta',
   inputPlaceholder: t.validation.placeholder || '',
   validationType: (t.type === 'transaction' ? 'transaction' : 
@@ -60,25 +60,40 @@ export default function Module7() {
     moduleId: 7
   })
   useModuleAnalytics(7) // Track module start
-  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
+  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'multisig-task' | 'taproot-task' | 'badge-task' | 'completed'>('intro')
   const [multisigResults, setMultisigResults] = useState<MultisigResults>({})
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
     await handleQuestionsComplete(score, total)
-    // Auto advance to tasks after 2 seconds
+    // Auto advance to multisig task after 2 seconds
     setTimeout(() => {
-      setCurrentSection('tasks')
+      setCurrentSection('multisig-task')
     }, 2000)
   }
 
-  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
-    await handleTasksComplete(completedTasks, totalTasks)
-    
-    if (completedTasks === totalTasks && progress.questionsCompleted) {
-      setTimeout(() => {
-        setCurrentSection('completed')
-      }, 2000)
-    }
+  const handleMultisigTaskComplete = (address: string) => {
+    setMultisigResults(prev => ({ ...prev, walletAddress: address }))
+    // Auto advance to taproot task after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('taproot-task')
+    }, 2000)
+  }
+
+  const handleTaprootTaskComplete = (txHash: string, address: string) => {
+    setMultisigResults(prev => ({ ...prev, transactionHash: txHash, walletAddress: address }))
+    // Auto advance to badge task after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('badge-task')
+    }, 2000)
+  }
+
+  const handleBadgeTaskComplete = (badgeId: string) => {
+    setMultisigResults(prev => ({ ...prev, inscriptionId: badgeId }))
+    // Complete tasks and advance to completion
+    handleTasksComplete(3, 3)
+    setTimeout(() => {
+      setCurrentSection('completed')
+    }, 2000)
   }
 
   // Calculate overall progress
@@ -162,7 +177,7 @@ export default function Module7() {
                   <h3 className="font-semibold text-purple-400 mb-2">🔐 Experiência Prática:</h3>
                   <p className="text-purple-300 text-sm">
                     Você vai criar carteiras multisig reais, dominar tecnologias Taproot 
-                    para transações eficientes e mintar seu NFT Badge final como Ordinal multisig.
+                    para transações eficientes e mintar seu NFT Badge final como Inscrição multisig.
                   </p>
                 </div>
                 
@@ -200,31 +215,19 @@ export default function Module7() {
           </div>
         )}
 
-        {/* Tasks Section */}
-        {currentSection === 'tasks' && (
+        {/* Multisig Task Section */}
+        {currentSection === 'multisig-task' && (
           <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-xl text-center">🎯 Tarefas Práticas</CardTitle>
+                <CardTitle className="text-xl text-center">🔐 Tarefa 1: Criador de Carteiras Multisig</CardTitle>
                 <CardDescription className="text-center">
-                  Crie carteiras multisig e transações Taproot avançadas
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            
-            {/* Multisig Creator */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg">🔐 Criador de Carteiras Multisig</CardTitle>
-                <CardDescription>
                   Configure carteiras que requerem múltiplas assinaturas
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <MultisigCreator 
-                  onWalletCreated={(address) => {
-                    setMultisigResults(prev => ({ ...prev, walletAddress: address }))
-                  }}
+                  onWalletCreated={handleMultisigTaskComplete}
                   onTransactionSigned={(txId) => {
                     setMultisigResults(prev => ({ ...prev, transactionHash: txId }))
                   }}
@@ -237,51 +240,49 @@ export default function Module7() {
                 />
               </CardContent>
             </Card>
+          </div>
+        )}
 
-            {/* Taproot Transaction Creator */}
+        {/* Taproot Task Section */}
+        {currentSection === 'taproot-task' && (
+          <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">🌿 Criador de Transações Taproot</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl text-center">🌿 Tarefa 2: Criador de Transações Taproot</CardTitle>
+                <CardDescription className="text-center">
                   Crie transações multisig eficientes usando Taproot
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <TaprootTransactionCreator 
-                  onTransactionCreated={(txHash, address) => {
-                    setMultisigResults(prev => ({ ...prev, transactionHash: txHash, walletAddress: address }))
-                  }}
+                  onTransactionCreated={handleTaprootTaskComplete}
                   onPrivateKeyGenerated={(privateKey) => {
                     setMultisigResults(prev => ({ ...prev, taprootPrivateKey: privateKey }))
                   }}
                 />
               </CardContent>
             </Card>
+          </div>
+        )}
 
-            {/* Badge NFT Creator */}
+        {/* Badge Task Section */}
+        {currentSection === 'badge-task' && (
+          <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">🎨 Criador de Badge NFT Final</CardTitle>
-                <CardDescription>
-                  Minte seu Ordinal NFT Badge final usando multisig
+                <CardTitle className="text-xl text-center">🎨 Tarefa 3: Criador de Badge NFT Final</CardTitle>
+                <CardDescription className="text-center">
+                  Minte sua Inscrição NFT Badge final usando multisig
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <MultisigBadgeCreator 
                   multisigWallet={multisigResults.multisigWallet}
                   multisigKeys={multisigResults.multisigKeys}
-                  onBadgeCreated={(badgeId) => {
-                    setMultisigResults(prev => ({ ...prev, ordinalId: badgeId }))
-                  }}
+                  onBadgeCreated={handleBadgeTaskComplete}
                 />
               </CardContent>
             </Card>
-            
-            <TaskSystem 
-              tasks={moduleTasks}
-              onComplete={handleTasksCompleteWithAdvance}
-              moduleId={7}
-            />
           </div>
         )}
 
@@ -301,7 +302,7 @@ export default function Module7() {
               {progress.badgeEarned && (
                 <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 sm:p-6">
                   <div className="text-3xl sm:text-4xl mb-2">🏆</div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-green-400 mb-2">Ordinal NFT Badge Final Conquistado!</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-green-400 mb-2">Inscrição NFT Badge Final Conquistado!</h3>
                   <Badge className="bg-purple-500/20 text-purple-400 text-sm sm:text-lg px-3 sm:px-4 py-1 sm:py-2">
                     <Award className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     {module7Badge.name}
@@ -309,11 +310,11 @@ export default function Module7() {
                   <p className="text-xs sm:text-sm text-gray-400 mt-2 leading-relaxed">
                     Você dominou todas as tecnologias avançadas do Bitcoin e criou seu badge NFT final!
                   </p>
-                  {multisigResults.ordinalId && (
+                  {multisigResults.inscriptionId && (
                     <div className="mt-4 p-3 bg-gray-800 rounded">
-                      <p className="text-xs text-gray-400">Seu Ordinal NFT Badge Final:</p>
+                      <p className="text-xs text-gray-400">Sua Inscrição NFT Badge Final:</p>
                       <code className="text-xs font-mono text-purple-400 break-all">
-                        {multisigResults.ordinalId}
+                        {multisigResults.inscriptionId}
                       </code>
                     </div>
                   )}
@@ -337,7 +338,7 @@ export default function Module7() {
               </div>
 
               {/* Multisig Results */}
-              {(multisigResults.walletAddress || multisigResults.transactionHash || multisigResults.ordinalId) && (
+              {(multisigResults.walletAddress || multisigResults.transactionHash || multisigResults.inscriptionId) && (
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-3">🔐 Seus Resultados Multisig/Taproot:</h3>
                   <div className="space-y-2 text-sm text-gray-300">
@@ -357,11 +358,11 @@ export default function Module7() {
                         </div>
                       </div>
                     )}
-                    {multisigResults.ordinalId && (
+                    {multisigResults.inscriptionId && (
                       <div>
                         <span className="font-medium">Badge NFT Final:</span>
                         <div className="font-mono text-xs bg-purple-900/50 p-2 rounded mt-1 break-all">
-                          {multisigResults.ordinalId}
+                          {multisigResults.inscriptionId}
                         </div>
                         <p className="text-xs text-purple-400 mt-1">
                           ✨ Este é seu NFT Badge final e mais valioso na blockchain Bitcoin!
@@ -421,7 +422,9 @@ export default function Module7() {
             <Button 
               variant="outline" 
               onClick={() => {
-                if (currentSection === 'tasks') setCurrentSection('questions')
+                if (currentSection === 'badge-task') setCurrentSection('taproot-task')
+                if (currentSection === 'taproot-task') setCurrentSection('multisig-task')
+                if (currentSection === 'multisig-task') setCurrentSection('questions')
                 if (currentSection === 'questions') setCurrentSection('intro')
               }}
               className="border-gray-600 text-gray-300"
@@ -432,10 +435,28 @@ export default function Module7() {
             
             {currentSection === 'questions' && progress.questionsCompleted && (
               <Button 
-                onClick={() => setCurrentSection('tasks')}
+                onClick={() => setCurrentSection('multisig-task')}
                 className="bg-purple-500 hover:bg-purple-600"
               >
-                Ir para Tarefas Práticas
+                Ir para Tarefa Multisig
+              </Button>
+            )}
+            
+            {currentSection === 'multisig-task' && multisigResults.walletAddress && (
+              <Button 
+                onClick={() => setCurrentSection('taproot-task')}
+                className="bg-purple-500 hover:bg-purple-600"
+              >
+                Ir para Tarefa Taproot
+              </Button>
+            )}
+            
+            {currentSection === 'taproot-task' && multisigResults.transactionHash && (
+              <Button 
+                onClick={() => setCurrentSection('badge-task')}
+                className="bg-purple-500 hover:bg-purple-600"
+              >
+                Ir para Tarefa Badge Final
               </Button>
             )}
           </div>

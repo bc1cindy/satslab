@@ -11,6 +11,9 @@ import { useModuleProgress } from '@/app/hooks/useModuleProgress'
 import { useModuleAnalytics } from '@/app/hooks/useAnalytics'
 import QuestionSystem from '@/app/components/modules/QuestionSystem'
 import TaskSystem from '@/app/components/modules/TaskSystem'
+import MultisigCreator from '@/app/components/modules/MultisigCreator'
+import TaprootTransactionCreator from '@/app/components/modules/TaprootTransactionCreator'
+import MultisigBadgeCreator from '@/app/components/modules/MultisigBadgeCreator'
 import { LanguageSelector } from '@/app/components/i18n/LanguageSelector'
 import { module7Questions, module7Tasks, module7Badge } from './data'
 
@@ -48,19 +51,37 @@ export default function Module7EN() {
     moduleId: 7
   })
   useModuleAnalytics(7)
-  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'tasks' | 'completed'>('intro')
+  const [currentSection, setCurrentSection] = useState<'intro' | 'questions' | 'multisig-task' | 'taproot-task' | 'badge-task' | 'completed'>('intro')
+  const [multisigResults, setMultisigResults] = useState<{walletAddress?: string, transactionHash?: string, inscriptionId?: string, multisigKeys?: any[], multisigWallet?: any, taprootPrivateKey?: string}>({})
 
   const handleQuestionsCompleteWithAdvance = async (score: number, total: number) => {
     await handleQuestionsComplete(score, total)
-    setCurrentSection('tasks')
+    setCurrentSection('multisig-task')
   }
 
-  const handleTasksCompleteWithAdvance = async (completedTasks: number, totalTasks: number) => {
-    await handleTasksComplete(completedTasks, totalTasks)
-    
-    if (completedTasks === totalTasks && progress.questionsCompleted) {
+  const handleMultisigTaskComplete = (address: string) => {
+    setMultisigResults(prev => ({ ...prev, walletAddress: address }))
+    // Auto advance to taproot task after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('taproot-task')
+    }, 2000)
+  }
+
+  const handleTaprootTaskComplete = (txHash: string, address: string) => {
+    setMultisigResults(prev => ({ ...prev, transactionHash: txHash, walletAddress: address }))
+    // Auto advance to badge task after 2 seconds
+    setTimeout(() => {
+      setCurrentSection('badge-task')
+    }, 2000)
+  }
+
+  const handleBadgeTaskComplete = (badgeId: string) => {
+    setMultisigResults(prev => ({ ...prev, inscriptionId: badgeId }))
+    // Complete tasks and advance to completion
+    handleTasksComplete(3, 3)
+    setTimeout(() => {
       setCurrentSection('completed')
-    }
+    }, 2000)
   }
 
   const overallProgress = (progress.questionsCompleted && progress.tasksCompleted) ? 100 :
@@ -204,23 +225,71 @@ export default function Module7EN() {
           </div>
         )}
 
-        {currentSection === 'tasks' && (
+        {/* Multisig Task Section */}
+        {currentSection === 'multisig-task' && (
           <div className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center text-xl">
-                  <CheckCircle className="h-6 w-6 text-blue-500 mr-3" />
-                  Advanced Multisig Tasks
-                </CardTitle>
-                <CardDescription>
-                  Hands-on experience with multisig wallets and collaborative transactions
+                <CardTitle className="text-xl text-center">🔐 Task 1: Multisig Wallet Creator</CardTitle>
+                <CardDescription className="text-center">
+                  Configure wallets that require multiple signatures
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <TaskSystem 
-                  tasks={moduleTasks}
-                  onComplete={handleTasksCompleteWithAdvance}
-                  moduleId={7}
+                <MultisigCreator 
+                  onWalletCreated={handleMultisigTaskComplete}
+                  onTransactionSigned={(txId) => {
+                    setMultisigResults(prev => ({ ...prev, transactionHash: txId }))
+                  }}
+                  onKeysGenerated={(keys) => {
+                    setMultisigResults(prev => ({ ...prev, multisigKeys: keys }))
+                  }}
+                  onWalletObjectCreated={(wallet) => {
+                    setMultisigResults(prev => ({ ...prev, multisigWallet: wallet }))
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Taproot Task Section */}
+        {currentSection === 'taproot-task' && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">🌿 Task 2: Taproot Transaction Creator</CardTitle>
+                <CardDescription className="text-center">
+                  Create efficient multisig transactions using Taproot
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TaprootTransactionCreator 
+                  onTransactionCreated={handleTaprootTaskComplete}
+                  onPrivateKeyGenerated={(privateKey) => {
+                    setMultisigResults(prev => ({ ...prev, taprootPrivateKey: privateKey }))
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Badge Task Section */}
+        {currentSection === 'badge-task' && (
+          <div className="space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">🎨 Task 3: Final NFT Badge Creator</CardTitle>
+                <CardDescription className="text-center">
+                  Mint your final Inscription NFT Badge using multisig
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MultisigBadgeCreator 
+                  multisigWallet={multisigResults.multisigWallet}
+                  multisigKeys={multisigResults.multisigKeys}
+                  onBadgeCreated={handleBadgeTaskComplete}
                 />
               </CardContent>
             </Card>
@@ -294,14 +363,43 @@ export default function Module7EN() {
             <Button 
               variant="outline" 
               onClick={() => {
-                if (currentSection === 'tasks') setCurrentSection('questions')
-                else if (currentSection === 'questions') setCurrentSection('intro')
+                if (currentSection === 'badge-task') setCurrentSection('taproot-task')
+                if (currentSection === 'taproot-task') setCurrentSection('multisig-task')
+                if (currentSection === 'multisig-task') setCurrentSection('questions')
+                if (currentSection === 'questions') setCurrentSection('intro')
               }}
               className="border-gray-600 text-gray-300"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
+            
+            {currentSection === 'questions' && progress.questionsCompleted && (
+              <Button 
+                onClick={() => setCurrentSection('multisig-task')}
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                Go to Multisig Task
+              </Button>
+            )}
+            
+            {currentSection === 'multisig-task' && multisigResults.walletAddress && (
+              <Button 
+                onClick={() => setCurrentSection('taproot-task')}
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                Go to Taproot Task
+              </Button>
+            )}
+            
+            {currentSection === 'taproot-task' && multisigResults.transactionHash && (
+              <Button 
+                onClick={() => setCurrentSection('badge-task')}
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                Go to Final Badge Task
+              </Button>
+            )}
             
             <div className="flex items-center space-x-2 text-sm text-gray-400">
               <Clock className="h-4 w-4" />

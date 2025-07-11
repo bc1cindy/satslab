@@ -12,6 +12,7 @@ import { Separator } from '@/app/components/ui/separator'
 import { MultisigService, MultisigWallet, MultisigKey, MultisigTransaction } from '@/app/lib/bitcoin/multisig-service'
 import { SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { useToast } from '@/app/hooks/use-toast'
+import { usePathname } from 'next/navigation'
 
 interface MultisigCreatorProps {
   onWalletCreated?: (address: string) => void
@@ -23,6 +24,20 @@ interface MultisigCreatorProps {
 export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated, onTransactionSigned, onKeysGenerated }: MultisigCreatorProps) {
   const [multisigKeys, setMultisigKeys] = useState<MultisigKey[]>([])
   const [multisigWallet, setMultisigWallet] = useState<MultisigWallet | null>(null)
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    keysGenerated: isEnglish ? 'Keys Generated!' : 'Chaves Geradas!',
+    keysGeneratedDesc: isEnglish ? '{0} private keys generated successfully' : '{0} chaves privadas geradas com sucesso',
+    error: isEnglish ? 'Error' : 'Erro',
+    errorGeneratingKeys: isEnglish ? 'Error generating keys' : 'Erro ao gerar chaves',
+    walletCreated: isEnglish ? 'Wallet Created!' : 'Carteira Criada!',
+    multisigWalletCreated: isEnglish ? 'Multisig wallet {0} created successfully' : 'Carteira multisig {0} criada com sucesso',
+    errorCreatingWallet: isEnglish ? 'Error creating wallet' : 'Erro ao criar carteira',
+    unknownError: isEnglish ? 'Unknown error' : 'Erro desconhecido'
+  }
   const [m, setM] = useState(2)
   const [n, setN] = useState(3)
   const [walletType, setWalletType] = useState<'p2sh' | 'p2wsh' | 'p2tr'>('p2wsh')

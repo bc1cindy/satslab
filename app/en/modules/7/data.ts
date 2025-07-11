@@ -9,7 +9,7 @@ export const module7Data = {
     "Learn about different multisig types (P2SH, P2WSH, P2TR)",
     "Create a functional 2-of-3 multisig wallet",
     "Sign multisig transactions collaboratively",
-    "Mint an Ordinal NFT Badge using multisig"
+    "Mint an Inscription NFT Badge using multisig"
   ],
   requiresLogin: true,
   difficulty: "Advanced"
@@ -100,23 +100,23 @@ export const module7Tasks = [
   },
   {
     id: 3,
-    title: "Mint Multisig Ordinal Badge",
-    description: "Create an Ordinal NFT Badge using multisig signature",
+    title: "Mint Multisig Inscription Badge",
+    description: "Create an Inscription NFT Badge using multisig signature",
     instructions: [
       "Use the multisig wallet created earlier",
-      "Create an Ordinal with JSON: {\"badge\": \"Multisig Master\", \"user_id\": \"your_public_key\"}",
+      "Create an Inscription with JSON: {\"badge\": \"Multisig Master\", \"user_id\": \"your_public_key\"}",
       "Sign with at least 2 of the 3 independent keys",
       "Confirm the mint on the Signet network"
     ],
     type: "ordinal" as const,
     validation: {
       type: "hash" as const,
-      placeholder: "Paste the multisig Ordinal ID",
+      placeholder: "Paste the multisig Inscription ID",
       expectedLength: 64
     },
     hints: [
       "You need 2 signatures to complete the transaction",
-      "The Ordinal will be associated with the multisig address",
+      "The Inscription will be associated with the multisig address",
       "Use the exact JSON provided in the instructions"
     ]
   }
