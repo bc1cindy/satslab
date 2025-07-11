@@ -275,9 +275,6 @@ export default function Module1() {
                   </Link>
                 </div>
                 
-                <p className="text-xs sm:text-sm text-gray-400">
-                  💡 Dica: Faça login para salvar seu progresso e sincronizar seus badges!
-                </p>
               </div>
             </CardContent>
           </Card>
