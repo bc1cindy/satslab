@@ -1,7 +1,13 @@
 {
   "name": "satslab",
   "version": "0.1.0",
-  "private": true,
+  "license": "MIT",
+  "description": "Free and open-source Bitcoin education platform with interactive modules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bc1cindy/satslab.git"
+  },
+  "keywords": ["bitcoin", "education", "blockchain", "cryptocurrency", "open-source", "free-software"],
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",

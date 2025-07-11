@@ -1,8 +1,10 @@
-# SatsLab - Bitcoin Education Platform
+# SatsLab - Free and Open Source Bitcoin Education Platform
 
 🚀 **Experience**: https://satslab.org/
 
 Interactive Bitcoin education platform with hands-on learning through practical modules using the Signet network.
+
+**🆓 Free Software**: SatsLab is proudly free and open source software, committed to educational freedom and accessibility for all.
 
 ## ⚡ Features
 
@@ -102,16 +104,34 @@ Simple authentication system:
 
 ## 🤝 Contributing
 
-Open source project! Contributions welcome:
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+**SatsLab is free and open source software!** We welcome contributions from the community:
+
+1. **Fork the repository**
+2. **Create your feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
+4. **Push to the branch** (`git push origin feature/amazing-feature`)
+5. **Open a Pull Request**
+
+### Code of Conduct
+- Respect the free software principles
+- Welcome contributors of all skill levels
+- Focus on educational value and accessibility
+- Maintain high code quality and documentation
 
 ## 📝 License
 
-MIT License - see LICENSE file for details.
+**MIT License** - SatsLab is free software that respects your freedoms.
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Freedom to:
+- ✅ **Use** - Run the program for any purpose
+- ✅ **Study** - Access and examine the source code
+- ✅ **Modify** - Change and improve the software
+- ✅ **Distribute** - Share copies with others
+- ✅ **Improve and Share** - Distribute your modifications
+
+This license is compatible with GNU GPL and approved by the Free Software Foundation.
 
 ## 🔗 Links
 
