@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
@@ -52,6 +53,77 @@ export default function InteractiveLightningChannel({
   onChannelStateChange,
   onTransactionCompleted
 }: InteractiveLightningChannelProps) {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    title: isEnglish ? 'Interactive Lightning Channel' : 'Canal Lightning Interativo',
+    description: isEnglish ? 'Learn how Lightning channels work in practice' : 'Aprenda como funcionam os canais Lightning na prática',
+    closed: isEnglish ? 'Closed' : 'Fechado',
+    opening: isEnglish ? 'Opening' : 'Abrindo',
+    active: isEnglish ? 'Active' : 'Ativo',
+    closing: isEnglish ? 'Closing' : 'Fechando',
+    openChannel: isEnglish ? 'Open Channel' : 'Abrir Canal',
+    reset: isEnglish ? 'Reset' : 'Resetar',
+    alice: isEnglish ? 'Alice' : 'Alice',
+    bob: isEnglish ? 'Bob' : 'Bob',
+    capacity: isEnglish ? 'Capacity' : 'Capacidade',
+    balance: isEnglish ? 'Balance' : 'Saldo',
+    sendPayment: isEnglish ? 'Send Payment' : 'Enviar Pagamento',
+    amount: isEnglish ? 'Amount (sats)' : 'Valor (sats)',
+    send: isEnglish ? 'Send' : 'Enviar',
+    closeChannel: isEnglish ? 'Close Channel' : 'Fechar Canal',
+    closingFee: isEnglish ? 'Closing Fee' : 'Taxa de Fechamento',
+    transactions: isEnglish ? 'Transactions' : 'Transações',
+    noTransactions: isEnglish ? 'No transactions yet' : 'Nenhuma transação ainda',
+    from: isEnglish ? 'From' : 'De',
+    to: isEnglish ? 'Para' : 'Para',
+    pending: isEnglish ? 'Pending' : 'Pendente',
+    completed: isEnglish ? 'Completed' : 'Concluído',
+    failed: isEnglish ? 'Failed' : 'Falhou',
+    channelInfo: isEnglish ? 'Channel Information' : 'Informações do Canal',
+    howChannelsWork: isEnglish ? 'How Lightning Channels Work' : 'Como Funcionam os Canais Lightning',
+    channelExplanation: isEnglish ? 'Lightning channels allow instant payments between participants without broadcasting every transaction to the blockchain.' : 'Os canais Lightning permitem pagamentos instantâneos entre participantes sem transmitir cada transação para a blockchain.',
+    onlyClosingFee: isEnglish ? 'Only the channel closing is recorded on-chain, requiring a transaction fee.' : 'Apenas o fechamento do canal é gravado na blockchain, exigindo uma taxa de transação.',
+    // Additional translations
+    totalCapacity: isEnglish ? 'Total Capacity' : 'Capacidade Total',
+    channelSetup: isEnglish ? 'Channel Setup' : 'Configuração do Canal',
+    aliceContribution: isEnglish ? 'Alice Contribution (sats)' : 'Contribuição de Alice (sats)',
+    fundDistribution: isEnglish ? 'Fund Distribution' : 'Distribuição de Fundos',
+    performTransaction: isEnglish ? 'Perform Transaction' : 'Realizar Transação',
+    description: isEnglish ? 'Description' : 'Descrição',
+    testPayment: isEnglish ? 'Test payment' : 'Pagamento de teste',
+    processing: isEnglish ? 'Processing...' : 'Processando...',
+    availableBalance: isEnglish ? 'Available balance' : 'Saldo disponível',
+    transactionHistory: isEnglish ? 'Transaction History' : 'Histórico de Transações',
+    advantages: isEnglish ? 'Advantages' : 'Vantagens',
+    limitations: isEnglish ? 'Limitations' : 'Limitações',
+    instantTransactions: isEnglish ? '✅ Instant transactions' : '✅ Transações instantâneas',
+    noMiningFees: isEnglish ? '✅ No mining fees' : '✅ Sem taxas de mineração',
+    unlimitedCapacity: isEnglish ? '✅ Unlimited transaction capacity' : '✅ Capacidade ilimitada de transações',
+    improvedPrivacy: isEnglish ? '✅ Improved privacy' : '✅ Privacidade melhorada',
+    requiresLockedFunds: isEnglish ? '⚠️ Requires locked funds' : '⚠️ Requer fundos bloqueados',
+    bothPartiesOnline: isEnglish ? '⚠️ Both parties must be online' : '⚠️ Ambas as partes devem estar online',
+    limitedChannelCapacity: isEnglish ? '⚠️ Limited channel capacity' : '⚠️ Capacidade limitada do canal',
+    onchainClosing: isEnglish ? '⚠️ Closing requires on-chain transaction' : '⚠️ Fechamento requer transação on-chain',
+    keyConceptTitle: isEnglish ? 'Key Concept:' : 'Conceito Chave:',
+    keyConceptText: isEnglish ? 'Lightning channels allow multiple off-chain transactions using only two on-chain transactions (opening and closing). This solves Bitcoin\'s scalability problem.' : 'Canais Lightning permitem múltiplas transações off-chain usando apenas duas transações on-chain (abertura e fechamento). Isso resolve o problema de escalabilidade do Bitcoin.',
+    tipTitle: isEnglish ? 'Tip:' : 'Dica:',
+    tipText: isEnglish ? 'In real Lightning channels, both parties contribute funds. Alice contributes' : 'Em canais Lightning reais, ambas as partes contribuem com fundos. Alice contribui com',
+    andBob: isEnglish ? 'and Bob with' : 'e Bob com',
+    advantageTitle: isEnglish ? 'Advantage:' : 'Vantagem:',
+    advantageText: isEnglish ? 'Transactions within the channel are instant and without mining fees!' : 'Transações dentro do canal são instantâneas e sem taxas de mineração!',
+    estimatedClosingFee: isEnglish ? 'Estimated Closing Fee:' : 'Taxa de Fechamento Estimada:',
+    closingFeeNote: isEnglish ? 'This fee is necessary to close the channel and make the on-chain transaction back to Bitcoin.' : 'Esta taxa é necessária para fechar o canal e fazer a transação on-chain de volta ao Bitcoin.',
+    // Alert messages
+    aliceContributionTooHigh: isEnglish ? 'Alice\'s contribution cannot be greater than total capacity' : 'Contribuição de Alice não pode ser maior que a capacidade total',
+    channelMustBeActive: isEnglish ? 'Channel must be active to process transactions' : 'Canal deve estar ativo para processar transações',
+    insufficientBalance: isEnglish ? 'does not have sufficient balance' : 'não tem saldo suficiente',
+    paymentOf: isEnglish ? 'Payment of' : 'Pagamento de',
+    sats: isEnglish ? 'sats' : 'sats'
+  }
+
   const [channelState, setChannelState] = useState<ChannelState>({
     capacity: 0,
     aliceBalance: 0,
@@ -77,7 +149,7 @@ export default function InteractiveLightningChannel({
   // Open channel
   const openChannel = async () => {
     if (aliceContribution > newCapacity) {
-      alert('Contribuição de Alice não pode ser maior que a capacidade total')
+      alert(t.aliceContributionTooHigh)
       return
     }
 
@@ -120,14 +192,14 @@ export default function InteractiveLightningChannel({
   // Process transaction
   const processTransaction = async () => {
     if (channelState.status !== 'active') {
-      alert('Canal deve estar ativo para processar transações')
+      alert(t.channelMustBeActive)
       return
     }
 
     const fromBalance = transactionFrom === 'alice' ? channelState.aliceBalance : channelState.bobBalance
     
     if (transactionAmount > fromBalance) {
-      alert(`${transactionFrom === 'alice' ? 'Alice' : 'Bob'} não tem saldo suficiente`)
+      alert(`${transactionFrom === 'alice' ? t.alice : t.bob} ${t.insufficientBalance}`)
       return
     }
 
@@ -136,7 +208,7 @@ export default function InteractiveLightningChannel({
       from: transactionFrom,
       to: transactionFrom === 'alice' ? 'bob' : 'alice',
       amount: transactionAmount,
-      description: transactionDescription || `Pagamento de ${transactionAmount} sats`,
+      description: transactionDescription || `${t.paymentOf} ${transactionAmount} ${t.sats}`,
       timestamp: Date.now(),
       status: 'pending'
     }
@@ -224,11 +296,11 @@ export default function InteractiveLightningChannel({
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Zap className="w-6 h-6 text-yellow-500" />
-              <span className="text-white">Simulador de Canal Lightning</span>
+              <span className="text-white">{t.title}</span>
             </div>
             <Badge variant="outline" className={`${getStatusColor(channelState.status)} border-current`}>
               {getStatusIcon(channelState.status)}
-              {channelState.status}
+              {t[channelState.status as keyof typeof t] || channelState.status}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -240,7 +312,7 @@ export default function InteractiveLightningChannel({
                 <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-2">
                   <Users className="w-8 h-8 text-white" />
                 </div>
-                <div className="text-sm text-gray-400">Alice</div>
+                <div className="text-sm text-gray-400">{t.alice}</div>
                 <div className="text-lg font-bold text-blue-400">
                   {formatAmount(channelState.aliceBalance)}
                 </div>
@@ -263,7 +335,7 @@ export default function InteractiveLightningChannel({
                     )}
                   </div>
                   <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-center">
-                    <div className="text-sm text-gray-400">Capacidade Total</div>
+                    <div className="text-sm text-gray-400">{t.totalCapacity}</div>
                     <div className="text-lg font-bold text-white">
                       {formatAmount(channelState.capacity)}
                     </div>
@@ -275,7 +347,7 @@ export default function InteractiveLightningChannel({
                 <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-2">
                   <Users className="w-8 h-8 text-white" />
                 </div>
-                <div className="text-sm text-gray-400">Bob</div>
+                <div className="text-sm text-gray-400">{t.bob}</div>
                 <div className="text-lg font-bold text-green-400">
                   {formatAmount(channelState.bobBalance)}
                 </div>
@@ -283,15 +355,15 @@ export default function InteractiveLightningChannel({
             </div>
 
             {/* Channel Controls */}
-            <div className="flex justify-center gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-6">
               {channelState.status === 'closed' && (
                 <Button
                   onClick={openChannel}
                   disabled={isSimulating}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 text-sm sm:text-base px-3 sm:px-4 py-2"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Abrir Canal
+                  {t.openChannel}
                 </Button>
               )}
               
@@ -300,19 +372,20 @@ export default function InteractiveLightningChannel({
                   onClick={closeChannel}
                   disabled={isSimulating}
                   variant="destructive"
+                  className="text-sm sm:text-base px-3 sm:px-4 py-2"
                 >
                   <Pause className="w-4 h-4 mr-2" />
-                  Fechar Canal
+                  {t.closeChannel}
                 </Button>
               )}
               
               <Button
                 onClick={resetSimulation}
                 variant="outline"
-                className="border-gray-600 text-gray-300"
+                className="border-gray-600 text-gray-300 text-sm sm:text-base px-3 sm:px-4 py-2"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                Resetar
+                {t.reset}
               </Button>
             </div>
           </div>
@@ -323,12 +396,12 @@ export default function InteractiveLightningChannel({
       {channelState.status === 'closed' && (
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-white">⚙️ Configuração do Canal</CardTitle>
+            <CardTitle className="text-white">⚙️ {t.channelSetup}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="capacity" className="text-gray-300">Capacidade Total (sats)</Label>
+                <Label htmlFor="capacity" className="text-gray-300">{t.totalCapacity} (sats)</Label>
                 <Input
                   id="capacity"
                   type="number"
@@ -338,7 +411,7 @@ export default function InteractiveLightningChannel({
                 />
               </div>
               <div>
-                <Label htmlFor="aliceContribution" className="text-gray-300">Contribuição de Alice (sats)</Label>
+                <Label htmlFor="aliceContribution" className="text-gray-300">{t.aliceContribution}</Label>
                 <Input
                   id="aliceContribution"
                   type="number"
@@ -351,7 +424,7 @@ export default function InteractiveLightningChannel({
             </div>
 
             <div>
-              <Label className="text-gray-300">Distribuição de Fundos</Label>
+              <Label className="text-gray-300">{t.fundDistribution}</Label>
               <div className="mt-2 space-y-2">
                 <div className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md">
                   <input
@@ -368,8 +441,8 @@ export default function InteractiveLightningChannel({
                   />
                 </div>
                 <div className="flex justify-between text-sm text-gray-400">
-                  <span>Alice: {formatAmount(aliceContribution)}</span>
-                  <span>Bob: {formatAmount(newCapacity - aliceContribution)}</span>
+                  <span>{t.alice}: {formatAmount(aliceContribution)}</span>
+                  <span>{t.bob}: {formatAmount(newCapacity - aliceContribution)}</span>
                 </div>
               </div>
             </div>
@@ -377,17 +450,16 @@ export default function InteractiveLightningChannel({
             <Alert className="bg-blue-900/20 border-blue-500/30">
               <Info className="w-4 h-4 text-blue-400" />
               <AlertDescription className="text-blue-300">
-                <strong>Dica:</strong> Em canais Lightning reais, ambas as partes contribuem com fundos. 
-                Alice contribui com {formatAmount(aliceContribution)} e Bob com {formatAmount(newCapacity - aliceContribution)}.
+                <strong>{t.tipTitle}</strong> {t.tipText} {formatAmount(aliceContribution)} {t.andBob} {formatAmount(newCapacity - aliceContribution)}.
               </AlertDescription>
             </Alert>
             
             <Alert className="bg-yellow-900/20 border border-yellow-500/30">
               <AlertTriangle className="w-4 h-4 text-yellow-400" />
               <AlertDescription className="text-yellow-300">
-                <strong>Taxa de Fechamento:</strong> Fechar um canal requer uma transação on-chain. 
-                A taxa estimada é baseada na capacidade do canal (aprox. 0.1% = {Math.floor(newCapacity * 0.001)} sats).
-                Para a tarefa, use esta taxa estimada.
+                <strong>{t.closingFee}:</strong> {t.onlyClosingFee} 
+                {isEnglish ? 'The estimated fee is based on channel capacity (approx. 0.1% =' : 'A taxa estimada é baseada na capacidade do canal (aprox. 0.1% ='} {Math.floor(newCapacity * 0.001)} sats).
+                {isEnglish ? 'For the task, use this estimated fee.' : 'Para a tarefa, use esta taxa estimada.'}
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -398,24 +470,24 @@ export default function InteractiveLightningChannel({
       {channelState.status === 'active' && (
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-white">💸 Realizar Transação</CardTitle>
+            <CardTitle className="text-white">💸 {t.performTransaction}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="from" className="text-gray-300">De</Label>
+                <Label htmlFor="from" className="text-gray-300">{t.from}</Label>
                 <select
                   id="from"
                   value={transactionFrom}
                   onChange={(e) => setTransactionFrom(e.target.value as 'alice' | 'bob')}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
                 >
-                  <option value="alice">Alice</option>
-                  <option value="bob">Bob</option>
+                  <option value="alice">{t.alice}</option>
+                  <option value="bob">{t.bob}</option>
                 </select>
               </div>
               <div>
-                <Label htmlFor="amount" className="text-gray-300">Valor (sats)</Label>
+                <Label htmlFor="amount" className="text-gray-300">{t.amount}</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -426,12 +498,12 @@ export default function InteractiveLightningChannel({
                 />
               </div>
               <div>
-                <Label htmlFor="description" className="text-gray-300">Descrição</Label>
+                <Label htmlFor="description" className="text-gray-300">{t.description}</Label>
                 <Input
                   id="description"
                   value={transactionDescription}
                   onChange={(e) => setTransactionDescription(e.target.value)}
-                  placeholder="Pagamento de teste"
+                  placeholder={t.testPayment}
                   className="bg-gray-800 border-gray-700 text-white"
                 />
               </div>
@@ -443,11 +515,11 @@ export default function InteractiveLightningChannel({
                 disabled={isSimulating || transactionAmount <= 0}
                 className="bg-yellow-600 hover:bg-yellow-700"
               >
-                {isSimulating ? 'Processando...' : 'Enviar Pagamento'}
+                {isSimulating ? t.processing : t.sendPayment}
               </Button>
               
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <span>Saldo disponível:</span>
+                <span>{t.availableBalance}:</span>
                 <span className="font-bold">
                   {formatAmount(transactionFrom === 'alice' ? channelState.aliceBalance : channelState.bobBalance)}
                 </span>
@@ -457,16 +529,16 @@ export default function InteractiveLightningChannel({
             <Alert className="bg-green-900/20 border-green-500/30">
               <CheckCircle className="w-4 h-4 text-green-400" />
               <AlertDescription className="text-green-300">
-                <strong>Vantagem:</strong> Transações dentro do canal são instantâneas e sem taxas de mineração!
+                <strong>{t.advantageTitle}</strong> {t.advantageText}
               </AlertDescription>
             </Alert>
             
             <Alert className="bg-orange-900/20 border border-orange-500/30">
               <DollarSign className="w-4 h-4 text-orange-400" />
               <AlertDescription className="text-orange-300">
-                <strong>Taxa de Fechamento Estimada:</strong> {Math.floor(channelState.capacity * 0.001)} satoshis
+                <strong>{t.estimatedClosingFee}</strong> {Math.floor(channelState.capacity * 0.001)} satoshis
                 <br />
-                <small>Esta taxa é necessária para fechar o canal e fazer a transação on-chain de volta ao Bitcoin.</small>
+                <small>{t.closingFeeNote}</small>
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -477,7 +549,7 @@ export default function InteractiveLightningChannel({
       {channelState.transactions.length > 0 && (
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle className="text-white">📋 Histórico de Transações</CardTitle>
+            <CardTitle className="text-white">📋 {t.transactionHistory}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -489,9 +561,9 @@ export default function InteractiveLightningChannel({
                         {getStatusIcon(transaction.status)}
                       </span>
                       <span className="font-medium text-white">
-                        {transaction.from === 'alice' ? 'Alice' : 'Bob'} 
+                        {transaction.from === 'alice' ? t.alice : t.bob} 
                         <ArrowRight className="w-4 h-4 inline mx-2" />
-                        {transaction.to === 'alice' ? 'Alice' : 'Bob'}
+                        {transaction.to === 'alice' ? t.alice : t.bob}
                       </span>
                       <span className="text-yellow-400 font-bold">
                         {formatAmount(transaction.amount)}
@@ -512,27 +584,27 @@ export default function InteractiveLightningChannel({
       {/* Educational Info */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle className="text-white">🎓 Como Funcionam os Canais Lightning</CardTitle>
+          <CardTitle className="text-white">🎓 {t.howChannelsWork}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-gray-800 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-400 mb-2">Vantagens</h4>
+                <h4 className="font-semibold text-green-400 mb-2">{t.advantages}</h4>
                 <ul className="space-y-1 text-sm text-gray-300">
-                  <li>✅ Transações instantâneas</li>
-                  <li>✅ Sem taxas de mineração</li>
-                  <li>✅ Capacidade ilimitada de transações</li>
-                  <li>✅ Privacidade melhorada</li>
+                  <li>{t.instantTransactions}</li>
+                  <li>{t.noMiningFees}</li>
+                  <li>{t.unlimitedCapacity}</li>
+                  <li>{t.improvedPrivacy}</li>
                 </ul>
               </div>
               <div className="bg-gray-800 p-4 rounded-lg">
-                <h4 className="font-semibold text-yellow-400 mb-2">Limitações</h4>
+                <h4 className="font-semibold text-yellow-400 mb-2">{t.limitations}</h4>
                 <ul className="space-y-1 text-sm text-gray-300">
-                  <li>⚠️ Requer fundos bloqueados</li>
-                  <li>⚠️ Ambas as partes devem estar online</li>
-                  <li>⚠️ Capacidade limitada do canal</li>
-                  <li>⚠️ Fechamento requer transação on-chain</li>
+                  <li>{t.requiresLockedFunds}</li>
+                  <li>{t.bothPartiesOnline}</li>
+                  <li>{t.limitedChannelCapacity}</li>
+                  <li>{t.onchainClosing}</li>
                 </ul>
               </div>
             </div>
@@ -540,9 +612,7 @@ export default function InteractiveLightningChannel({
             <Alert className="bg-blue-900/20 border-blue-500/30">
               <Zap className="w-4 h-4 text-blue-400" />
               <AlertDescription className="text-blue-300">
-                <strong>Conceito Chave:</strong> Canais Lightning permitem múltiplas transações off-chain 
-                usando apenas duas transações on-chain (abertura e fechamento). Isso resolve o problema 
-                de escalabilidade do Bitcoin.
+                <strong>{t.keyConceptTitle}</strong> {t.keyConceptText}
               </AlertDescription>
             </Alert>
           </div>
