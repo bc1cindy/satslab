@@ -65,7 +65,7 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
           {question.options.map((option, index) => (
             <div
               key={index}
-              className={`p-2 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] max-w-full ${getOptionStyle(index)}`}
+              className={`p-2 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] max-w-full whitespace-normal ${getOptionStyle(index)}`}
               onClick={() => handleAnswer(index)}
             >
               <div className="w-full">
@@ -80,11 +80,10 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
                     {String.fromCharCode(65 + index)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="inline-block text-xs sm:text-base leading-relaxed" style={{ 
-                      maxWidth: '100%',
+                    <span className="block text-xs sm:text-base leading-relaxed whitespace-normal" style={{ 
                       wordWrap: 'break-word',
-                      wordBreak: 'break-word', 
-                      overflowWrap: 'break-word'
+                      overflowWrap: 'break-word',
+                      hyphens: 'auto'
                     }}>
                       {option}
                     </span>

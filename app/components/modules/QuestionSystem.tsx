@@ -172,7 +172,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                 <Button
                   key={index}
                   variant="ghost"
-                  className={`${buttonClass} [&>div]:w-full [&>div>div]:w-full`}
+                  className={`${buttonClass} [&>div]:w-full [&>div>div]:w-full whitespace-normal sm:whitespace-nowrap`}
                   onClick={() => handleAnswer(index)}
                   disabled={isAnswered}
                 >
@@ -185,11 +185,10 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                       
                       {/* Text Content - Flexible width with proper wrapping */}
                       <div className="flex-1 min-w-0">
-                        <span className="inline-block text-xs sm:text-base leading-relaxed" style={{ 
-                          maxWidth: '100%',
+                        <span className="block text-xs sm:text-base leading-relaxed whitespace-normal" style={{ 
                           wordWrap: 'break-word',
-                          wordBreak: 'break-word', 
-                          overflowWrap: 'break-word'
+                          overflowWrap: 'break-word',
+                          hyphens: 'auto'
                         }}>
                           {option}
                         </span>
