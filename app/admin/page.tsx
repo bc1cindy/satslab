@@ -751,6 +751,11 @@ export default function AdminDashboard() {
           <p>{t('analyticsFooter')}</p>
           <p className="mt-1">{t('realtimeMonitoring')} {platformStats?.total_users || 0} {t('activeUsersText')}</p>
           <p className="mt-1 text-xs">{t('geolocation')} {geolocationStats.length > 0 ? `${geolocationStats.reduce((sum, stat) => sum + stat.count, 0)} ${t('locations')}` : t('awaitingData')}</p>
+          {geolocationStats.length > 0 && platformStats && (
+            <p className="mt-1 text-xs text-yellow-400">
+              {platformStats.total_users - geolocationStats.reduce((sum, stat) => sum + stat.count, 0)} usuários sem dados geográficos
+            </p>
+          )}
         </div>
       </main>
     </div>
