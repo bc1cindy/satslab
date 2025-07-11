@@ -199,7 +199,9 @@ export default function MultisigBadgeCreator({ multisigWallet, multisigKeys, onB
           <div className="space-y-2 text-sm">
             <div>
               <span className="text-gray-400">{isEnglish ? 'Address' : 'Endereço'}:</span>
-              <code className="block text-xs font-mono mt-1">{multisigWallet.address}</code>
+              <code className="block text-xs sm:text-sm font-mono mt-1 bg-gray-800 p-2 rounded break-all word-break-all overflow-wrap-anywhere">
+                {multisigWallet.address}
+              </code>
             </div>
             <div>
               <span className="text-gray-400">{isEnglish ? 'Configuration' : 'Configuração'}:</span>

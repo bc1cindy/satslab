@@ -342,13 +342,19 @@ export default function Module7EN() {
                   </p>
                 </div>
 
-                <div className="flex justify-center space-x-4 pt-4">
-                  <Link href="/en">
-                    <Button variant="outline" className="border-blue-500 text-blue-400 hover:bg-blue-500/10">
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4">
+                  <Link href="/en" className="flex-1 sm:flex-initial">
+                    <Button variant="outline" className="w-full sm:w-auto border-blue-500 text-blue-400 hover:bg-blue-500/10">
                       Back to Dashboard
                     </Button>
                   </Link>
-                  <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+                  <Button 
+                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                    onClick={() => {
+                      const tweetText = "🎆 Just completed the SatsLab Bitcoin Course! 🎆\n\n🚀 Mastered all 7 modules covering:\n• Bitcoin fundamentals & economics\n• Security & wallet management\n• Transactions & fee dynamics\n• Mining & proof-of-work\n• Lightning Network\n• Taproot & Inscriptions NFTs\n• Advanced multisig security\n\n🏆 Earned the 'Multisig Master' badge!\n\n#Bitcoin #Learning #SatsLab #Blockchain"
+                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank')
+                    }}
+                  >
                     Share Your Achievement
                     <Award className="ml-2 h-5 w-5" />
                   </Button>

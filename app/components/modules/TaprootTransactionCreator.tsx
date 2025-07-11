@@ -333,27 +333,39 @@ export default function TaprootTransactionCreator({ onTransactionCreated, onPriv
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <h4 className="font-semibold text-orange-400">🔒 Privacidade</h4>
+              <h4 className="font-semibold text-orange-400">🔒 {isEnglish ? 'Privacy' : 'Privacidade'}</h4>
               <p className="text-sm text-gray-300">
-                Transações complexas parecem transações simples, melhorando a privacidade
+                {isEnglish 
+                  ? 'Complex transactions look like simple transactions, improving privacy'
+                  : 'Transações complexas parecem transações simples, melhorando a privacidade'
+                }
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-green-400">⚡ Eficiência</h4>
+              <h4 className="font-semibold text-green-400">⚡ {isEnglish ? 'Efficiency' : 'Eficiência'}</h4>
               <p className="text-sm text-gray-300">
-                Assinaturas Schnorr reduzem o tamanho das transações multisig
+                {isEnglish 
+                  ? 'Schnorr signatures reduce the size of multisig transactions'
+                  : 'Assinaturas Schnorr reduzem o tamanho das transações multisig'
+                }
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-blue-400">🛠️ Flexibilidade</h4>
+              <h4 className="font-semibold text-blue-400">🛠️ {isEnglish ? 'Flexibility' : 'Flexibilidade'}</h4>
               <p className="text-sm text-gray-300">
-                Permite contratos inteligentes mais sofisticados com MAST
+                {isEnglish 
+                  ? 'Enables more sophisticated smart contracts with MAST'
+                  : 'Permite contratos inteligentes mais sofisticados com MAST'
+                }
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-purple-400">🔗 Compatibilidade</h4>
+              <h4 className="font-semibold text-purple-400">🔗 {isEnglish ? 'Compatibility' : 'Compatibilidade'}</h4>
               <p className="text-sm text-gray-300">
-                Backward compatible - funciona com software Bitcoin existente
+                {isEnglish 
+                  ? 'Backward compatible - works with existing Bitcoin software'
+                  : 'Backward compatible - funciona com software Bitcoin existente'
+                }
               </p>
             </div>
           </div>
