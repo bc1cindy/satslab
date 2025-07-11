@@ -125,6 +125,33 @@ export async function GET(request: Request) {
       .select('*', { count: 'exact', head: true })
       .like('user_id', 'session_%')
     
+    // Get ALL unique users count - fallback to counting from events if RPC fails
+    let uniqueUserCount = null
+    try {
+      const { data: uniqueUsersData, error: uniqueUsersError } = await supabase
+        .rpc('get_unique_user_count')
+      
+      if (!uniqueUsersError && uniqueUsersData) {
+        uniqueUserCount = uniqueUsersData
+        console.log('Unique users from RPC:', uniqueUserCount)
+      }
+    } catch (e) {
+      console.log('RPC function not available, using fallback method')
+    }
+    
+    // Fallback: count unique users from all events
+    if (uniqueUserCount === null) {
+      const { data: allUserEvents, error: allUsersError } = await supabase
+        .from('user_events')
+        .select('user_id')
+        .like('user_id', 'session_%')
+      
+      if (!allUsersError && allUserEvents) {
+        uniqueUserCount = new Set(allUserEvents.map(e => e.user_id)).size
+        console.log('Unique users from events:', uniqueUserCount)
+      }
+    }
+    
     // For other calculations, we still need the session data
     const { data: sessionData, error: sessionDataError } = await supabase
       .from('user_sessions')
@@ -167,7 +194,8 @@ export async function GET(request: Request) {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     
-    const totalUsers = new Set(sessionData?.map(s => s.user_id) || []).size
+    // Use the accurate unique users count from our calculation
+    const totalUsers = uniqueUserCount || new Set(sessionData?.map(s => s.user_id) || []).size
     const activeUsers24h = new Set(
       sessionData?.filter(s => new Date(s.created_at) >= oneDayAgo)
         .map(s => s.user_id) || []
