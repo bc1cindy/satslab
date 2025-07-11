@@ -346,17 +346,36 @@ export default function Module4() {
                 </p>
                 
                 {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Link href="/modules/5" className="flex-1">
-                    <Button className="w-full bg-orange-500 hover:bg-orange-600 text-sm sm:text-base py-2 sm:py-3">
-                      Próximo Módulo: Lightning Network
-                    </Button>
-                  </Link>
-                  <Link href="/" className="flex-1 sm:flex-initial">
-                    <Button variant="outline" className="w-full sm:w-auto border-gray-600 text-gray-300 text-sm sm:text-base py-2 sm:py-3">
-                      Voltar ao Início
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-3">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 py-3"
+                    onClick={() => {
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 4, 
+                          moduleName: 'Módulo 4', 
+                          isEnglish: false
+                        })
+                        shareToTwitter(message)
+                      })
+                    }}
+                  >
+                    🎆 Compartilhar Conquista
+                    <Award className="ml-2 h-5 w-5" />
+                  </Button>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <Link href="/modules/5" className="flex-1">
+                      <Button className="w-full bg-orange-500 hover:bg-orange-600 text-sm sm:text-base py-2 sm:py-3">
+                        Próximo Módulo: Lightning Network
+                      </Button>
+                    </Link>
+                    <Link href="/" className="flex-1 sm:flex-initial">
+                      <Button variant="outline" className="w-full sm:w-auto border-gray-600 text-gray-300 text-sm sm:text-base py-2 sm:py-3">
+                        Voltar ao Início
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </CardContent>

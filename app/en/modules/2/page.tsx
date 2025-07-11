@@ -253,18 +253,36 @@ export default function Module2EN() {
                   </ul>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4">
-                  <Link href="/en" className="flex-1 sm:flex-initial">
-                    <Button variant="outline" className="w-full sm:w-auto border-green-500 text-green-400 hover:bg-green-500/10 text-sm sm:text-base py-2 sm:py-3">
-                      Back to Modules
-                    </Button>
-                  </Link>
-                  <Link href="/en/modules/3" className="flex-1">
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base py-2 sm:py-3">
-                      Next Module: Signet Transactions
-                      <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-3 pt-4">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 py-3"
+                    onClick={() => {
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 2, 
+                          moduleName: 'Module 2', 
+                          isEnglish: true
+                        })
+                        shareToTwitter(message)
+                      })
+                    }}
+                  >
+                    Share Your Achievement
+                    <Award className="ml-2 h-5 w-5" />
+                  </Button>
+                  <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                    <Link href="/en" className="flex-1 sm:flex-initial">
+                      <Button variant="outline" className="w-full sm:w-auto border-green-500 text-green-400 hover:bg-green-500/10 text-sm sm:text-base py-2 sm:py-3">
+                        Back to Modules
+                      </Button>
+                    </Link>
+                    <Link href="/en/modules/3" className="flex-1">
+                      <Button className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base py-2 sm:py-3">
+                        Next Module: Signet Transactions
+                        <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -247,18 +247,36 @@ export default function Module5EN() {
                   </ul>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:space-x-4 pt-4">
-                  <Link href="/en/modules/6" className="w-full sm:w-auto">
-                    <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
-                      Next Module: Taproot and Inscriptions
-                      <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
-                    </Button>
-                  </Link>
-                  <Link href="/en" className="w-full sm:w-auto">
-                    <Button variant="outline" className="w-full border-yellow-500 text-yellow-400 hover:bg-yellow-500/10">
-                      Back to Modules
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-3 pt-4">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 py-3"
+                    onClick={() => {
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 5, 
+                          moduleName: 'Module 5', 
+                          isEnglish: true
+                        })
+                        shareToTwitter(message)
+                      })
+                    }}
+                  >
+                    Share Your Achievement
+                    <Award className="ml-2 h-5 w-5" />
+                  </Button>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:justify-center sm:space-x-4">
+                    <Link href="/en/modules/6" className="w-full sm:w-auto">
+                      <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
+                        Next Module: Taproot and Inscriptions
+                        <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
+                      </Button>
+                    </Link>
+                    <Link href="/en" className="w-full sm:w-auto">
+                      <Button variant="outline" className="w-full border-yellow-500 text-yellow-400 hover:bg-yellow-500/10">
+                        Back to Modules
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

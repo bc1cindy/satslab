@@ -249,18 +249,36 @@ export default function Module3EN() {
                   </ul>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4">
-                  <Link href="/en" className="flex-1 sm:flex-initial">
-                    <Button variant="outline" className="w-full sm:w-auto border-purple-500 text-purple-400 hover:bg-purple-500/10 text-sm sm:text-base py-2 sm:py-3">
-                      Back to Modules
-                    </Button>
-                  </Link>
-                  <Link href="/en/modules/4" className="flex-1">
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-2 sm:py-3">
-                      Next Module: Mining Simulation
-                      <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-3 pt-4">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 py-3"
+                    onClick={() => {
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 3, 
+                          moduleName: 'Module 3', 
+                          isEnglish: true
+                        })
+                        shareToTwitter(message)
+                      })
+                    }}
+                  >
+                    Share Your Achievement
+                    <Award className="ml-2 h-5 w-5" />
+                  </Button>
+                  <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                    <Link href="/en" className="flex-1 sm:flex-initial">
+                      <Button variant="outline" className="w-full sm:w-auto border-purple-500 text-purple-400 hover:bg-purple-500/10 text-sm sm:text-base py-2 sm:py-3">
+                        Back to Modules
+                      </Button>
+                    </Link>
+                    <Link href="/en/modules/4" className="flex-1">
+                      <Button className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base py-2 sm:py-3">
+                        Next Module: Mining Simulation
+                        <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

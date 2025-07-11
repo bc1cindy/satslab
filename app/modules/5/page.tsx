@@ -339,17 +339,36 @@ export default function Module5() {
                 </p>
                 
                 {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                  <Link href="/modules/6" className="w-full sm:flex-1">
-                    <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-sm sm:text-base py-2 sm:py-3">
-                      {t.nextModule}
-                    </Button>
-                  </Link>
-                  <Link href="/" className="w-full sm:flex-initial">
-                    <Button variant="outline" className="w-full sm:w-auto border-gray-600 text-gray-300 text-sm sm:text-base py-2 sm:py-3">
-                      {t.backToHome}
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-3">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 py-3"
+                    onClick={() => {
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 5, 
+                          moduleName: 'Módulo 5', 
+                          isEnglish: false
+                        })
+                        shareToTwitter(message)
+                      })
+                    }}
+                  >
+                    🎆 Compartilhar Conquista
+                    <Award className="ml-2 h-5 w-5" />
+                  </Button>
+                  
+                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                    <Link href="/modules/6" className="w-full sm:flex-1">
+                      <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-sm sm:text-base py-2 sm:py-3">
+                        {t.nextModule}
+                      </Button>
+                    </Link>
+                    <Link href="/" className="w-full sm:flex-initial">
+                      <Button variant="outline" className="w-full sm:w-auto border-gray-600 text-gray-300 text-sm sm:text-base py-2 sm:py-3">
+                        {t.backToHome}
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </CardContent>

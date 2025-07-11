@@ -257,18 +257,36 @@ export default function Module1EN() {
                 </div>
 
                 {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
-                  <Link href="/en" className="w-full sm:flex-1">
-                    <Button variant="outline" className="w-full border-blue-500 text-blue-400 hover:bg-blue-500/10 text-sm sm:text-base py-3 px-4">
-                      Back to Modules
-                    </Button>
-                  </Link>
-                  <Link href="/en/modules/2" className="w-full sm:flex-1">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base py-3 px-4">
-                      Next Module: Security and Wallets
-                      <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
-                    </Button>
-                  </Link>
+                <div className="flex flex-col gap-3">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 py-3"
+                    onClick={() => {
+                      import('@/app/lib/shareAchievement').then(({ generateShareMessage, shareToTwitter }) => {
+                        const message = generateShareMessage({ 
+                          moduleId: 1, 
+                          moduleName: 'Module 1', 
+                          isEnglish: true
+                        })
+                        shareToTwitter(message)
+                      })
+                    }}
+                  >
+                    🎆 Share Your Achievement
+                    <Award className="ml-2 h-5 w-5" />
+                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                    <Link href="/en" className="w-full sm:flex-1">
+                      <Button variant="outline" className="w-full border-blue-500 text-blue-400 hover:bg-blue-500/10 text-sm sm:text-base py-3 px-4">
+                        Back to Modules
+                      </Button>
+                    </Link>
+                    <Link href="/en/modules/2" className="w-full sm:flex-1">
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-sm sm:text-base py-3 px-4">
+                        Next Module: Security and Wallets
+                        <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>
