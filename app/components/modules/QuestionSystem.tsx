@@ -176,31 +176,34 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                   onClick={() => handleAnswer(index)}
                   disabled={isAnswered}
                 >
-                  <div className="flex items-start w-full gap-3">
-                    {/* Text Content - Takes available space */}
-                    <div className="flex-1 min-w-0 overflow-hidden pr-2">
-                      <div className="flex items-start gap-1">
-                        <span className="font-medium text-xs sm:text-base flex-shrink-0">{String.fromCharCode(97 + index)})</span>
-                        <span className="block text-xs sm:text-base leading-relaxed" style={{ 
+                  <div className="w-full">
+                    <div className="flex items-start gap-2">
+                      {/* Option Letter - Fixed width */}
+                      <span className="font-medium text-xs sm:text-base flex-shrink-0 mt-0.5">
+                        {String.fromCharCode(97 + index)})
+                      </span>
+                      
+                      {/* Text Content - Flexible width with proper wrapping */}
+                      <div className="flex-1 min-w-0">
+                        <span className="inline-block text-xs sm:text-base leading-relaxed" style={{ 
+                          maxWidth: '100%',
+                          wordWrap: 'break-word',
                           wordBreak: 'break-word', 
-                          overflowWrap: 'anywhere',
-                          WebkitHyphens: 'auto',
-                          MozHyphens: 'auto',
-                          msHyphens: 'auto',
-                          hyphens: 'auto'
+                          overflowWrap: 'break-word',
+                          WebkitLineBreak: 'after-white-space'
                         }}>
                           {option}
                         </span>
                       </div>
+                      
+                      {/* Status Icon - Fixed width */}
+                      {isAnswered && (
+                        <div className="flex-shrink-0 ml-2">
+                          {index === question.correct && <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />}
+                          {index === selectedAnswer && index !== question.correct && <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />}
+                        </div>
+                      )}
                     </div>
-                    
-                    {/* Status Icon - Fixed width */}
-                    {isAnswered && (
-                      <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
-                        {index === question.correct && <CheckCircle className="h-5 w-5 text-green-500" />}
-                        {index === selectedAnswer && index !== question.correct && <XCircle className="h-5 w-5 text-red-500" />}
-                      </div>
-                    )}
                   </div>
                 </Button>
               )

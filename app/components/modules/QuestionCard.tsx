@@ -68,29 +68,39 @@ export function QuestionCard({ question, onAnswer, showResult = false }: Questio
               className={`p-2 sm:p-4 rounded-lg border-2 transition-all min-h-[60px] max-w-full ${getOptionStyle(index)}`}
               onClick={() => handleAnswer(index)}
             >
-              <div className="flex items-start gap-3">
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium flex-shrink-0 ${
-                  hasAnswered && index === question.correctAnswer
-                    ? 'border-green-500 bg-green-500 text-white'
-                    : hasAnswered && index === selectedAnswer
-                      ? 'border-red-500 bg-red-500 text-white'
-                      : 'border-gray-300'
-                }`}>
-                  {String.fromCharCode(65 + index)}
-                </div>
-                <span className="flex-1 min-w-0 text-xs sm:text-base leading-relaxed break-all hyphens-auto overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere', hyphens: 'auto', wordSpacing: '-0.1em' }}>
-                  {option}
-                </span>
-                {hasAnswered && (
-                  <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
-                    {index === question.correctAnswer && (
-                      <span className="text-green-600 text-lg">✓</span>
-                    )}
-                    {index === selectedAnswer && index !== question.correctAnswer && (
-                      <span className="text-red-600 text-lg">✗</span>
-                    )}
+              <div className="w-full">
+                <div className="flex items-start gap-2">
+                  <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0 mt-0.5 ${
+                    hasAnswered && index === question.correctAnswer
+                      ? 'border-green-500 bg-green-500 text-white'
+                      : hasAnswered && index === selectedAnswer
+                        ? 'border-red-500 bg-red-500 text-white'
+                        : 'border-gray-300'
+                  }`}>
+                    {String.fromCharCode(65 + index)}
                   </div>
-                )}
+                  <div className="flex-1 min-w-0">
+                    <span className="inline-block text-xs sm:text-base leading-relaxed" style={{ 
+                      maxWidth: '100%',
+                      wordWrap: 'break-word',
+                      wordBreak: 'break-word', 
+                      overflowWrap: 'break-word',
+                      WebkitLineBreak: 'after-white-space'
+                    }}>
+                      {option}
+                    </span>
+                  </div>
+                  {hasAnswered && (
+                    <div className="flex-shrink-0 ml-2">
+                      {index === question.correctAnswer && (
+                        <span className="text-green-600 text-base sm:text-lg">✓</span>
+                      )}
+                      {index === selectedAnswer && index !== question.correctAnswer && (
+                        <span className="text-red-600 text-base sm:text-lg">✗</span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
