@@ -118,6 +118,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       toast({
         title: t.keysGenerated,
         description: t.keysGeneratedDesc.replace('{0}', n.toString()),
+        variant: "success",
       })
       
       if (onKeysGenerated) {
@@ -150,6 +151,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       toast({
         title: t.walletCreated,
         description: `${isEnglish ? 'Address' : 'Endereço'}: ${wallet.address}`,
+        variant: "success",
       })
 
       if (onWalletCreated) {
@@ -206,6 +208,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       toast({
         title: t.multisigTransactionCreated,
         description: t.requiresSignatures.replace('{0}', multisigWallet.m.toString()).replace('{1}', multisigWallet.n.toString()),
+        variant: "success",
       })
 
     } catch (error) {
@@ -242,6 +245,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       toast({
         title: t.transactionSigned,
         description: t.signatureAdded.replace('{0}', signedTransaction.signatures.size.toString()).replace('{1}', signedTransaction.requiredSignatures.toString()),
+        variant: "success",
       })
 
       if (signedTransaction.isComplete && onTransactionSigned) {
