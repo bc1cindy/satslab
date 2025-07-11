@@ -98,12 +98,11 @@ export default function WalletGeneratorEducational() {
     tipText: isEnglish 
       ? '💡 Tip: Write down these 12 words on paper, in the correct order. Never take a photo or save in a digital file!'
       : '💡 Dica: Anote estas 12 palavras em papel, na ordem correta. Nunca tire foto ou salve em arquivo digital!',
-    confirmBackup: isEnglish ? 'I have safely backed up my seed phrase' : 'Fiz backup seguro da minha seed phrase',
+    confirmBackup: isEnglish ? 'I wrote down the words' : 'Fiz backup seguro da minha seed phrase',
     verificationTitle: isEnglish ? 'Step 2: Verification' : 'Passo 2: Verificação',
     verificationText: isEnglish 
       ? 'To ensure you wrote down the seed phrase correctly, please enter the first word:'
       : 'Para garantir que anotou a seed phrase corretamente, digite a primeira palavra:',
-    firstWordPlaceholder: isEnglish ? 'Enter the first word' : 'Digite a primeira palavra',
     verifyButton: isEnglish ? 'Verify' : 'Verificar',
     verificationError: isEnglish ? 'Incorrect word. Please try again.' : 'Palavra incorreta. Tente novamente.',
     completeTitle: isEnglish ? 'Step 3: Your Bitcoin Address' : 'Passo 3: Seu Endereço Bitcoin',
@@ -325,7 +324,7 @@ export default function WalletGeneratorEducational() {
 
               <Button
                 onClick={handleBackupConfirm}
-                className="w-full bg-orange-500 hover:bg-orange-600"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-sm sm:text-base py-3 px-3 whitespace-normal text-center"
               >
                 {t.confirmBackup}
               </Button>
