@@ -14,7 +14,7 @@ import YouTubeVideos from '@/app/components/YouTubeVideos'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
   ChevronRight, Bitcoin, Trophy,
-  Target, Gamepad2, Award, Youtube
+  Target, Gamepad2, Award
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -178,7 +178,7 @@ export default function HomePage() {
       </main>
 
       {/* Donation Section - Full Width */}
-      <section className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-16">
+      <section className={`text-center py-16 ${isEnglish ? 'bg-black' : 'bg-gradient-to-b from-orange-900/20 to-orange-950/20'}`}>
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">
@@ -216,12 +216,6 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold mb-4 text-white">
             {isEnglish ? 'Buy Bitcoin KYC-Free' : 'Compre Bitcoin sem KYC'}
           </h2>
-          <p className="text-gray-300 text-lg mb-8">
-            {isEnglish 
-              ? 'Support SatsLab by using our affiliate links to buy Bitcoin without KYC requirements'
-              : 'Apoie o SatsLab usando nossos links de afiliado para comprar Bitcoin sem exigências de KYC'
-            }
-          </p>
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
             <a 
               href="https://spiketospike.com/?referral=CINDY" 

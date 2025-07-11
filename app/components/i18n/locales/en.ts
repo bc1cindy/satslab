@@ -12,7 +12,7 @@ export const en = {
       title: 'Why take SatsLab?',
       practical: {
         title: 'Practical Learning',
-        description: 'Practice with real Bitcoin transactions on the Signet network, without financial risk.'
+        description: 'Learn Bitcoin for free by doing with real transactions on the Signet network and hands-on projects'
       },
       badges: {
         title: 'Badge System',

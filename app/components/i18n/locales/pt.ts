@@ -12,7 +12,7 @@ export const pt = {
       title: 'Por que fazer o SatsLab?',
       practical: {
         title: 'Aprendizado Prático',
-        description: 'Aprenda fazendo com transações reais na rede Signet e projetos hands-on'
+        description: 'Aprenda Bitcoin gratuitamente fazendo com transações reais na rede Signet e projetos hands-on'
       },
       badges: {
         title: 'Sistema de Badges',
