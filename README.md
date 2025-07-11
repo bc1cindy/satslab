@@ -13,16 +13,6 @@ Interactive Bitcoin education platform with hands-on learning through practical 
 - **Badge System**: Virtual rewards and Ordinals
 - **Hands-on Learning**: Real transaction experience
 
-## 📚 Modules
-
-1. **Bitcoin & Signet Introduction** (no login required)
-2. **Security & Wallets**
-3. **Signet Transactions**
-4. **Bitcoin Mining**
-5. **Lightning Network**
-6. **Taproot & Ordinals**
-7. **Multisig & HD Wallets**
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
@@ -84,18 +74,6 @@ app/
 └── api/                # API routes
 ```
 
-## 🔐 Authentication
-
-Simple authentication system:
-- IP-based authentication
-- Progress tracking per user
-
-## 🏆 Rewards System
-
-- **Virtual Badges**: Modules 1-5 (stored in Supabase)
-- **Ordinals**: Modules 6-7 (minted on Signet)
-- **Progress Tracking**: Complete activity monitoring
-
 ## 🌐 APIs Used
 
 - **mempool.space/signet**: Signet block explorer
@@ -138,6 +116,19 @@ This license is compatible with GNU GPL and approved by the Free Software Founda
 - **Live Site**: https://satslab.org/
 - **Repository**: https://github.com/bc1cindy/satslab
 - **Issues**: https://github.com/bc1cindy/satslab/issues
+
+## 💝 Donations
+
+SatsLab is free and open source software. We accept Bitcoin donations to help maintain and improve the platform:
+
+- **Lightning Network** ⚡ - Fast and low fees
+- **On-chain Bitcoin** ₿ - Traditional Bitcoin transactions
+- **Powered by BTCPay Server** - Self-hosted, non-custodial payment processing
+
+Visit [satslab.org](https://satslab.org/) and click the donation button to support our educational mission. Your donations help us:
+- Maintain server infrastructure
+- Develop new educational modules
+- Keep the platform free for everyone worldwide
 
 ## 🙏 Support
 
