@@ -154,7 +154,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
           {/* Options */}
           <div className="space-y-3">
             {question.options.map((option, index) => {
-              let buttonClass = "w-full text-left p-2 sm:p-4 rounded-lg border transition-all duration-200 min-h-[60px] max-w-full "
+              let buttonClass = "w-full text-left p-2 sm:p-4 rounded-lg border transition-all duration-200 min-h-[60px] max-w-full overflow-hidden "
               
               if (!isAnswered) {
                 buttonClass += "border-gray-600 bg-gray-800 hover:bg-gray-700 hover:border-gray-500 text-white"
@@ -178,11 +178,20 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                 >
                   <div className="flex items-start w-full gap-3">
                     {/* Text Content - Takes available space */}
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <span className="block text-xs sm:text-base leading-relaxed break-all hyphens-auto" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere', hyphens: 'auto' }}>
-                        <span className="font-medium mr-1 sm:mr-2">{String.fromCharCode(97 + index)})</span>
-                        <span style={{ wordSpacing: '-0.1em' }}>{option}</span>
-                      </span>
+                    <div className="flex-1 min-w-0 overflow-hidden pr-2">
+                      <div className="flex items-start gap-1">
+                        <span className="font-medium text-xs sm:text-base flex-shrink-0">{String.fromCharCode(97 + index)})</span>
+                        <span className="block text-xs sm:text-base leading-relaxed" style={{ 
+                          wordBreak: 'break-word', 
+                          overflowWrap: 'anywhere',
+                          WebkitHyphens: 'auto',
+                          MozHyphens: 'auto',
+                          msHyphens: 'auto',
+                          hyphens: 'auto'
+                        }}>
+                          {option}
+                        </span>
+                      </div>
                     </div>
                     
                     {/* Status Icon - Fixed width */}
