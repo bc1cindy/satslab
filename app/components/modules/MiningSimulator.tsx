@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/ca
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { Play, Pause, RotateCcw, Cpu, Zap, Clock, Target, Hash } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 interface MiningStats {
   nonce: number
@@ -24,6 +25,37 @@ export default function MiningSimulator({
   onHashFound, 
   targetZeros = 4 
 }: MiningSimulatorProps) {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    title: isEnglish ? 'Mining Simulator' : 'Simulador de Mineração',
+    findHash: isEnglish ? 'Find a hash that starts with' : 'Encontre um hash que comece com',
+    success: isEnglish ? '✅ Success' : '✅ Sucesso',
+    mining: isEnglish ? '⛏️ Mining' : '⛏️ Minerando',
+    stopped: isEnglish ? '⏸️ Stopped' : '⏸️ Parado',
+    zeros: isEnglish ? 'zeros' : 'zeros',
+    start: isEnglish ? 'Start' : 'Iniciar',
+    stop: isEnglish ? 'Stop' : 'Parar',
+    nonce: isEnglish ? 'Nonce' : 'Nonce',
+    attempts: isEnglish ? 'Attempts' : 'Tentativas',
+    time: isEnglish ? 'Time' : 'Tempo',
+    currentHash: isEnglish ? 'Current Hash' : 'Hash Atual',
+    validHashFound: isEnglish ? '✅ Valid hash found!' : '✅ Hash válido encontrado!',
+    invalidHash: isEnglish ? '❌ Invalid hash' : '❌ Hash inválido',
+    waitingToStart: isEnglish ? 'Waiting to start mining...' : 'Aguardando início da mineração...',
+    blockMinedSuccess: isEnglish ? '🎉 Block Mined Successfully!' : '🎉 Bloco Minerado com Sucesso!',
+    finalHash: isEnglish ? 'Final Hash:' : 'Hash Final:',
+    winningNonce: isEnglish ? 'Winning Nonce:' : 'Nonce Vencedor:',
+    totalAttempts: isEnglish ? 'Total Attempts:' : 'Total de Tentativas:',
+    timeElapsed: isEnglish ? 'Time Elapsed:' : 'Tempo Decorrido:',
+    howItWorks: isEnglish ? '💡 How It Works' : '💡 Como Funciona',
+    nonceExplanation: isEnglish ? 'Number incremented with each attempt' : 'Número incrementado a cada tentativa',
+    hashExplanation: isEnglish ? 'SHA-256 result of the block header' : 'Resultado SHA-256 do cabeçalho do bloco',
+    powExplanation: isEnglish ? 'Find hash with specific zeros' : 'Encontrar hash com zeros específicos'
+  }
+
   const [isRunning, setIsRunning] = useState(false)
   const [stats, setStats] = useState<MiningStats>({
     nonce: 0,
@@ -151,10 +183,10 @@ export default function MiningSimulator({
       <CardHeader>
         <CardTitle className="flex items-center gap-3 text-white">
           <Cpu className="w-6 h-6 text-orange-500" />
-          Simulador de Mineração
+          {t.title}
         </CardTitle>
         <p className="text-gray-400">
-          Encontre um hash que comece com <span className="text-orange-400 font-mono">{targetPattern}</span>
+          {t.findHash} <span className="text-orange-400 font-mono">{targetPattern}</span>
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -169,11 +201,11 @@ export default function MiningSimulator({
                 "bg-gray-700 text-gray-300 border-gray-600"
               }
             >
-              {foundHash ? "✅ Sucesso" : isRunning ? "⛏️ Minerando" : "⏸️ Parado"}
+              {foundHash ? t.success : isRunning ? t.mining : t.stopped}
             </Badge>
             <Badge variant="outline" className="bg-gray-800 text-gray-300 border-gray-600">
               <Target className="w-3 h-3 mr-1" />
-              {targetZeros} zeros
+              {targetZeros} {t.zeros}
             </Badge>
           </div>
           <div className="flex gap-3">
@@ -187,7 +219,7 @@ export default function MiningSimulator({
               }`}
             >
               {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              {isRunning ? 'Parar' : 'Iniciar'}
+              {isRunning ? t.stop : t.start}
             </Button>
             <Button 
               variant="outline" 
@@ -207,7 +239,7 @@ export default function MiningSimulator({
             </div>
             <div className="text-sm text-gray-400 flex items-center justify-center">
               <Hash className="w-3 h-3 mr-1" />
-              Nonce
+              {t.nonce}
             </div>
           </div>
           
@@ -227,7 +259,7 @@ export default function MiningSimulator({
             </div>
             <div className="text-sm text-gray-400 flex items-center justify-center">
               <Target className="w-3 h-3 mr-1" />
-              Tentativas
+              {t.attempts}
             </div>
           </div>
           
@@ -237,14 +269,14 @@ export default function MiningSimulator({
             </div>
             <div className="text-sm text-gray-400 flex items-center justify-center">
               <Clock className="w-3 h-3 mr-1" />
-              Tempo
+              {t.time}
             </div>
           </div>
         </div>
 
         {/* Hash Atual */}
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-white">Hash Atual</h3>
+          <h3 className="text-lg font-semibold text-white">{t.currentHash}</h3>
           <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
             {stats.currentHash ? (
               <>
@@ -256,12 +288,12 @@ export default function MiningSimulator({
                 <div className={`text-xs flex items-center ${
                   stats.isValid ? 'text-green-400' : 'text-red-400'
                 }`}>
-                  {stats.isValid ? '✅ Hash válido encontrado!' : '❌ Hash inválido'}
+                  {stats.isValid ? t.validHashFound : t.invalidHash}
                 </div>
               </>
             ) : (
               <div className="text-gray-500 text-sm">
-                Aguardando início da mineração...
+                {t.waitingToStart}
               </div>
             )}
           </div>
@@ -271,23 +303,23 @@ export default function MiningSimulator({
         {foundHash && (
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-green-400 mb-3 flex items-center">
-              🎉 Bloco Minerado com Sucesso!
+              {t.blockMinedSuccess}
             </h3>
             <div className="space-y-2 text-sm text-gray-300">
               <div className="flex justify-between">
-                <span>Hash Final:</span>
+                <span>{t.finalHash}</span>
                 <span className="font-mono text-green-400">{foundHash.slice(0, 16)}...</span>
               </div>
               <div className="flex justify-between">
-                <span>Nonce Vencedor:</span>
+                <span>{t.winningNonce}</span>
                 <span className="text-blue-400">{stats.nonce.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>Total de Tentativas:</span>
+                <span>{t.totalAttempts}</span>
                 <span className="text-purple-400">{stats.attempts.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>Tempo Decorrido:</span>
+                <span>{t.timeElapsed}</span>
                 <span className="text-orange-400">{formatTime(stats.timeElapsed)}</span>
               </div>
             </div>
@@ -296,11 +328,11 @@ export default function MiningSimulator({
 
         {/* Explicação */}
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-400 mb-2">💡 Como Funciona</h4>
+          <h4 className="font-semibold text-blue-400 mb-2">{t.howItWorks}</h4>
           <div className="text-sm text-gray-300 space-y-1">
-            <p>• <strong>Nonce:</strong> Número incrementado a cada tentativa</p>
-            <p>• <strong>Hash:</strong> Resultado SHA-256 do cabeçalho do bloco</p>
-            <p>• <strong>Proof-of-Work:</strong> Encontrar hash com zeros específicos</p>
+            <p>• <strong>Nonce:</strong> {t.nonceExplanation}</p>
+            <p>• <strong>Hash:</strong> {t.hashExplanation}</p>
+            <p>• <strong>Proof-of-Work:</strong> {t.powExplanation}</p>
           </div>
         </div>
       </CardContent>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/ca
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
 import { CheckCircle, XCircle, HelpCircle, Lightbulb } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 interface Question {
   id: string
@@ -22,6 +23,27 @@ interface QuestionSystemProps {
 }
 
 export default function QuestionSystem({ questions, onComplete, moduleId }: QuestionSystemProps) {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    questionsCompleted: isEnglish ? 'Questions Completed!' : 'Perguntas Concluídas!',
+    accuracyRate: isEnglish ? '% accuracy' : '% de acerto',
+    excellent: isEnglish ? 'Excellent!' : 'Excelente!',
+    goodWork: isEnglish ? 'Good work!' : 'Bom trabalho!',
+    keepStudying: isEnglish ? 'Keep studying!' : 'Continue estudando!',
+    masteredConcepts: isEnglish ? 'You have mastered the basic concepts well!' : 'Você domina bem os conceitos básicos!',
+    reviewConcepts: isEnglish ? 'Review the concepts and try again when you feel ready.' : 'Revise os conceitos e tente novamente quando se sentir pronto.',
+    question: isEnglish ? 'Question' : 'Pergunta',
+    of: isEnglish ? 'of' : 'de',
+    score: isEnglish ? 'Score:' : 'Pontuação:',
+    hint: isEnglish ? 'Hint:' : 'Dica:',
+    explanation: isEnglish ? 'Explanation:' : 'Explicação:',
+    nextQuestion: isEnglish ? 'Next Question' : 'Próxima Pergunta',
+    viewResults: isEnglish ? 'View Results' : 'Ver Resultados'
+  }
+
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>(new Array(questions.length).fill(-1))
   const [showResults, setShowResults] = useState<boolean[]>(new Array(questions.length).fill(false))
@@ -82,7 +104,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white flex items-center justify-center">
             <CheckCircle className="h-8 w-8 text-green-500 mr-3" />
-            Perguntas Concluídas!
+            {t.questionsCompleted}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
@@ -90,7 +112,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
             {score}/{questions.length}
           </div>
           <div className="text-xl text-gray-300">
-            {percentage}% de acerto
+            {percentage}{t.accuracyRate}
           </div>
           <Badge 
             variant="secondary" 
@@ -100,12 +122,12 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
               'bg-red-500/20 text-red-400'
             }`}
           >
-            {percentage >= 80 ? 'Excelente!' : percentage >= 60 ? 'Bom trabalho!' : 'Continue estudando!'}
+            {percentage >= 80 ? t.excellent : percentage >= 60 ? t.goodWork : t.keepStudying}
           </Badge>
           <p className="text-gray-400">
             {percentage >= 80 
-              ? 'Você domina bem os conceitos básicos!'
-              : 'Revise os conceitos e tente novamente quando se sentir pronto.'
+              ? t.masteredConcepts
+              : t.reviewConcepts
             }
           </p>
         </CardContent>
@@ -117,8 +139,8 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
     <div className="space-y-6">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-400">
-        <span>Pergunta {currentQuestion + 1} de {questions.length}</span>
-        <span>Pontuação: {score}/{questions.length}</span>
+        <span>{t.question} {currentQuestion + 1} {t.of} {questions.length}</span>
+        <span>{t.score} {score}/{questions.length}</span>
       </div>
 
       {/* Progress Bar */}
@@ -144,7 +166,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
               <div className="flex items-start">
                 <Lightbulb className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-blue-400 mb-1">Dica:</p>
+                  <p className="text-sm font-medium text-blue-400 mb-1">{t.hint}</p>
                   <p className="text-sm text-blue-300">{question.hint}</p>
                 </div>
               </div>
@@ -211,7 +233,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
           {/* Explanation */}
           {isAnswered && (
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
-              <p className="text-sm font-medium text-gray-300 mb-2">Explicação:</p>
+              <p className="text-sm font-medium text-gray-300 mb-2">{t.explanation}</p>
               <p className="text-sm text-gray-400">{question.explanation}</p>
             </div>
           )}
@@ -223,7 +245,7 @@ export default function QuestionSystem({ questions, onComplete, moduleId }: Ques
                 onClick={handleNext}
                 className="bg-blue-500 hover:bg-blue-600"
               >
-                {currentQuestion < questions.length - 1 ? 'Próxima Pergunta' : 'Ver Resultados'}
+                {currentQuestion < questions.length - 1 ? t.nextQuestion : t.viewResults}
               </Button>
             </div>
           )}
