@@ -30,6 +30,16 @@ const OPReturnSimulator = dynamic(
   { ssr: false }
 )
 
+const MiningSimulator = dynamic(
+  () => import('./MiningSimulator'),
+  { ssr: false }
+)
+
+const PoolMiningSimulator = dynamic(
+  () => import('./PoolMiningSimulator'),
+  { ssr: false }
+)
+
 interface Task {
   id: string
   title: string
@@ -431,6 +441,30 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
             <div className="mb-6">
               <OPReturnSimulator onTransactionSent={(txid: string) => {
                 setUserInputs(prev => ({ ...prev, [currentTask]: txid }))
+              }} />
+            </div>
+          )}
+
+          {/* Mining Simulator for mining simulation tasks */}
+          {!isCompleted && (
+            (task.title.toLowerCase() === 'simulador de mineração') || 
+            (task.title.toLowerCase() === 'mining simulator')
+          ) && (
+            <div className="mb-6">
+              <MiningSimulator onHashFound={(hash: string, nonce: number) => {
+                setUserInputs(prev => ({ ...prev, [currentTask]: hash }))
+              }} />
+            </div>
+          )}
+
+          {/* Pool Mining Simulator for pool mining simulation tasks */}
+          {!isCompleted && (
+            (task.title.toLowerCase() === 'simulação de pool mining') || 
+            (task.title.toLowerCase() === 'pool mining simulation')
+          ) && (
+            <div className="mb-6">
+              <PoolMiningSimulator onRewardEarned={(reward: number) => {
+                setUserInputs(prev => ({ ...prev, [currentTask]: reward.toFixed(6) }))
               }} />
             </div>
           )}
