@@ -116,7 +116,7 @@ export default function OPReturnSimulator({ onTransactionSent }: OPReturnSimulat
     messageRecordedDesc: isEnglish ? 'Your message has been permanently recorded on the blockchain.' : 'Sua mensagem foi gravada permanentemente na blockchain.',
     receipt: isEnglish ? '📄 Transaction Receipt' : '📄 Comprovante da Transação',
     type: isEnglish ? 'Type:' : 'Tipo:',
-    permanentData: isEnglish ? 'OP_RETURN - Permanent Data' : 'OP_RETURN - Dados Permanentes',
+    receiptType: isEnglish ? 'OP_RETURN - Permanent Data' : 'OP_RETURN - Dados Permanentes',
     recordedMessage: isEnglish ? 'Recorded Message:' : 'Mensagem Gravada:',
     usedFee: isEnglish ? 'Used Fee:' : 'Taxa Utilizada:',
     transactionId: isEnglish ? 'Transaction ID (TXID):' : 'ID da Transação (TXID):',
@@ -449,7 +449,7 @@ export default function OPReturnSimulator({ onTransactionSent }: OPReturnSimulat
                 <div className="space-y-2">
                   <div>
                     <span className="text-sm text-gray-400">{t.type}</span>
-                    <p className="font-medium text-white">{t.permanentData}</p>
+                    <p className="font-medium text-white">{t.receiptType}</p>
                   </div>
 
                   <div>
