@@ -490,17 +490,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
             (task.title.toLowerCase() === 'send lightning payment')
           ) && (
             <div className="mb-6">
-              <IntegratedLightningWallet 
-                onPaymentCompleted={(payment: any) => {
-                  setUserInputs(prev => ({ ...prev, [currentTask]: payment.preimage || payment.id }))
-                }}
-                onChannelOpened={(channel: any) => {
-                  setUserInputs(prev => ({ ...prev, [currentTask]: channel.id }))
-                }}
-                onAddressGenerated={(address: string) => {
-                  setUserInputs(prev => ({ ...prev, [currentTask]: address }))
-                }}
-              />
+              <IntegratedLightningWallet />
             </div>
           )}
 
@@ -510,14 +500,7 @@ export default function TaskSystem({ tasks, onComplete, moduleId }: TaskSystemPr
             (task.title.toLowerCase() === 'simulate lightning channel')
           ) && (
             <div className="mb-6">
-              <InteractiveLightningChannel 
-                onChannelStateChange={(state: any) => {
-                  // Handle channel state changes if needed
-                }}
-                onTransactionCompleted={(transaction: any) => {
-                  setUserInputs(prev => ({ ...prev, [currentTask]: transaction.id }))
-                }}
-              />
+              <InteractiveLightningChannel />
             </div>
           )}
 

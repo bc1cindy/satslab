@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
 import { Badge } from '@/app/components/ui/badge'
@@ -83,6 +84,45 @@ export default function IntegratedLightningWallet({
   onChannelOpened,
   onAddressGenerated
 }: IntegratedLightningWalletProps) {
+  const pathname = usePathname()
+  const isEnglish = pathname.startsWith('/en')
+
+  // Translations
+  const t = {
+    title: isEnglish ? 'Integrated Lightning Wallet' : 'Carteira Lightning Integrada',
+    online: isEnglish ? 'Online' : 'Online',
+    offline: isEnglish ? 'Offline' : 'Offline',
+    synced: isEnglish ? 'Synced' : 'Sincronizado',
+    syncing: isEnglish ? 'Syncing' : 'Sincronizando',
+    availableBalance: isEnglish ? 'Available Balance' : 'Saldo Disponível',
+    wallet: isEnglish ? 'Wallet' : 'Carteira',
+    channels: isEnglish ? 'Channels' : 'Canais',
+    payments: isEnglish ? 'Payments' : 'Pagamentos',
+    receive: isEnglish ? 'Receive' : 'Receber',
+    send: isEnglish ? 'Send' : 'Enviar',
+    amount: isEnglish ? 'Amount (sats)' : 'Valor (sats)',
+    description: isEnglish ? 'Description (optional)' : 'Descrição (opcional)',
+    generateInvoice: isEnglish ? 'Generate Invoice' : 'Gerar Invoice',
+    paymentReceived: isEnglish ? 'Payment received' : 'Pagamento recebido',
+    insufficientBalance: isEnglish ? 'Insufficient balance' : 'Saldo insuficiente',
+    lightningPayment: isEnglish ? 'Lightning Payment' : 'Pagamento Lightning',
+    invoice: isEnglish ? 'Lightning Invoice' : 'Invoice Lightning',
+    enterValidInvoice: isEnglish ? 'Enter a valid invoice and amount' : 'Digite um invoice e valor válidos',
+    processing: isEnglish ? 'Processing...' : 'Processando...',
+    payInvoice: isEnglish ? 'Pay Invoice' : 'Pagar Invoice',
+    noChannels: isEnglish ? 'No channels yet' : 'Nenhum canal ainda',
+    openChannel: isEnglish ? 'Open Channel' : 'Abrir Canal',
+    nodeAddress: isEnglish ? 'Node Address' : 'Endereço do Nó',
+    capacity: isEnglish ? 'Capacity (sats)' : 'Capacidade (sats)',
+    noPayments: isEnglish ? 'No payments yet' : 'Nenhum pagamento ainda',
+    type: isEnglish ? 'Type' : 'Tipo',
+    status: isEnglish ? 'Status' : 'Status',
+    pending: isEnglish ? 'Pending' : 'Pendente',
+    routing: isEnglish ? 'Routing' : 'Roteando',
+    completed: isEnglish ? 'Completed' : 'Concluído',
+    failed: isEnglish ? 'Failed' : 'Falhou'
+  }
+
   const [walletState, setWalletState] = useState<WalletState>({
     balance: 0,
     channels: [],
@@ -171,7 +211,7 @@ export default function IntegratedLightningWallet({
       id: Math.random().toString(36).substr(2, 9),
       type: 'receive',
       amount,
-      description: description || 'Pagamento recebido',
+      description: description || t.paymentReceived,
       status: 'completed',
       timestamp: Date.now(),
       fee: 0,
@@ -194,13 +234,13 @@ export default function IntegratedLightningWallet({
   // Process outgoing payment
   const processPayment = async () => {
     if (!sendInvoice || !sendAmount) {
-      alert('Digite um invoice e valor válidos')
+      alert(t.enterValidInvoice)
       return
     }
 
     const amount = Number(sendAmount)
     if (amount > walletState.balance) {
-      alert('Saldo insuficiente')
+      alert(t.insufficientBalance)
       return
     }
 
@@ -216,7 +256,7 @@ export default function IntegratedLightningWallet({
       id: Math.random().toString(36).substr(2, 9),
       type: 'send',
       amount,
-      description: `Pagamento Lightning de ${amount} sats`,
+      description: `${t.lightningPayment} ${amount} sats`,
       status: 'pending',
       timestamp: Date.now(),
       fee: 0,
@@ -302,7 +342,7 @@ export default function IntegratedLightningWallet({
   // Open new channel
   const openChannel = async (nodeId: string, capacity: number) => {
     if (capacity > walletState.balance) {
-      alert('Saldo insuficiente para abrir canal')
+      alert(t.insufficientBalance)
       return
     }
 
@@ -380,14 +420,14 @@ export default function IntegratedLightningWallet({
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Zap className="w-6 h-6 text-yellow-500" />
-              <span className="text-white">Carteira Lightning Integrada</span>
+              <span className="text-white">{t.title}</span>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant={walletState.isOnline ? 'default' : 'destructive'}>
-                {walletState.isOnline ? 'Online' : 'Offline'}
+                {walletState.isOnline ? t.online : t.offline}
               </Badge>
               <Badge variant={walletState.syncedToChain ? 'default' : 'secondary'}>
-                {walletState.syncedToChain ? 'Sincronizado' : 'Sincronizando'}
+                {walletState.syncedToChain ? t.synced : t.syncing}
               </Badge>
             </div>
           </CardTitle>
