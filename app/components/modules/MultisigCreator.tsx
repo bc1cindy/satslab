@@ -279,10 +279,10 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
             </TabsList>
             
             <TabsContent value="setup" className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="m-value" className="text-sm font-medium">
-                    M ({t.requiredSignatures})
+                  <Label htmlFor="m-value" className="text-xs sm:text-sm font-medium">
+                    M ({isEnglish ? 'Req.' : 'Nec.'})
                   </Label>
                   <Input
                     id="m-value"
@@ -291,12 +291,12 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                     onChange={(e) => setM(Number(e.target.value))}
                     min="1"
                     max="15"
-                    className="text-center"
+                    className="text-center h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="n-value" className="text-sm font-medium">
-                    N ({t.totalKeys})
+                  <Label htmlFor="n-value" className="text-xs sm:text-sm font-medium">
+                    N ({isEnglish ? 'Total' : 'Total'})
                   </Label>
                   <Input
                     id="n-value"
@@ -305,43 +305,37 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                     onChange={(e) => setN(Number(e.target.value))}
                     min="1"
                     max="15"
-                    className="text-center"
+                    className="text-center h-10"
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
                 <Label className="text-sm font-medium">{t.walletType}</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1 sm:gap-2">
                   <Button
                     variant={walletType === 'p2sh' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2sh')}
-                    className="text-xs sm:text-sm h-10 sm:h-9"
+                    className="text-xs h-12 sm:h-10 px-1 sm:px-3 flex flex-col justify-center"
                   >
-                    <span className="block">
-                      <span className="font-semibold">P2SH</span>
-                      <span className="block text-xs opacity-75">(Legacy)</span>
-                    </span>
+                    <div className="font-semibold">P2SH</div>
+                    <div className="text-[10px] sm:text-xs opacity-75 leading-tight">(Legacy)</div>
                   </Button>
                   <Button
                     variant={walletType === 'p2wsh' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2wsh')}
-                    className="text-xs sm:text-sm h-10 sm:h-9"
+                    className="text-xs h-12 sm:h-10 px-1 sm:px-3 flex flex-col justify-center"
                   >
-                    <span className="block">
-                      <span className="font-semibold">P2WSH</span>
-                      <span className="block text-xs opacity-75">(SegWit)</span>
-                    </span>
+                    <div className="font-semibold">P2WSH</div>
+                    <div className="text-[10px] sm:text-xs opacity-75 leading-tight">(SegWit)</div>
                   </Button>
                   <Button
                     variant={walletType === 'p2tr' ? 'default' : 'outline'}
                     onClick={() => setWalletType('p2tr')}
-                    className="text-xs sm:text-sm h-10 sm:h-9"
+                    className="text-xs h-12 sm:h-10 px-1 sm:px-3 flex flex-col justify-center"
                   >
-                    <span className="block">
-                      <span className="font-semibold">P2TR</span>
-                      <span className="block text-xs opacity-75">(Taproot)</span>
-                    </span>
+                    <div className="font-semibold">P2TR</div>
+                    <div className="text-[10px] sm:text-xs opacity-75 leading-tight">(Taproot)</div>
                   </Button>
                 </div>
               </div>
