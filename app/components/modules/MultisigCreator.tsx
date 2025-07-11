@@ -63,6 +63,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
     noKeysGenerated: isEnglish ? 'No keys generated. Go to "Setup" tab to generate keys.' : 'Nenhuma chave gerada. Vá para a aba "Setup" para gerar chaves.',
     publicKey: isEnglish ? 'Public Key' : 'Chave Pública',
     privateKey: isEnglish ? 'Private Key (WIF)' : 'Chave Privada (WIF)',
+    key: isEnglish ? 'Key' : 'Chave',
     select: isEnglish ? 'Select' : 'Selecionar',
     createMultisigFirst: isEnglish ? 'Create a multisig wallet first in the "Setup" tab' : 'Crie uma carteira multisig primeiro na aba "Setup"',
     recipientAddress: isEnglish ? 'Recipient Address' : 'Endereço Destinatário',
