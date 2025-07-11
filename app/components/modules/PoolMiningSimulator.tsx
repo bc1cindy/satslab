@@ -153,7 +153,10 @@ export default function PoolMiningSimulator({
     const blockProbability = 0.002 // 0.2% chance per interval (10x menos por rodar 10x mais)
     
     if (Math.random() < blockProbability) {
-      const blockReward = 6.25 // Current Bitcoin block reward
+      // Current Bitcoin block reward after 2024 halving + average transaction fees
+      const baseReward = 3.125 // Block subsidy after April 2024 halving
+      const avgFees = 0.05 + Math.random() * 0.15 // Realistic fee range: 0.05-0.20 BTC
+      const blockReward = baseReward + avgFees
       const playerShare = (stats.playerContribution / 100) * blockReward
       
       setStats(prev => ({
@@ -165,7 +168,7 @@ export default function PoolMiningSimulator({
 
       setRecentBlocks(prev => [
         {
-          height: 750000 + stats.blocksFound + 1,
+          height: 870000 + stats.blocksFound + 1, // Current Bitcoin block height (2025)
           reward: blockReward,
           playerShare,
           timestamp: Date.now()
