@@ -36,7 +36,65 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
     walletCreated: isEnglish ? 'Wallet Created!' : 'Carteira Criada!',
     multisigWalletCreated: isEnglish ? 'Multisig wallet {0} created successfully' : 'Carteira multisig {0} criada com sucesso',
     errorCreatingWallet: isEnglish ? 'Error creating wallet' : 'Erro ao criar carteira',
-    unknownError: isEnglish ? 'Unknown error' : 'Erro desconhecido'
+    unknownError: isEnglish ? 'Unknown error' : 'Erro desconhecido',
+    multisigTransactionCreated: isEnglish ? 'Multisig Transaction Created!' : 'Transação Multisig Criada!',
+    requiresSignatures: isEnglish ? 'Requires {0} signatures out of {1} possible' : 'Requer {0} assinaturas de {1} possíveis',
+    errorCreatingTransaction: isEnglish ? 'Error creating transaction' : 'Erro ao criar transação',
+    transactionSigned: isEnglish ? 'Transaction Signed!' : 'Transação Assinada!',
+    signatureAdded: isEnglish ? 'Signature {0} of {1} added' : 'Assinatura {0} de {1} adicionada',
+    errorSigningTransaction: isEnglish ? 'Error signing transaction' : 'Erro ao assinar transação',
+    transactionOrKeyNotAvailable: isEnglish ? 'Transaction or key not available' : 'Transação ou chave não disponível',
+    fillRequiredFields: isEnglish ? 'Fill in all required fields' : 'Preencha todos os campos obrigatórios',
+    multisigWallet: isEnglish ? 'Multisig Wallet' : 'Carteira Multisig',
+    multisigWalletDescription: isEnglish ? 'Create multisig wallets that require multiple signatures for transactions' : 'Crie carteiras multisig que requerem múltiplas assinaturas para transações',
+    setup: isEnglish ? 'Setup' : 'Setup',
+    keys: isEnglish ? 'Keys' : 'Chaves',
+    transaction: isEnglish ? 'Transaction' : 'Transação',
+    advanced: isEnglish ? 'Advanced' : 'Avançado',
+    requiredSignatures: isEnglish ? 'Required Signatures' : 'Assinaturas Necessárias',
+    totalKeys: isEnglish ? 'Total Keys' : 'Total de Chaves',
+    walletType: isEnglish ? 'Wallet Type' : 'Tipo de Carteira',
+    generateKeys: isEnglish ? 'Generate {0} Private Keys' : 'Gerar {0} Chaves Privadas',
+    createWallet: isEnglish ? 'Create {0}-of-{1} Wallet' : 'Criar Carteira {0}-de-{1}',
+    multisigAddress: isEnglish ? 'Multisig Address' : 'Endereço Multisig',
+    type: isEnglish ? 'Type' : 'Tipo',
+    configuration: isEnglish ? 'Configuration' : 'Configuração',
+    privateKeysGenerated: isEnglish ? 'Private Keys Generated' : 'Chaves Privadas Geradas',
+    noKeysGenerated: isEnglish ? 'No keys generated. Go to "Setup" tab to generate keys.' : 'Nenhuma chave gerada. Vá para a aba "Setup" para gerar chaves.',
+    publicKey: isEnglish ? 'Public Key' : 'Chave Pública',
+    privateKey: isEnglish ? 'Private Key (WIF)' : 'Chave Privada (WIF)',
+    select: isEnglish ? 'Select' : 'Selecionar',
+    createMultisigFirst: isEnglish ? 'Create a multisig wallet first in the "Setup" tab' : 'Crie uma carteira multisig primeiro na aba "Setup"',
+    recipientAddress: isEnglish ? 'Recipient Address' : 'Endereço Destinatário',
+    amount: isEnglish ? 'Amount (sats)' : 'Valor (sats)',
+    feeRate: isEnglish ? 'Fee Rate (sats/vB)' : 'Taxa (sats/vB)',
+    estimatedFee: isEnglish ? 'Estimated fee' : 'Taxa estimada',
+    creating: isEnglish ? 'Creating...' : 'Criando...',
+    createTransaction: isEnglish ? 'Create Transaction' : 'Criar Transação',
+    multisigTransactionCreated2: isEnglish ? 'Multisig Transaction Created' : 'Transação Multisig Criada',
+    signatures: isEnglish ? 'Signatures' : 'Assinaturas',
+    status: isEnglish ? 'Status' : 'Status',
+    complete: isEnglish ? 'Complete' : 'Completa',
+    pending: isEnglish ? 'Pending' : 'Pendente',
+    fee: isEnglish ? 'Fee' : 'Taxa',
+    txId: isEnglish ? 'TX ID' : 'TX ID',
+    signingProcess: isEnglish ? 'Signing Process' : 'Processo de Assinatura',
+    createTransactionFirst: isEnglish ? 'Create a multisig transaction first in the "Transaction" tab' : 'Crie uma transação multisig primeiro na aba "Transação"',
+    signatureProgress: isEnglish ? 'Signature Progress' : 'Progresso das Assinaturas',
+    signWithKeys: isEnglish ? 'Sign with Available Keys' : 'Assinar com Chaves Disponíveis',
+    signed: isEnglish ? 'Signed' : 'Assinada',
+    sign: isEnglish ? 'Sign' : 'Assinar',
+    transactionComplete: isEnglish ? 'Transaction Complete!' : 'Transação Completa!',
+    viewOnExplorer: isEnglish ? 'View on Explorer' : 'Ver no Explorer',
+    multisigUseCases: isEnglish ? 'Multisig Use Cases' : 'Casos de Uso Multisig',
+    corporateSecurity: isEnglish ? 'Corporate Security' : 'Segurança Corporativa',
+    corporateSecurityDesc: isEnglish ? 'Companies use multisig to protect funds, requiring approval from multiple executives for transactions.' : 'Empresas usam multisig para proteger fundos, exigindo aprovação de múltiplos executivos para transações.',
+    personalCustody: isEnglish ? 'Personal Custody' : 'Custódia Pessoal',
+    personalCustodyDesc: isEnglish ? 'Individuals distribute keys across devices or locations to avoid single points of failure.' : 'Indivíduos distribuem chaves entre dispositivos ou locais para evitar ponto único de falha.',
+    escrowServices: isEnglish ? 'Escrow Services' : 'Escrow Services',
+    escrowServicesDesc: isEnglish ? 'Commercial transactions with neutral third party, releasing funds only with agreement from parties.' : 'Transações comerciais com terceiro neutro, liberando fundos apenas com acordo das partes.',
+    inheritance: isEnglish ? 'Inheritance' : 'Inheritance',
+    inheritanceDesc: isEnglish ? 'Digital inheritance where family members can access funds in specific situations.' : 'Herança digital onde familiares podem acessar fundos em situações específicas.'
   }
   const [m, setM] = useState(2)
   const [n, setN] = useState(3)
@@ -57,8 +115,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       setMultisigKeys(keys)
       
       toast({
-        title: "Chaves Geradas!",
-        description: `${n} chaves privadas geradas com sucesso`,
+        title: t.keysGenerated,
+        description: t.keysGeneratedDesc.replace('{0}', n.toString()),
       })
       
       if (onKeysGenerated) {
@@ -66,8 +124,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       }
     } catch (error) {
       toast({
-        title: "Erro ao gerar chaves",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorGeneratingKeys,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     }
@@ -76,8 +134,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
   const createMultisigWallet = useCallback(() => {
     if (multisigKeys.length !== n) {
       toast({
-        title: "Erro",
-        description: `Necessário ${n} chaves para criar carteira ${m}-de-${n}`,
+        title: t.error,
+        description: isEnglish ? `Need ${n} keys to create ${m}-of-${n} wallet` : `Necessário ${n} chaves para criar carteira ${m}-de-${n}`,
         variant: "destructive",
       })
       return
@@ -89,8 +147,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       setMultisigWallet(wallet)
       
       toast({
-        title: "Carteira Multisig Criada!",
-        description: `Endereço: ${wallet.address}`,
+        title: t.walletCreated,
+        description: `${isEnglish ? 'Address' : 'Endereço'}: ${wallet.address}`,
       })
 
       if (onWalletCreated) {
@@ -102,8 +160,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       }
     } catch (error) {
       toast({
-        title: "Erro ao criar carteira",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorCreatingWallet,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     }
@@ -145,14 +203,14 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       setCurrentTransaction(transaction)
       
       toast({
-        title: "Transação Multisig Criada!",
-        description: `Requer ${multisigWallet.m} assinaturas de ${multisigWallet.n} possíveis`,
+        title: t.multisigTransactionCreated,
+        description: t.requiresSignatures.replace('{0}', multisigWallet.m.toString()).replace('{1}', multisigWallet.n.toString()),
       })
 
     } catch (error) {
       toast({
-        title: "Erro ao criar transação",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorCreatingTransaction,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     } finally {
@@ -163,8 +221,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
   const signTransaction = useCallback((keyIndex: number) => {
     if (!currentTransaction || !multisigKeys[keyIndex]) {
       toast({
-        title: "Erro",
-        description: "Transação ou chave não disponível",
+        title: t.error,
+        description: t.transactionOrKeyNotAvailable,
         variant: "destructive",
       })
       return
@@ -181,8 +239,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
       setCurrentTransaction(signedTransaction)
       
       toast({
-        title: "Transação Assinada!",
-        description: `Assinatura ${signedTransaction.signatures.size} de ${signedTransaction.requiredSignatures} adicionada`,
+        title: t.transactionSigned,
+        description: t.signatureAdded.replace('{0}', signedTransaction.signatures.size.toString()).replace('{1}', signedTransaction.requiredSignatures.toString()),
       })
 
       if (signedTransaction.isComplete && onTransactionSigned) {
@@ -191,8 +249,8 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
 
     } catch (error) {
       toast({
-        title: "Erro ao assinar transação",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
+        title: t.errorSigningTransaction,
+        description: error instanceof Error ? error.message : t.unknownError,
         variant: "destructive",
       })
     }
@@ -206,24 +264,24 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Carteira Multisig</CardTitle>
+          <CardTitle>{t.multisigWallet}</CardTitle>
           <CardDescription>
-            Crie carteiras multisig que requerem múltiplas assinaturas para transações
+            {t.multisigWalletDescription}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="setup" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="setup">Setup</TabsTrigger>
-              <TabsTrigger value="keys">Chaves</TabsTrigger>
-              <TabsTrigger value="transaction">Transação</TabsTrigger>
-              <TabsTrigger value="signing">Assinatura</TabsTrigger>
+              <TabsTrigger value="setup">{t.setup}</TabsTrigger>
+              <TabsTrigger value="keys">{t.keys}</TabsTrigger>
+              <TabsTrigger value="transaction">{t.transaction}</TabsTrigger>
+              <TabsTrigger value="signing">{isEnglish ? 'Signing' : 'Assinatura'}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="setup" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="m-value">M (Assinaturas Necessárias)</Label>
+                  <Label htmlFor="m-value">M ({t.requiredSignatures})</Label>
                   <Input
                     id="m-value"
                     type="number"
@@ -234,7 +292,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="n-value">N (Total de Chaves)</Label>
+                  <Label htmlFor="n-value">N ({t.totalKeys})</Label>
                   <Input
                     id="n-value"
                     type="number"
@@ -247,7 +305,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
               </div>
 
               <div className="space-y-2">
-                <Label>Tipo de Carteira</Label>
+                <Label>{t.walletType}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button
                     variant={walletType === 'p2sh' ? 'default' : 'outline'}
@@ -272,14 +330,14 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
 
               <div className="space-y-2">
                 <Button onClick={generateMultisigKeys} className="w-full">
-                  Gerar {n} Chaves Privadas
+                  {t.generateKeys.replace('{0}', n.toString())}
                 </Button>
                 <Button 
                   onClick={createMultisigWallet} 
                   disabled={multisigKeys.length !== n}
                   className="w-full"
                 >
-                  Criar Carteira {m}-de-{n}
+                  {t.createWallet.replace('{0}', m.toString()).replace('{1}', n.toString())}
                 </Button>
               </div>
 
@@ -288,15 +346,15 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                   <AlertDescription>
                     <div className="space-y-2">
                       <div>
-                        <strong>Endereço Multisig:</strong>
+                        <strong>{t.multisigAddress}:</strong>
                         <br />
                         <code className="text-sm break-all">{multisigWallet.address}</code>
                       </div>
                       <div>
-                        <strong>Tipo:</strong> {multisigWallet.type.toUpperCase()}
+                        <strong>{t.type}:</strong> {multisigWallet.type.toUpperCase()}
                       </div>
                       <div>
-                        <strong>Configuração:</strong> {multisigWallet.m}-de-{multisigWallet.n}
+                        <strong>{t.configuration}:</strong> {multisigWallet.m}-{isEnglish ? 'of' : 'de'}-{multisigWallet.n}
                       </div>
                     </div>
                   </AlertDescription>
@@ -306,12 +364,12 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
             
             <TabsContent value="keys" className="space-y-4">
               <div className="space-y-4">
-                <h3 className="font-semibold">Chaves Privadas Geradas</h3>
+                <h3 className="font-semibold">{t.privateKeysGenerated}</h3>
                 
                 {multisigKeys.length === 0 ? (
                   <Alert>
                     <AlertDescription>
-                      Nenhuma chave gerada. Vá para a aba "Setup" para gerar chaves.
+                      {t.noKeysGenerated}
                     </AlertDescription>
                   </Alert>
                 ) : (
@@ -320,23 +378,23 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                       <Card key={index} className="p-3">
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <Badge variant="secondary">Chave {index + 1}</Badge>
+                            <Badge variant="secondary">{t.key} {index + 1}</Badge>
                             <Button
                               size="sm"
                               onClick={() => setSigningKeyIndex(index)}
                               variant={signingKeyIndex === index ? 'default' : 'outline'}
                             >
-                              Selecionar
+                              {t.select}
                             </Button>
                           </div>
                           <div>
-                            <Label className="text-xs">Chave Pública:</Label>
+                            <Label className="text-xs">{t.publicKey}:</Label>
                             <code className="text-xs break-all block bg-gray-50 p-1 rounded">
                               {key.publicKey}
                             </code>
                           </div>
                           <div>
-                            <Label className="text-xs">Chave Privada (WIF):</Label>
+                            <Label className="text-xs">{t.privateKey}:</Label>
                             <code className="text-xs break-all block bg-gray-50 p-1 rounded">
                               {key.wif}
                             </code>
@@ -353,14 +411,14 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
               {!multisigWallet && (
                 <Alert>
                   <AlertDescription>
-                    Crie uma carteira multisig primeiro na aba "Setup"
+                    {t.createMultisigFirst}
                   </AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="recipient-multisig">Endereço Destinatário</Label>
+                  <Label htmlFor="recipient-multisig">{t.recipientAddress}</Label>
                   <Input
                     id="recipient-multisig"
                     value={recipientAddress}
@@ -371,7 +429,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="amount-multisig">Valor (sats)</Label>
+                  <Label htmlFor="amount-multisig">{t.amount}</Label>
                   <Input
                     id="amount-multisig"
                     type="number"
@@ -384,7 +442,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="fee-rate-multisig">Taxa (sats/vB)</Label>
+                  <Label htmlFor="fee-rate-multisig">{t.feeRate}</Label>
                   <Input
                     id="fee-rate-multisig"
                     type="number"
@@ -397,13 +455,13 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
 
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-600">
-                    Taxa estimada: {estimateMultisigFee()} sats
+                    {t.estimatedFee}: {estimateMultisigFee()} sats
                   </div>
                   <Button 
                     onClick={createMultisigTransaction} 
                     disabled={isCreating || !multisigWallet}
                   >
-                    {isCreating ? 'Criando...' : 'Criar Transação'}
+                    {isCreating ? t.creating : t.createTransaction}
                   </Button>
                 </div>
               </div>
@@ -413,20 +471,20 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                   <AlertDescription>
                     <div className="space-y-2">
                       <div>
-                        <strong>Transação Multisig Criada</strong>
+                        <strong>{t.multisigTransactionCreated2}</strong>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <strong>Assinaturas:</strong> {currentTransaction.signatures.size}/{currentTransaction.requiredSignatures}
+                          <strong>{t.signatures}:</strong> {currentTransaction.signatures.size}/{currentTransaction.requiredSignatures}
                         </div>
                         <div>
-                          <strong>Status:</strong> {currentTransaction.isComplete ? 'Completa' : 'Pendente'}
+                          <strong>{t.status}:</strong> {currentTransaction.isComplete ? t.complete : t.pending}
                         </div>
                         <div>
-                          <strong>Taxa:</strong> {currentTransaction.fee} sats
+                          <strong>{t.fee}:</strong> {currentTransaction.fee} sats
                         </div>
                         <div>
-                          <strong>TX ID:</strong> {currentTransaction.txId || 'Pendente'}
+                          <strong>{t.txId}:</strong> {currentTransaction.txId || t.pending}
                         </div>
                       </div>
                     </div>
@@ -439,19 +497,19 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
               {!currentTransaction && (
                 <Alert>
                   <AlertDescription>
-                    Crie uma transação multisig primeiro na aba "Transação"
+                    {t.createTransactionFirst}
                   </AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-4">
-                <h3 className="font-semibold">Processo de Assinatura</h3>
+                <h3 className="font-semibold">{t.signingProcess}</h3>
                 
                 {currentTransaction && (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label>Progresso das Assinaturas</Label>
+                        <Label>{t.signatureProgress}</Label>
                         <div className="mt-2 flex items-center space-x-2">
                           <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
@@ -467,10 +525,10 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                         </div>
                       </div>
                       <div>
-                        <Label>Status</Label>
+                        <Label>{t.status}</Label>
                         <div className="mt-2">
                           <Badge variant={currentTransaction.isComplete ? 'default' : 'secondary'}>
-                            {currentTransaction.isComplete ? 'Completa' : 'Pendente'}
+                            {currentTransaction.isComplete ? t.complete : t.pending}
                           </Badge>
                         </div>
                       </div>
@@ -479,12 +537,12 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                     <Separator />
 
                     <div className="space-y-3">
-                      <Label>Assinar com Chaves Disponíveis</Label>
+                      <Label>{t.signWithKeys}</Label>
                       <div className="grid grid-cols-1 gap-2">
                         {multisigKeys.map((key, index) => (
                           <div key={index} className="flex items-center justify-between p-2 border rounded">
                             <div className="flex items-center space-x-2">
-                              <Badge variant="outline">Chave {index + 1}</Badge>
+                              <Badge variant="outline">{t.key} {index + 1}</Badge>
                               <code className="text-xs">
                                 {key.publicKey.substring(0, 20)}...
                               </code>
@@ -494,7 +552,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                               onClick={() => signTransaction(index)}
                               disabled={currentTransaction.signatures.has(index) || currentTransaction.isComplete}
                             >
-                              {currentTransaction.signatures.has(index) ? 'Assinada' : 'Assinar'}
+                              {currentTransaction.signatures.has(index) ? t.signed : t.sign}
                             </Button>
                           </div>
                         ))}
@@ -506,10 +564,10 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                         <AlertDescription>
                           <div className="space-y-2">
                             <div>
-                              <strong>Transação Completa!</strong>
+                              <strong>{t.transactionComplete}</strong>
                             </div>
                             <div>
-                              <strong>TX ID:</strong>
+                              <strong>{t.txId}:</strong>
                               <br />
                               <code className="text-sm">{currentTransaction.txId}</code>
                             </div>
@@ -519,7 +577,7 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
                               rel="noopener noreferrer"
                               className="text-blue-600 hover:underline"
                             >
-                              Ver no Explorer
+                              {t.viewOnExplorer}
                             </a>
                           </div>
                         </AlertDescription>
@@ -535,32 +593,32 @@ export default function MultisigCreator({ onWalletCreated, onWalletObjectCreated
 
       <Card>
         <CardHeader>
-          <CardTitle>Casos de Uso Multisig</CardTitle>
+          <CardTitle>{t.multisigUseCases}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <h4 className="font-semibold">Segurança Corporativa</h4>
+              <h4 className="font-semibold">{t.corporateSecurity}</h4>
               <p className="text-sm text-gray-600">
-                Empresas usam multisig para proteger fundos, exigindo aprovação de múltiplos executivos para transações.
+                {t.corporateSecurityDesc}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold">Custódia Pessoal</h4>
+              <h4 className="font-semibold">{t.personalCustody}</h4>
               <p className="text-sm text-gray-600">
-                Indivíduos distribuem chaves entre dispositivos ou locais para evitar ponto único de falha.
+                {t.personalCustodyDesc}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold">Escrow Services</h4>
+              <h4 className="font-semibold">{t.escrowServices}</h4>
               <p className="text-sm text-gray-600">
-                Transações comerciais com terceiro neutro, liberando fundos apenas com acordo das partes.
+                {t.escrowServicesDesc}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold">Inheritance</h4>
+              <h4 className="font-semibold">{t.inheritance}</h4>
               <p className="text-sm text-gray-600">
-                Herança digital onde familiares podem acessar fundos em situações específicas.
+                {t.inheritanceDesc}
               </p>
             </div>
           </div>
