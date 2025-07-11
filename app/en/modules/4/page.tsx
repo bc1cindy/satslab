@@ -212,31 +212,31 @@ export default function Module4EN() {
 
         {currentSection === 'completed' && (
           <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-orange-900 to-blue-900 border-orange-500">
-              <CardHeader className="text-center">
+            <Card className="bg-gradient-to-br from-orange-900 to-blue-900 border-orange-500 mx-auto max-w-2xl">
+              <CardHeader className="text-center px-4 sm:px-6">
                 <div className="flex justify-center mb-4">
-                  <Award className="h-16 w-16 text-yellow-500" />
+                  <Award className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-500" />
                 </div>
-                <CardTitle className="text-2xl text-white">Congratulations! Module Completed</CardTitle>
-                <CardDescription className="text-orange-200">
+                <CardTitle className="text-xl sm:text-2xl text-white">Congratulations! Module Completed</CardTitle>
+                <CardDescription className="text-orange-200 text-sm sm:text-base">
                   You have successfully completed Module 4
                 </CardDescription>
               </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <div className="bg-black/20 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-white mb-2">🏆 Badge Earned:</h3>
-                  <div className="flex items-center justify-center space-x-3">
-                    <Trophy className="h-8 w-8 text-yellow-500" />
-                    <span className="text-xl font-bold text-yellow-400">Mining Apprentice</span>
+              <CardContent className="text-center space-y-4 px-4 sm:px-6">
+                <div className="bg-black/20 p-3 sm:p-4 rounded-lg">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">🏆 Badge Earned:</h3>
+                  <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+                    <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
+                    <span className="text-lg sm:text-xl font-bold text-yellow-400">Mining Apprentice</span>
                   </div>
-                  <p className="text-orange-200 text-sm mt-2">
+                  <p className="text-orange-200 text-xs sm:text-sm mt-2 leading-relaxed">
                     Completed mining simulations and understood the proof-of-work process
                   </p>
                 </div>
 
-                <div className="bg-black/20 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-white mb-2">📚 What you learned:</h3>
-                  <ul className="text-orange-200 text-sm space-y-1">
+                <div className="bg-black/20 p-3 sm:p-4 rounded-lg">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">📚 What you learned:</h3>
+                  <ul className="text-orange-200 text-xs sm:text-sm space-y-1 text-left">
                     <li>• How proof-of-work secures the Bitcoin network</li>
                     <li>• The computational challenge miners face</li>
                     <li>• How difficulty adjusts to maintain block times</li>
@@ -245,16 +245,16 @@ export default function Module4EN() {
                   </ul>
                 </div>
 
-                <div className="flex justify-center space-x-4 pt-4">
-                  <Link href="/en">
-                    <Button variant="outline" className="border-orange-500 text-orange-400 hover:bg-orange-500/10">
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4">
+                  <Link href="/en" className="flex-1 sm:flex-initial">
+                    <Button variant="outline" className="w-full sm:w-auto border-orange-500 text-orange-400 hover:bg-orange-500/10 text-sm sm:text-base py-2 sm:py-3">
                       Back to Modules
                     </Button>
                   </Link>
-                  <Link href="/en/modules/5">
-                    <Button className="bg-orange-600 hover:bg-orange-700">
+                  <Link href="/en/modules/5" className="flex-1">
+                    <Button className="w-full bg-orange-600 hover:bg-orange-700 text-sm sm:text-base py-2 sm:py-3">
                       Next Module: Lightning Network
-                      <ArrowLeft className="ml-2 h-5 w-5 rotate-180" />
+                      <ArrowLeft className="ml-2 h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
                     </Button>
                   </Link>
                 </div>

@@ -287,26 +287,26 @@ export default function Module7() {
 
         {/* Completion Screen */}
         {currentSection === 'completed' && (
-          <Card className="bg-gray-900 border-gray-800 text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl text-green-400 flex items-center justify-center">
-                <Trophy className="h-8 w-8 mr-3" />
-                Parabéns! Módulo Final Concluído
+          <Card className="bg-gray-900 border-gray-800 text-center mx-auto max-w-2xl">
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-xl sm:text-2xl text-green-400 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                <Trophy className="h-6 w-6 sm:h-8 sm:w-8" />
+                <span className="text-center">Parabéns! Módulo Final Concluído</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm sm:text-base">
                 Você completou com sucesso o Módulo 7 - Carteiras Multisig
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
               {progress.badgeEarned && (
-                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-6">
-                  <div className="text-4xl mb-2">🏆</div>
-                  <h3 className="text-xl font-semibold text-green-400 mb-2">Ordinal NFT Badge Final Conquistado!</h3>
-                  <Badge className="bg-purple-500/20 text-purple-400 text-lg px-4 py-2">
-                    <Award className="h-5 w-5 mr-2" />
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 sm:p-6">
+                  <div className="text-3xl sm:text-4xl mb-2">🏆</div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-green-400 mb-2">Ordinal NFT Badge Final Conquistado!</h3>
+                  <Badge className="bg-purple-500/20 text-purple-400 text-sm sm:text-lg px-3 sm:px-4 py-1 sm:py-2">
+                    <Award className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     {module7Badge.name}
                   </Badge>
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-xs sm:text-sm text-gray-400 mt-2 leading-relaxed">
                     Você dominou todas as tecnologias avançadas do Bitcoin e criou seu badge NFT final!
                   </p>
                   {multisigResults.ordinalId && (
@@ -320,19 +320,19 @@ export default function Module7() {
                 </div>
               )}
 
-              {/* Summary */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-purple-400">{progress.questionsScore}/3</div>
-                  <div className="text-sm text-gray-400">Perguntas Corretas</div>
+              {/* Summary - Responsive Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl font-bold text-purple-400">{progress.questionsScore}/3</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Perguntas Corretas</div>
                 </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-green-400">{progress.tasksScore}/3</div>
-                  <div className="text-sm text-gray-400">Tarefas Concluídas</div>
+                <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl font-bold text-green-400">{progress.tasksScore}/3</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Tarefas Concluídas</div>
                 </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-orange-400">{Math.floor(progress.timeSpent / 60)}m</div>
-                  <div className="text-sm text-gray-400">Tempo Total</div>
+                <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-400">{Math.floor(progress.timeSpent / 60)}m</div>
+                  <div className="text-xs sm:text-sm text-gray-400">Tempo Total</div>
                 </div>
               </div>
 
@@ -373,9 +373,9 @@ export default function Module7() {
               )}
 
               {/* Learning Summary */}
-              <div className="bg-gray-800 rounded-lg p-4">
-                <h3 className="font-semibold text-white mb-3">🎓 O que você aprendeu:</h3>
-                <ul className="list-disc list-inside space-y-1 text-gray-300 text-sm text-left">
+              <div className="bg-gray-800 rounded-lg p-3 sm:p-4">
+                <h3 className="font-semibold text-white mb-3 text-sm sm:text-base">🎓 O que você aprendeu:</h3>
+                <ul className="list-disc list-inside space-y-1 text-gray-300 text-xs sm:text-sm text-left">
                   <li>Carteiras multisig distribuem risco entre múltiplas chaves independentes</li>
                   <li>Taproot melhora privacidade fazendo multisig parecer transações simples</li>
                   <li>Assinaturas Schnorr reduzem tamanho e custos de transações multisig</li>
@@ -386,25 +386,26 @@ export default function Module7() {
 
               {/* Final Achievement */}
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-purple-500/20 to-orange-500/20 border border-purple-500/30 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400 mb-2">
+                <div className="bg-gradient-to-r from-purple-500/20 to-orange-500/20 border border-purple-500/30 rounded-lg p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400 mb-2">
                     🎉 Parabéns pela Jornada Completa!
                   </h3>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
                     Você completou todos os 7 módulos da SatsLab e se tornou um verdadeiro especialista 
                     em Bitcoin. Agora você possui conhecimento completo desde o básico até as tecnologias 
                     mais avançadas do protocolo!
                   </p>
                 </div>
                 
-                <div className="flex space-x-4">
+                {/* Mobile: Stack buttons vertically, Desktop: Side by side */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Link href="/" className="flex-1">
-                    <Button className="w-full bg-purple-500 hover:bg-purple-600">
+                    <Button className="w-full bg-purple-500 hover:bg-purple-600 text-sm sm:text-base py-2 sm:py-3">
                       Ver Módulos Completos
                     </Button>
                   </Link>
-                  <Link href="/">
-                    <Button variant="outline" className="border-gray-600 text-gray-300">
+                  <Link href="/" className="flex-1 sm:flex-initial">
+                    <Button variant="outline" className="w-full sm:w-auto border-gray-600 text-gray-300 text-sm sm:text-base py-2 sm:py-3">
                       Voltar ao Início
                     </Button>
                   </Link>
