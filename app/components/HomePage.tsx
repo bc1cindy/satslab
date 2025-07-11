@@ -234,7 +234,12 @@ export default function HomePage() {
               <div className="text-left">
                 <div className="font-bold text-white text-lg">Spike to Spike</div>
                 <div className="text-sm text-orange-400 font-semibold">
-                  {isEnglish ? '20% discount on fee' : '20% de desconto na taxa'}
+                  {isEnglish ? '20% discount on fee with this link' : (
+                    <>
+                      20% de desconto na taxa<br className="sm:hidden" />
+                      <span className="hidden sm:inline"> </span>com esse link
+                    </>
+                  )}
                 </div>
               </div>
             </a>
@@ -256,7 +261,12 @@ export default function HomePage() {
               <div className="text-left">
                 <div className="font-bold text-white text-lg">Mooze</div>
                 <div className="text-sm text-orange-400 font-semibold">
-                  {isEnglish ? '15% discount on fee - code: Cindy' : '15% de desconto na taxa - cupom: Cindy'}
+                  {isEnglish ? '15% discount on fee with code: Cindy' : (
+                    <>
+                      15% de desconto na taxa<br className="sm:hidden" />
+                      <span className="hidden sm:inline"> </span>com o cupom: Cindy
+                    </>
+                  )}
                 </div>
               </div>
             </a>
