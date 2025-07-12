@@ -27,11 +27,11 @@ import { LanguageProvider } from '@/app/components/i18n/LanguageProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SatsLab - Bitcoin Operations Platform',
+  title: 'SatsLab - Bitcoin',
   description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
   metadataBase: new URL('https://satslab.org'),
   openGraph: {
-    title: 'SatsLab - Bitcoin Operations Platform',
+    title: 'SatsLab - Bitcoin',
     description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
     url: 'https://satslab.org',
     siteName: 'SatsLab',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SatsLab - Bitcoin Operations Platform',
+    title: 'SatsLab - Bitcoin',
     description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
     images: ['/images/SatsLabProLogo/SatsLabProLogo.png'],
   },
