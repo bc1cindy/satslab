@@ -29,6 +29,29 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'SatsLab - Bitcoin Operations Platform',
   description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
+  metadataBase: new URL('https://satslab.org'),
+  openGraph: {
+    title: 'SatsLab - Bitcoin Operations Platform',
+    description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
+    url: 'https://satslab.org',
+    siteName: 'SatsLab',
+    images: [
+      {
+        url: '/images/SatsLabProLogo/SatsLabProLogo.png',
+        width: 1200,
+        height: 630,
+        alt: 'SatsLab Pro Logo',
+      }
+    ],
+    locale: 'pt_BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SatsLab - Bitcoin Operations Platform',
+    description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
+    images: ['/images/SatsLabProLogo/SatsLabProLogo.png'],
+  },
 }
 
 export default function RootLayout({
