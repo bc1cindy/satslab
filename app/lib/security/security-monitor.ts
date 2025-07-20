@@ -618,8 +618,169 @@ export class SecurityMonitor {
     // like Splunk, ELK Stack, or cloud monitoring services
     if (process.env.NODE_ENV === 'production' && event.severity === 'critical') {
       // Example: Send to external monitoring
-      console.log('Forwarding critical security event to external monitoring:', event.id)
+      this.sendSlackAlert(event)
+      this.sendEmailAlert(event)
+      console.log('🚨 Forwarding critical security event to external monitoring:', event.id)
     }
+  }
+
+  /**
+   * Send Slack alert for critical events
+   */
+  private async sendSlackAlert(event: SecurityEvent): Promise<void> {
+    const webhookUrl = process.env.SLACK_SECURITY_WEBHOOK_URL
+    if (!webhookUrl) return
+
+    const message = {
+      text: `🚨 CRITICAL SECURITY ALERT`,
+      attachments: [
+        {
+          color: 'danger',
+          fields: [
+            {
+              title: 'Event Type',
+              value: event.type,
+              short: true
+            },
+            {
+              title: 'Severity',
+              value: event.severity.toUpperCase(),
+              short: true
+            },
+            {
+              title: 'Source',
+              value: event.source,
+              short: true
+            },
+            {
+              title: 'Risk Score',
+              value: event.risk_score.toString(),
+              short: true
+            },
+            {
+              title: 'Timestamp',
+              value: event.timestamp,
+              short: false
+            }
+          ]
+        }
+      ]
+    }
+
+    try {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message)
+      })
+    } catch (error) {
+      console.error('Failed to send Slack alert:', error)
+    }
+  }
+
+  /**
+   * Send email alert for critical events
+   */
+  private async sendEmailAlert(event: SecurityEvent): Promise<void> {
+    const adminEmail = process.env.SECURITY_ADMIN_EMAIL
+    if (!adminEmail) return
+
+    // In production, integrate with email service (SendGrid, SES, etc.)
+    console.log(`📧 Would send email alert to ${adminEmail} for event ${event.id}`)
+  }
+
+  /**
+   * Enhanced threat detection with automatic IP blocking
+   */
+  public detectAndBlockThreats(request: Request, body?: string): {
+    blocked: boolean
+    threats: string[]
+    riskScore: number
+  } {
+    const threats: string[] = []
+    let riskScore = 0
+    const ip = this.getClientIP(request)
+    
+    // Check for common attack patterns in URL
+    const url = new URL(request.url)
+    const suspiciousPatterns = [
+      /(\bunion\b|\bselect\b|\binsert\b|\bdelete\b)/i,
+      /(&lt;script|<script|javascript:|eval\()/i,
+      /(\.\.\/)|(\.\.\\)|(%2e%2e)/i,
+      /(cmd\.exe|powershell|\/bin\/bash)/i
+    ]
+
+    suspiciousPatterns.forEach(pattern => {
+      if (pattern.test(url.pathname + url.search)) {
+        threats.push('Suspicious URL pattern detected')
+        riskScore += 30
+      }
+    })
+
+    // Check request body for threats
+    if (body) {
+      suspiciousPatterns.forEach(pattern => {
+        if (pattern.test(body)) {
+          threats.push('Suspicious payload detected')
+          riskScore += 40
+        }
+      })
+    }
+
+    // Check for crypto-specific threats
+    const cryptoPatterns = [
+      /[13][a-km-zA-HJ-NP-Z1-9]{25,34}/g, // Bitcoin addresses
+      /xprv[a-zA-Z0-9]{100,}/g, // Extended private keys
+      /[5KL][1-9A-HJ-NP-Za-km-z]{50,51}/g // Private keys WIF format
+    ]
+
+    cryptoPatterns.forEach(pattern => {
+      if (body && pattern.test(body)) {
+        threats.push('Cryptocurrency private data detected')
+        riskScore += 60
+      }
+    })
+
+    // Auto-block if risk score is too high
+    const shouldBlock = riskScore >= 70
+    
+    if (shouldBlock) {
+      this.logEvent(
+        'suspicious_activity',
+        'critical',
+        'input_validation',
+        'threat_detector',
+        {
+          threats,
+          riskScore,
+          autoBlocked: true
+        },
+        undefined,
+        undefined,
+        ip,
+        request.headers.get('user-agent') || undefined
+      )
+    }
+
+    return {
+      blocked: shouldBlock,
+      threats,
+      riskScore
+    }
+  }
+
+  /**
+   * Get client IP address
+   */
+  private getClientIP(request: Request): string {
+    const forwarded = request.headers.get('x-forwarded-for')
+    const realIp = request.headers.get('x-real-ip')
+    const cfConnectingIp = request.headers.get('cf-connecting-ip')
+    
+    return cfConnectingIp || 
+           realIp || 
+           forwarded?.split(',')[0]?.trim() || 
+           'unknown'
   }
 
   private determineSeverityFromValidation(failure: string): 'low' | 'medium' | 'high' | 'critical' {

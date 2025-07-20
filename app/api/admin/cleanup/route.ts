@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/client'
+import { requireAdminAccess } from '@/app/lib/auth/admin-auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 VERIFICAR AUTENTICAÇÃO DE ADMIN
+    const adminAuth = await requireAdminAccess()
+    if (adminAuth.error) {
+      return NextResponse.json(
+        adminAuth.response,
+        { status: adminAuth.status }
+      )
+    }
     const supabase = createClient()
     
     // 1. Clean up old IP-based sessions (keeping only cookie-based sessions)

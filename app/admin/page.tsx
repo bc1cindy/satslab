@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Badge } from '@/app/components/ui/badge'
 import { Button } from '@/app/components/ui/button'
-import { useRequireAuth } from '@/app/components/auth/AuthProvider'
-import { analyticsService } from '@/app/lib/supabase/analytics-service'
+import { useSession } from 'next-auth/react'
+import { formatDateBR } from '@/app/lib/utils'
 import { createClient } from '@/app/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowLeft, Users, Clock, Trophy, Wallet, Activity, TrendingUp, Calendar, BarChart3, Zap, Target, MapPin, Languages } from 'lucide-react'
+import { ArrowLeft, Users, Clock, Trophy, Wallet, Activity, TrendingUp, Calendar, BarChart3, Zap, Target, MapPin, Languages, Crown, Plus, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
+import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 interface PlatformStats {
   total_users: number
@@ -52,6 +53,25 @@ interface GeolocationStats {
   country: string
   count: number
   percentage: number
+}
+
+interface ProUser {
+  email: string
+  is_pro: boolean
+  pro_expires_at: string
+  created_at: string
+  updated_at: string
+  days_remaining: number
+  is_expired: boolean
+  expires_soon: boolean
+}
+
+interface ProUsersData {
+  users: ProUser[]
+  total: number
+  active: number
+  expired: number
+  expiring_soon: number
 }
 
 // Translation object
@@ -118,7 +138,31 @@ const translations = {
     activeUsersText: "usuários ativos",
     geolocation: "Geolocalização:",
     locations: "localizações",
-    awaitingData: "Aguardando dados"
+    awaitingData: "Aguardando dados",
+
+    // Pro Users Management
+    proUsersManagement: "Gerenciamento de Usuários Pro",
+    addProUser: "Adicionar Usuário Pro",
+    emailPlaceholder: "email@exemplo.com",
+    addUser: "Adicionar",
+    totalProUsers: "Total Pro",
+    activeProUsers: "Ativos",
+    expiredProUsers: "Expirados", 
+    expiringSoon: "Expirando em breve",
+    email: "Email",
+    expiresAt: "Expira em",
+    status: "Status",
+    actions: "Ações",
+    active: "Ativo",
+    expired: "Expirado",
+    expiringSoonStatus: "Expira em breve",
+    removeAccess: "Remover Acesso",
+    daysRemaining: "dias restantes",
+    dayRemaining: "dia restante",
+    expiredDays: "expirado há",
+    days: "dias",
+    noProUsers: "Nenhum usuário Pro",
+    proUsersWillAppear: "Usuários Pro aparecerão aqui quando adicionados"
   },
   en: {
     // Header
@@ -182,23 +226,121 @@ const translations = {
     activeUsersText: "active users",
     geolocation: "Geolocation:",
     locations: "locations",
-    awaitingData: "Awaiting data"
+    awaitingData: "Awaiting data",
+
+    // Pro Users Management
+    proUsersManagement: "Pro Users Management",
+    addProUser: "Add Pro User",
+    emailPlaceholder: "email@example.com",
+    addUser: "Add User",
+    totalProUsers: "Total Pro",
+    activeProUsers: "Active",
+    expiredProUsers: "Expired",
+    expiringSoon: "Expiring Soon",
+    email: "Email",
+    expiresAt: "Expires At",
+    status: "Status",
+    actions: "Actions",
+    active: "Active",
+    expired: "Expired",
+    expiringSoonStatus: "Expiring Soon",
+    removeAccess: "Remove Access",
+    daysRemaining: "days remaining",
+    dayRemaining: "day remaining",
+    expiredDays: "expired",
+    days: "days ago",
+    noProUsers: "No Pro users",
+    proUsersWillAppear: "Pro users will appear here when added"
   }
 }
 
 export default function AdminDashboard() {
-  const { isLoading } = useRequireAuth()
+  const { data: session, status } = useSession()
+  const isLoading = status === 'loading'
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
   const [realtimeData, setRealtimeData] = useState<RealtimeAnalytics | null>(null)
   const [moduleStats, setModuleStats] = useState<ModuleAnalytics[]>([])
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [geolocationStats, setGeolocationStats] = useState<GeolocationStats[]>([])
+  const [proUsersData, setProUsersData] = useState<ProUsersData | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
+  const [newUserEmail, setNewUserEmail] = useState('')
+  const [addingUser, setAddingUser] = useState(false)
 
   // Helper function to get translations
   const t = (key: keyof typeof translations.pt) => translations[language][key]
+
+  const fetchProUsers = async () => {
+    try {
+      const response = await fetch('/api/admin/pro-users')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setProUsersData(data)
+        }
+      }
+    } catch (error) {
+      securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to fetch Pro users list', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  const addProUser = async () => {
+    if (!newUserEmail || addingUser) return
+    
+    setAddingUser(true)
+    try {
+      const response = await fetch('/api/admin/pro-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newUserEmail })
+      })
+      
+      if (response.ok) {
+        setNewUserEmail('')
+        await fetchProUsers() // Refresh list
+        alert('Usuário Pro adicionado com sucesso!')
+      } else {
+        const error = await response.json()
+        alert(`Erro: ${error.error}`)
+      }
+    } catch (error) {
+      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to add Pro user', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+      alert('Erro ao adicionar usuário')
+    } finally {
+      setAddingUser(false)
+    }
+  }
+
+  const removeProUser = async (email: string) => {
+    if (!confirm(`Remover acesso Pro de ${email}?`)) return
+    
+    try {
+      const response = await fetch('/api/admin/pro-users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      
+      if (response.ok) {
+        await fetchProUsers() // Refresh list
+        alert('Acesso Pro removido com sucesso!')
+      } else {
+        const error = await response.json()
+        alert(`Erro: ${error.error}`)
+      }
+    } catch (error) {
+      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to remove Pro user', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+      alert('Erro ao remover usuário')
+    }
+  }
 
   const fetchAllData = async (forceRefresh = false) => {
     try {
@@ -216,7 +358,9 @@ export default function AdminDashboard() {
       // Use our new analytics endpoint that calculates everything correctly
       // Add cache-busting timestamp to ensure fresh data
       const timestamp = Date.now()
-      console.log(`Fetching analytics data at ${new Date(timestamp).toISOString()}...`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Fetching analytics data at ${new Date(timestamp).toISOString()}...`)
+      }
       
       const analyticsResponse = await fetch(`/api/admin/analytics-data?t=${timestamp}&force=true`, {
         cache: 'no-store',
@@ -229,17 +373,21 @@ export default function AdminDashboard() {
         const analyticsData = await analyticsResponse.json()
         
         if (analyticsData.success) {
-          console.log('Analytics data received:', {
-            totalSessions: analyticsData.platformStats.total_sessions,
-            totalUsers: analyticsData.platformStats.total_users,
-            timestamp: new Date().toISOString()
-          })
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Analytics data received:', {
+              totalSessions: analyticsData.platformStats.total_sessions,
+              totalUsers: analyticsData.platformStats.total_users,
+              timestamp: new Date().toISOString()
+            })
+          }
           
           // Set platform stats from our endpoint
           setPlatformStats(analyticsData.platformStats)
           
           // Set module stats from our endpoint  
-          console.log('Module Analytics from API:', analyticsData.moduleAnalytics)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Module Analytics from API:', analyticsData.moduleAnalytics)
+          }
           setModuleStats(analyticsData.moduleAnalytics)
           
           // Set geolocation stats from our endpoint
@@ -271,15 +419,22 @@ export default function AdminDashboard() {
         .limit(50)
 
       if (activityError) {
-        console.warn('Activity data error:', activityError)
+        securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Activity data fetch failed', {
+          error: activityError instanceof Error ? activityError.message : 'Unknown error'
+        })
         setRecentActivity([])
       } else {
         setRecentActivity(activityData || [])
       }
 
+      // Fetch Pro users data
+      await fetchProUsers()
+
       setLastUpdated(new Date())
     } catch (error) {
-      console.error('Error fetching admin data:', error)
+      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Admin dashboard data fetch failed', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
       // Set fallback data even on error
       setPlatformStats({
         total_users: 0,
@@ -311,14 +466,18 @@ export default function AdminDashboard() {
     
     // Auto-refresh every 30 seconds for real-time updates
     const interval = setInterval(() => {
-      console.log('Auto-refreshing admin data...')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Auto-refreshing admin data...')
+      }
       fetchAllData(true)
     }, 30000) // 30 seconds for real-time updates
     
     // Also refresh when tab becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('Tab became visible, refreshing data...')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Tab became visible, refreshing data...')
+        }
         fetchAllData(true)
       }
     }
@@ -373,6 +532,38 @@ export default function AdminDashboard() {
     )
   }
 
+  // Check if user is authenticated and is admin
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Acesso Restrito</h1>
+          <p className="text-gray-400 mb-4">Você precisa estar logado para acessar esta página.</p>
+          <Link href="/auth" className="text-orange-500 hover:text-orange-400">
+            Fazer Login
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Check if user is admin
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  if (!adminEmail || session.user?.email !== adminEmail) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Acesso Negado</h1>
+          <p className="text-gray-400 mb-4">Apenas administradores podem acessar esta página.</p>
+          <p className="text-xs text-gray-500 mb-4">Usuário atual: {session.user?.email}</p>
+          <Link href="/dashboard" className="text-orange-500 hover:text-orange-400">
+            Voltar ao Dashboard
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -399,7 +590,9 @@ export default function AdminDashboard() {
               </Button>
               <Button 
                 onClick={() => {
-                  console.log('Manual refresh triggered')
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('Manual refresh triggered')
+                  }
                   // Clear all state first
                   setPlatformStats(null)
                   setModuleStats([])
@@ -540,6 +733,133 @@ export default function AdminDashboard() {
               <p className="text-xs text-gray-400 mt-1">
                 {t('learningCompleted')}
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Pro Users Management */}
+        <div className="mb-8">
+          <Card className="bg-gray-900 border-gray-800">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Crown className="h-5 w-5 text-yellow-500 mr-2" />
+                {t('proUsersManagement')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Add User Form */}
+              <div className="mb-6 p-4 bg-gray-800 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">{t('addProUser')}</h3>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    placeholder={t('emailPlaceholder')}
+                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    onKeyDown={(e) => e.key === 'Enter' && addProUser()}
+                  />
+                  <Button 
+                    onClick={addProUser}
+                    disabled={!newUserEmail || addingUser}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {addingUser ? '...' : t('addUser')}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Pro Users Stats */}
+              {proUsersData && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-3 bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-400">{proUsersData.total}</div>
+                    <div className="text-sm text-gray-400">{t('totalProUsers')}</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-green-400">{proUsersData.active}</div>
+                    <div className="text-sm text-gray-400">{t('activeProUsers')}</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-red-400">{proUsersData.expired}</div>
+                    <div className="text-sm text-gray-400">{t('expiredProUsers')}</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-400">{proUsersData.expiring_soon}</div>
+                    <div className="text-sm text-gray-400">{t('expiringSoon')}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Users List */}
+              {proUsersData && proUsersData.users.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-700">
+                        <th className="text-left py-2 px-3">{t('email')}</th>
+                        <th className="text-left py-2 px-3">{t('expiresAt')}</th>
+                        <th className="text-left py-2 px-3">{t('status')}</th>
+                        <th className="text-left py-2 px-3">{t('actions')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {proUsersData.users.map((user) => (
+                        <tr key={user.email} className="border-b border-gray-800 hover:bg-gray-800/50">
+                          <td className="py-2 px-3 font-medium">{user.email}</td>
+                          <td className="py-2 px-3">
+                            {formatDateBR(user.pro_expires_at)}
+                          </td>
+                          <td className="py-2 px-3">
+                            {user.is_expired ? (
+                              <Badge variant="outline" className="text-red-400 border-red-500/20">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                {t('expired')} ({Math.abs(user.days_remaining)} {t('days')})
+                              </Badge>
+                            ) : user.expires_soon ? (
+                              <Badge variant="outline" className="text-orange-400 border-orange-500/20">
+                                <Clock className="h-3 w-3 mr-1" />
+                                {user.days_remaining === 1 ? 
+                                  `${user.days_remaining} ${t('dayRemaining')}` : 
+                                  `${user.days_remaining} ${t('daysRemaining')}`
+                                }
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-green-400 border-green-500/20">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                {user.days_remaining === 1 ? 
+                                  `${user.days_remaining} ${t('dayRemaining')}` : 
+                                  `${user.days_remaining} ${t('daysRemaining')}`
+                                }
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            <Button
+                              onClick={() => removeProUser(user.email)}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-400 border-red-500/20 hover:bg-red-500/10"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              {t('removeAccess')}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Crown className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-500">{t('noProUsers')}</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {t('proUsersWillAppear')}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

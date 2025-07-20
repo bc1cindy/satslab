@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/client'
+import { requireAdminAccess } from '@/app/lib/auth/admin-auth'
 
 // GET /api/admin/analytics - Get comprehensive analytics data
 export async function GET(request: NextRequest) {
   try {
+    // 🔒 VERIFICAR AUTENTICAÇÃO DE ADMIN
+    const adminAuth = await requireAdminAccess()
+    if (adminAuth.error) {
+      return NextResponse.json(
+        adminAuth.response,
+        { status: adminAuth.status }
+      )
+    }
     const supabase = createClient()
     
     // Fetch platform stats
@@ -86,6 +95,14 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/analytics/export - Export analytics data
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 VERIFICAR AUTENTICAÇÃO DE ADMIN
+    const adminAuth = await requireAdminAccess()
+    if (adminAuth.error) {
+      return NextResponse.json(
+        adminAuth.response,
+        { status: adminAuth.status }
+      )
+    }
     const { format, dateRange } = await request.json()
     const supabase = createClient()
 

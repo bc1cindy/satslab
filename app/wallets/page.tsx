@@ -8,6 +8,7 @@ import { Badge } from '@/app/components/ui/badge'
 import { Button } from '@/app/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, Wallet, Copy, ExternalLink, Plus, Calendar, Coins, RefreshCw } from 'lucide-react'
+import { formatDateBR } from '@/app/lib/utils'
 
 interface WalletData {
   id: string
@@ -38,12 +39,16 @@ export default function WalletsPage() {
             .order('created_at', { ascending: false })
 
           if (error) {
-            console.error('Error loading wallets:', error)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error loading wallets:', error)
+            }
           } else {
             setWallets(data || [])
           }
         } catch (error) {
-          console.error('Error loading wallets:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error loading wallets:', error)
+          }
         } finally {
           setWalletsLoading(false)
         }
@@ -61,7 +66,9 @@ export default function WalletsPage() {
       setCopied(type)
       setTimeout(() => setCopied(''), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to copy:', err)
+      }
     }
   }
 
@@ -72,7 +79,9 @@ export default function WalletsPage() {
 
   const refreshBalance = async (walletId: string) => {
     // Simulated balance refresh - in a real app this would call the mempool API
-    console.log('Refreshing balance for wallet:', walletId)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Refreshing balance for wallet:', walletId)
+    }
   }
 
   if (isLoading) {
@@ -232,7 +241,7 @@ export default function WalletsPage() {
                     <div className="text-right">
                       <div className="text-xs text-gray-500">
                         <Calendar className="h-3 w-3 inline mr-1" />
-                        Criada em {new Date(wallet.created_at).toLocaleDateString('pt-BR')}
+                        Criada em {formatDateBR(wallet.created_at)}
                       </div>
                     </div>
                   </div>

@@ -386,12 +386,11 @@ export default function Module7() {
               <div className="space-y-4">
                 <div className="bg-gradient-to-r from-purple-500/20 to-orange-500/20 border border-purple-500/30 rounded-lg p-4 sm:p-6">
                   <h3 className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400 mb-2">
-                    🎉 Parabéns pela Jornada Completa!
+                    🎉 Parabéns por Completar o Módulo 7!
                   </h3>
                   <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    Você completou todos os 7 módulos da SatsLab e se tornou um verdadeiro especialista 
-                    em Bitcoin. Agora você possui conhecimento completo desde o básico até as tecnologias 
-                    mais avançadas do protocolo!
+                    Você dominou as carteiras multisig e adquiriu conhecimentos avançados de segurança 
+                    em Bitcoin. Este é um marco importante na sua jornada de aprendizado sobre o protocolo!
                   </p>
                 </div>
                 

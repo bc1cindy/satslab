@@ -19,7 +19,9 @@ export default function VerifyAnalytics() {
       setData(result)
       setLastRefresh(new Date())
     } catch (error) {
-      console.error('Error fetching analytics data:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching analytics data:', error)
+      }
     } finally {
       setLoading(false)
     }

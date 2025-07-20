@@ -21,3 +21,5 @@ export default function AnalyticsWrapper({ children }: AnalyticsWrapperProps) {
 
   return <>{children}</>
 }
+
+export { AnalyticsWrapper }

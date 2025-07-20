@@ -21,6 +21,7 @@ import { ThemeProvider } from '@/app/components/theme-provider'
 import { Toaster } from '@/app/components/ui/toaster'
 import AnalyticsWrapper from '@/app/components/layout/AnalyticsWrapper'
 import { SessionProvider } from '@/app/lib/session/session-provider'
+import NextAuthProvider from '@/app/components/auth/NextAuthProvider'
 import CookieBanner from '@/app/components/layout/CookieBanner'
 import { LanguageProvider } from '@/app/components/i18n/LanguageProvider'
 
@@ -71,17 +72,19 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider>
-            <AuthProvider>
-              <AnalyticsWrapper>
-                <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
-                  {children}
-                  <CookieBanner />
-                </div>
-              </AnalyticsWrapper>
-              <Toaster />
-            </AuthProvider>
-          </SessionProvider>
+          <NextAuthProvider>
+            <SessionProvider>
+              <AuthProvider>
+                <AnalyticsWrapper>
+                  <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
+                    {children}
+                    <CookieBanner />
+                  </div>
+                </AnalyticsWrapper>
+                <Toaster />
+              </AuthProvider>
+            </SessionProvider>
+          </NextAuthProvider>
         </ThemeProvider>
       </body>
     </html>

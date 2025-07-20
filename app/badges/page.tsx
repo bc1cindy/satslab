@@ -9,6 +9,7 @@ import { Badge } from '@/app/components/ui/badge'
 import { Button } from '@/app/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, Trophy, Calendar, Award, Sparkles } from 'lucide-react'
+import { formatDateBR } from '@/app/lib/utils'
 
 export default function BadgesPage() {
   const { session, isLoading } = useRequireAuth()
@@ -23,7 +24,9 @@ export default function BadgesPage() {
           const userBadges = await getUserBadges(session.user.id)
           setBadges(userBadges)
         } catch (error) {
-          console.error('Error loading badges:', error)
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error loading badges:', error)
+          }
         } finally {
           setBadgesLoading(false)
         }
@@ -158,7 +161,7 @@ export default function BadgesPage() {
                     <div className="pt-2 border-t border-gray-800">
                       <div className="flex items-center justify-center text-xs text-gray-400">
                         <Calendar className="h-3 w-3 mr-1" />
-                        Conquistado em {new Date(earnedBadge.earnedAt).toLocaleDateString('pt-BR')}
+                        Conquistado em {formatDateBR(earnedBadge.earnedAt)}
                       </div>
                     </div>
                   )}

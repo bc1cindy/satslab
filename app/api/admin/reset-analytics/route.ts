@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/app/lib/supabase/server'
+import { getServerSupabase } from '@/app/lib/supabase-server'
+import { requireAdminAccess } from '@/app/lib/auth/admin-auth'
 
 export async function POST() {
   try {
-    const supabase = createServerClient()
+    // 🔒 VERIFICAR AUTENTICAÇÃO DE ADMIN
+    const adminAuth = await requireAdminAccess()
+    if (adminAuth.error) {
+      return NextResponse.json(
+        adminAuth.response,
+        { status: adminAuth.status }
+      )
+    }
+    const supabase = getServerSupabase()
     
     // WARNING: This will delete ALL analytics data
     // Only use if you want a fresh start

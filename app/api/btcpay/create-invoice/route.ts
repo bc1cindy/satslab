@@ -1,42 +1,130 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/lib/auth'
+import { exchangeRateCache } from '@/app/lib/exchange-rate-cache'
+import { CreateInvoiceSchema, validateInput } from '@/app/lib/validation/schemas'
+import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const { storeId, amount, currency = 'SATS', paymentMethod = 'lightning' } = await request.json()
-
-    console.log('Dados recebidos:', { storeId, amount, currency, paymentMethod })
-
-    if (!storeId || !amount || amount <= 0) {
-      console.error('Validação falhou:', { storeId, amount })
+    // 🔒 VERIFICAR AUTENTICAÇÃO
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Store ID e quantidade são obrigatórios' },
+        { error: 'Não autorizado - Login necessário' },
+        { status: 401 }
+      )
+    }
+
+    // 🔒 VALIDAÇÃO SEGURA COM ZOD
+    const requestBody = await request.json()
+    
+    // Validar dados de entrada
+    const validation = validateInput(CreateInvoiceSchema, {
+      amount: requestBody.amount,
+      currency: requestBody.currency || 'BRL',
+      userEmail: session.user.email, // Usar email da sessão (seguro)
+      metadata: requestBody.metadata
+    })
+
+    if (!validation.success) {
+      securityLogger.warn(
+        SecurityEventType.SUSPICIOUS_ACTIVITY,
+        'Invalid invoice creation attempt',
+        { 
+          error: validation.error,
+          userEmail: session.user.email,
+          requestData: {
+            amount: requestBody.amount,
+            currency: requestBody.currency
+          }
+        },
+        request
+      )
+      
+      return NextResponse.json(
+        { error: `Dados inválidos: ${validation.error}` },
         { status: 400 }
       )
     }
 
+    if (!validation.data) {
+      return NextResponse.json(
+        { error: 'Erro na validação dos dados' },
+        { status: 400 }
+      )
+    }
+    
+    const { amount, currency, userEmail } = validation.data
+
+    // Log seguro da operação
+    securityLogger.info(
+      SecurityEventType.PAYMENT_INITIATED,
+      'BTCPay invoice creation requested',
+      { amount, currency },
+      request
+    )
+
+    // Obter cotação USD/BRL com cache seguro
+    const usdToBrlRate = await exchangeRateCache.getUsdToBrlRate()
+    
+    // Converter BRL para USD
+    const amountUSD = amount / usdToBrlRate
+    
+    // Log seguro das conversões
+    securityLogger.info(
+      SecurityEventType.PAYMENT_INITIATED,
+      'Currency conversion calculated',
+      { 
+        usdToBrlRate,
+        amountBRL: amount,
+        amountUSD: amountUSD.toFixed(2)
+      }
+    )
+
     const btcpayUrl = process.env.BTCPAY_URL || 'https://demo.btcpayserver.org'
     const apiKey = process.env.BTCPAY_API_KEY
+    const storeId = process.env.BTCPAY_STORE_ID
 
-    console.log('Configuração BTCPay:', { btcpayUrl, hasApiKey: !!apiKey })
+    securityLogger.info(
+      SecurityEventType.CONFIGURATION_CHANGE,
+      'BTCPay configuration verified',
+      { hasApiKey: !!apiKey, hasStoreId: !!storeId }
+    )
 
-    if (!apiKey) {
-      console.error('BTCPay API key não configurada')
+    if (!apiKey || !storeId) {
+      securityLogger.error(
+        SecurityEventType.SYSTEM_ERROR,
+        'BTCPay configuration incomplete'
+      )
       return NextResponse.json(
-        { error: 'BTCPay API key não configurada' },
+        { error: 'BTCPay Server não configurado corretamente' },
         { status: 500 }
       )
     }
 
     const invoiceData = {
-      amount: amount.toString(),
-      currency,
+      amount: amountUSD.toFixed(2),
+      currency: 'USD',
       metadata: {
-        buyerName: 'Apoiador SatsLab',
-        itemDesc: 'Doação para SatsLab'
+        buyerEmail: userEmail,
+        itemDesc: 'SatsLab Pro - Curso Completo de Bitcoin',
+        finalAmountBRL: amount,
+        exchangeRate: usdToBrlRate
+      },
+      checkout: {
+        redirectURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/pro?payment=success`,
+        paymentMethods: ['BTC', 'BTC-LightningNetwork']
       }
     }
 
-    console.log('Enviando para BTCPay:', { url: `${btcpayUrl}/api/v1/stores/${storeId}/invoices`, invoiceData })
+    securityLogger.info(
+      SecurityEventType.PAYMENT_INITIATED,
+      'Sending invoice to BTCPay',
+      { amount: amountUSD.toFixed(2), currency: 'USD' }
+    )
 
     const response = await fetch(`${btcpayUrl}/api/v1/stores/${storeId}/invoices`, {
       method: 'POST',
@@ -47,11 +135,19 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(invoiceData)
     })
 
-    console.log('Resposta BTCPay:', { status: response.status, statusText: response.statusText })
+    securityLogger.info(
+      SecurityEventType.PAYMENT_INITIATED,
+      'BTCPay response received',
+      { status: response.status, statusText: response.statusText }
+    )
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('BTCPay API error:', { status: response.status, error: errorData })
+      securityLogger.error(
+        SecurityEventType.PAYMENT_FAILED,
+        'BTCPay API error',
+        { status: response.status }
+      )
       return NextResponse.json(
         { error: 'Erro ao criar invoice no BTCPay', details: errorData },
         { status: response.status }
@@ -60,49 +156,31 @@ export async function POST(request: NextRequest) {
 
     const invoice = await response.json()
 
-    // Determinar o método de pagamento preferido
-    let paymentString = ''
-    let qrCode = ''
-
-    if (paymentMethod === 'lightning' && invoice.paymentMethods) {
-      const lightningMethod = invoice.paymentMethods.find(
-        (method: any) => method.paymentType === 'LightningNetwork'
-      )
-      if (lightningMethod) {
-        paymentString = lightningMethod.destination
-        qrCode = lightningMethod.qrCode
-      }
-    } else if (paymentMethod === 'onchain' && invoice.paymentMethods) {
-      const onchainMethod = invoice.paymentMethods.find(
-        (method: any) => method.paymentType === 'BTCLike'
-      )
-      if (onchainMethod) {
-        paymentString = onchainMethod.destination
-        qrCode = onchainMethod.qrCode
-      }
-    }
-
-    // Fallback para o primeiro método disponível
-    if (!paymentString && invoice.paymentMethods && invoice.paymentMethods.length > 0) {
-      const firstMethod = invoice.paymentMethods[0]
-      paymentString = firstMethod.destination
-      qrCode = firstMethod.qrCode
-    }
+    securityLogger.info(
+      SecurityEventType.PAYMENT_COMPLETED,
+      'BTCPay invoice created successfully',
+      { invoiceId: invoice.id, amount: invoice.amount }
+    )
 
     const result = {
+      success: true,
       id: invoice.id,
       amount: invoice.amount,
       currency: invoice.currency,
       status: invoice.status,
-      paymentString,
-      qrCode,
-      checkoutUrl: `${btcpayUrl}/i/${invoice.id}`,
+      checkoutUrl: invoice.checkoutLink || `${btcpayUrl}/i/${invoice.id}`,
+      finalAmountBRL: amount,
+      exchangeRate: usdToBrlRate,
       expiresAt: invoice.expirationTime
     }
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error creating BTCPay invoice:', error)
+    securityLogger.error(
+      SecurityEventType.SYSTEM_ERROR,
+      'Error creating BTCPay invoice',
+      { error: error instanceof Error ? error.message : 'Unknown error' }
+    )
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

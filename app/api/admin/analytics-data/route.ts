@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/app/lib/supabase/server'
+import { getServerSupabase } from '@/app/lib/supabase-server'
+import { requireAdminAccess } from '@/app/lib/auth/admin-auth'
+import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   try {
-    console.log('Analytics API called at:', new Date().toISOString())
+    // 🔒 VERIFICAR ACESSO ADMIN (Seguro - sem hardcoded emails)
+    const adminCheck = await requireAdminAccess()
+    if (adminCheck.error) {
+      return NextResponse.json(
+        adminCheck.response,
+        { status: adminCheck.status }
+      )
+    }
+
+    // Log admin access securely
+    securityLogger.logAccessControl(true, 'admin_analytics', undefined, request)
     
     // Force no-cache headers
     const headers = new Headers({
@@ -13,7 +27,7 @@ export async function GET(request: Request) {
       'Surrogate-Control': 'no-store'
     })
     
-    const supabase = createServerClient()
+    const supabase = getServerSupabase()
     
     // Get module analytics data correctly
     const moduleAnalytics = []
@@ -60,12 +74,12 @@ export async function GET(request: Request) {
         .like('user_id', 'session_%')
       
       if (startUsersError || completionsError || startsError || tasksError || badgesError) {
-        console.error('Error fetching module data:', {
-          startUsersError,
-          completionsError,
-          startsError,
-          tasksError,
-          badgesError
+        securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Module analytics data fetch failed', {
+          hasStartUsersError: !!startUsersError,
+          hasCompletionsError: !!completionsError,
+          hasStartsError: !!startsError,
+          hasTasksError: !!tasksError,
+          hasBadgesError: !!badgesError
         })
       }
       
@@ -99,16 +113,10 @@ export async function GET(request: Request) {
         completion_rate: Math.round(completionRate * 10) / 10 // Round to 1 decimal
       }
       
-      // Log Module 6 data for debugging
-      if (moduleId === 6) {
-        console.log('Module 6 data:', moduleData)
-      }
       
       moduleAnalytics.push(moduleData)
     }
     
-    // Get platform stats
-    console.log('Fetching sessions from database...')
     
     // First, let's get the total count to see if there's a limit issue
     const { count: totalCount, error: countError } = await supabase
@@ -116,7 +124,6 @@ export async function GET(request: Request) {
       .select('*', { count: 'exact', head: true })
       .like('user_id', 'session_%')
     
-    console.log('Total count from database:', totalCount)
     
     // Use count for total sessions instead of fetching all data
     // This avoids the limit issue completely
@@ -133,10 +140,8 @@ export async function GET(request: Request) {
       
       if (!uniqueUsersError && uniqueUsersData) {
         uniqueUserCount = uniqueUsersData
-        console.log('Unique users from RPC:', uniqueUserCount)
       }
     } catch (e) {
-      console.log('RPC function not available, using fallback method')
     }
     
     // Fallback: use SQL to count distinct users directly
@@ -157,12 +162,10 @@ export async function GET(request: Request) {
           })
         
         if (!patternError && patternCheck && patternCheck.length > 0) {
-          console.log('Historical user analytics:', patternCheck[0])
           
           // Total unique users since the beginning (everyone who ever accepted analytics)
           uniqueUserCount = patternCheck[0].total_unique_users_ever || 0
           
-          console.log('Total unique users since beginning:', uniqueUserCount)
         } else {
           // Fallback to session-only count
           const { data: sqlResult, error: sqlError } = await supabase
@@ -172,11 +175,9 @@ export async function GET(request: Request) {
           
           if (!sqlError && sqlResult && sqlResult.length > 0) {
             uniqueUserCount = sqlResult[0].count
-            console.log('Unique users from SQL count (fallback):', uniqueUserCount)
           }
         }
       } catch (e) {
-        console.log('SQL count failed, using data fetch fallback')
       }
       
       // If SQL fails, try fetching data (less reliable due to limits)
@@ -188,7 +189,6 @@ export async function GET(request: Request) {
         
         if (!allSessionsError && allSessions) {
           uniqueUserCount = new Set(allSessions.map(s => s.user_id)).size
-          console.log('Unique users from sessions data (may be limited):', uniqueUserCount)
         }
       }
     }
@@ -200,10 +200,11 @@ export async function GET(request: Request) {
       .like('user_id', 'session_%')
       .range(0, 9999) // Get sample for calculations
     
-    console.log(`Total sessions count: ${sessionCount}`)
-    console.log(`Session data returned: ${sessionData?.length || 0} sessions`)
     if (sessionsError || sessionDataError) {
-      console.error('Error fetching sessions:', sessionsError, sessionDataError)
+      securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Session data fetch failed', {
+        hasSessionsError: !!sessionsError,
+        hasSessionDataError: !!sessionDataError
+      })
     }
     
     const { data: walletEvents, error: walletError } = await supabase
@@ -223,11 +224,11 @@ export async function GET(request: Request) {
       .eq('event_type', 'badge_earned')
     
     if (sessionsError || walletError || moduleError || badgeError) {
-      console.error('Error fetching platform stats:', {
-        sessionsError,
-        walletError,
-        moduleError,
-        badgeError
+      securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Platform stats fetch failed', {
+        hasSessionsError: !!sessionsError,
+        hasWalletError: !!walletError,
+        hasModuleError: !!moduleError,
+        hasBadgeError: !!badgeError
       })
     }
     
@@ -258,10 +259,8 @@ export async function GET(request: Request) {
         if (!activityError && activityData && activityData.length > 0) {
           activeUsers24h = activityData[0].users_24h || 0
           activeUsers7d = activityData[0].users_7d || 0
-          console.log('Activity from SQL:', { activeUsers24h, activeUsers7d })
         }
       } catch (e) {
-        console.log('Failed to get activity data from SQL, using fallback')
       }
     }
     
@@ -275,20 +274,11 @@ export async function GET(request: Request) {
         sessionData?.filter(s => new Date(s.created_at) >= sevenDaysAgo)
           .map(s => s.user_id) || []
       ).size
-      console.log('Activity from sample data:', { activeUsers24h, activeUsers7d })
     }
     
-    // Debug logging
-    console.log('Final user count calculation:', {
-      uniqueUserCountFromRPC: uniqueUserCount,
-      sessionDataSample: sessionData?.length || 0,
-      finalTotalUsers: totalUsers,
-      moduleUniqueUsers: moduleAnalytics.reduce((sum, m) => sum + m.unique_users, 0)
-    })
     
     // Use the accurate count instead of limited data length
     const totalSessions = sessionCount || 0
-    console.log(`Total sessions found: ${totalSessions} at ${new Date().toISOString()}`)
     
     // Calculate average session duration from ALL sessions (not just sample)
     let avgSessionDuration = 0
@@ -305,11 +295,6 @@ export async function GET(request: Request) {
         const totalDuration = allSessionsWithDuration.reduce((sum, s) => sum + s.total_duration_seconds, 0)
         avgSessionDuration = totalDuration / allSessionsWithDuration.length
         
-        console.log('Session duration from ALL data:', {
-          totalSessionsWithDuration: allSessionsWithDuration.length,
-          avgDurationSeconds: Math.round(avgSessionDuration),
-          avgDurationMinutes: Math.round(avgSessionDuration / 60)
-        })
       } else {
         // Fallback to sample data
         const sessionsWithDuration = sessionData?.filter(s => 
@@ -320,14 +305,8 @@ export async function GET(request: Request) {
           ? sessionsWithDuration.reduce((sum, s) => sum + s.total_duration_seconds, 0) / sessionsWithDuration.length
           : 0
         
-        console.log('Session duration from sample fallback:', {
-          sessionsWithDuration: sessionsWithDuration.length,
-          avgDurationSeconds: Math.round(avgSessionDuration),
-          avgDurationMinutes: Math.round(avgSessionDuration / 60)
-        })
       }
     } catch (e) {
-      console.log('Failed to get duration data, using sample fallback')
       avgSessionDuration = 0
     }
     
@@ -338,7 +317,6 @@ export async function GET(request: Request) {
     // Get ALL session data with geolocation to get accurate counts
     let geolocationStats: Array<{country: string, count: number, percentage: number}> = []
     
-    console.log('Fetching ALL geolocation data...')
     
     // Get ALL sessions with geolocation data (not limited sample)
     const { data: allGeoSessions, error: allGeoError } = await supabase
@@ -346,10 +324,6 @@ export async function GET(request: Request) {
       .select('user_id, geolocation')
       .not('geolocation', 'is', null)
     
-    console.log('All geo sessions fetched:', {
-      count: allGeoSessions?.length || 0,
-      error: allGeoError
-    })
     
     if (!allGeoError && allGeoSessions && allGeoSessions.length > 0) {
       const countryUserStats = new Map<string, Set<string>>()
@@ -384,14 +358,7 @@ export async function GET(request: Request) {
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
       
-      console.log('Geolocation from ALL data:', {
-        totalWithGeo: totalUsersWithGeo,
-        totalSessions: allGeoSessions.length,
-        countries: geolocationStats.length,
-        topCountries: geolocationStats.slice(0, 3)
-      })
     } else {
-      console.log('Failed to get ALL geolocation data, using sample fallback')
       // Fallback to limited session data
       const geoSessionsWithLocation = sessionData?.filter(s => s.geolocation?.country) || []
       
@@ -421,18 +388,9 @@ export async function GET(request: Request) {
           .sort((a, b) => b.count - a.count)
           .slice(0, 10)
         
-        console.log('Geolocation from sample fallback:', {
-          totalWithGeo: totalUsersWithGeo,
-          countries: geolocationStats.length
-        })
       }
     }
     
-    // Log wallet events for debugging
-    console.log('Wallet events:', {
-      total: walletEvents?.length || 0,
-      sessionUsers: walletEvents?.filter(e => e.user_id.startsWith('session_')).length || 0
-    })
     
     const response = NextResponse.json({
       success: true,
@@ -458,7 +416,9 @@ export async function GET(request: Request) {
     
     return response
   } catch (error) {
-    console.error('Analytics data error:', error)
+    securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Analytics data fetch failed', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
     return NextResponse.json(
       { error: 'Failed to fetch analytics data' },
       { status: 500 }

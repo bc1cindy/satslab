@@ -4,7 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { edgeSessionManager } from './edge-session-manager'
 
 interface RateLimitConfig {
   windowMs: number
@@ -35,22 +34,23 @@ class SecurityMiddleware {
   private securityHeaders: SecurityHeaders = {
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://mempool.space https://www.youtube.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://mempool.space https://*.supabase.co wss://*.supabase.co",
-      "frame-src 'self' https://www.youtube.com https://youtube.com",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://mempool.space https://www.youtube.com https://apis.google.com https://accounts.google.com https://www.gstatic.com https://ssl.gstatic.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // Mantido para TailwindCSS
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://mempool.space https://*.supabase.co wss://*.supabase.co https://api.exchangerate-api.com https://api.frankfurter.app https://accounts.google.com https://apis.google.com",
+      "media-src 'self' https://f005.backblazeb2.com https://*.backblazeb2.com blob:", // Permitir todas as URLs do B2 com parâmetros
+      "frame-src 'self' https://www.youtube.com https://youtube.com https://accounts.google.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
-      "base-uri 'self'"
-    ].join('; '),
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].concat(process.env.NODE_ENV === 'production' ? ["upgrade-insecure-requests"] : []).join('; '),
     'X-Frame-Options': 'DENY',
     'X-Content-Type-Options': 'nosniff',
-    'X-XSS-Protection': '1; mode=block',
-    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+    'X-XSS-Protection': '0', // Desabilitado pois pode causar vulnerabilidades
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
   }
 
   constructor() {
@@ -111,6 +111,7 @@ class SecurityMiddleware {
     if (process.env.NODE_ENV === 'production') {
       response.headers.set('X-Powered-By', '') // Remove server fingerprinting
       response.headers.set('Server', '') // Remove server fingerprinting
+      response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
     }
 
     return response
@@ -158,38 +159,51 @@ class SecurityMiddleware {
     reason?: string
     session?: any
   }> {
-    const sessionToken = this.extractSessionToken(request)
+    // Check for NextAuth session token
+    const sessionToken = request.cookies.get('next-auth.session-token')?.value ||
+                       request.cookies.get('__Secure-next-auth.session-token')?.value
+    
     if (!sessionToken) {
       return { valid: false, reason: 'No session token' }
     }
 
-    const clientInfo = {
-      ipAddress: this.getClientIP(request),
-      userAgent: request.headers.get('user-agent') || ''
-    }
-
-    const session = edgeSessionManager.validateSession(sessionToken, clientInfo)
-    if (!session) {
-      return { valid: false, reason: 'Invalid or expired session' }
-    }
-
-    return { valid: true, session }
+    // For now, presence of a session token is enough
+    // NextAuth will validate the actual session in API routes
+    // This is just a first line of defense
+    return { valid: true, session: { token: sessionToken } }
   }
 
   /**
    * CSRF token validation
    */
   private validateCSRF(request: NextRequest): { valid: boolean; reason?: string } {
-    const sessionToken = this.extractSessionToken(request)
-    const csrfToken = request.headers.get('x-csrf-token') || 
-                     request.nextUrl.searchParams.get('_token')
-
-    if (!sessionToken || !csrfToken) {
-      return { valid: false, reason: 'Missing CSRF token' }
+    // NextAuth handles its own CSRF for auth routes
+    if (request.nextUrl.pathname.startsWith('/api/auth/')) {
+      return { valid: true }
     }
-
-    const isValid = edgeSessionManager.validateCSRFToken(sessionToken, csrfToken)
-    return { valid: isValid, reason: isValid ? undefined : 'Invalid CSRF token' }
+    
+    // For now, we'll implement a simple CSRF check
+    // In production, integrate with NextAuth's CSRF token
+    const origin = request.headers.get('origin')
+    const referer = request.headers.get('referer')
+    
+    // Basic same-origin check
+    if (origin || referer) {
+      const requestUrl = new URL(request.url)
+      const originUrl = origin ? new URL(origin) : referer ? new URL(referer) : null
+      
+      if (originUrl && originUrl.host === requestUrl.host) {
+        return { valid: true }
+      }
+    }
+    
+    // For API calls, check for a custom header (prevents CSRF)
+    const customHeader = request.headers.get('x-requested-with')
+    if (customHeader === 'XMLHttpRequest') {
+      return { valid: true }
+    }
+    
+    return { valid: false, reason: 'CSRF validation failed' }
   }
 
   /**
@@ -272,31 +286,37 @@ class SecurityMiddleware {
            'unknown'
   }
 
-  private extractSessionToken(request: NextRequest): string | null {
-    // Try cookie first (preferred)
-    const cookieToken = request.cookies.get('session_token')?.value
-    if (cookieToken) return cookieToken
-
-    // Fallback to Authorization header
-    const authHeader = request.headers.get('authorization')
-    if (authHeader?.startsWith('Bearer ')) {
-      return authHeader.substring(7)
-    }
-
-    return null
-  }
 
   private isProtectedRoute(path: string): boolean {
+    // Protected routes that require authentication
     const protectedRoutes = [
-      '/dashboard',
-      '/api/user',
-      '/api/progress'
+      '/pro',                    // Pro area pages
+      '/api/videos/secure',      // Pro video access
+      '/api/admin/',            // Admin endpoints
+      '/api/payments/confirm',  // Payment confirmation
+      '/api/comments/',         // Comments (authenticated users)
     ]
-
+    
     return protectedRoutes.some(route => path.startsWith(route))
   }
 
   private isStateChangingOperation(request: NextRequest): boolean {
+    // Whitelist of routes that don't need CSRF protection
+    const csrfWhitelist = [
+      '/api/btcpay/',      // BTCPay API (uses API key auth)
+      '/api/webhooks/',    // Webhooks (use signature verification)
+      '/api/auth/',        // NextAuth routes (have own CSRF)
+    ]
+    
+    // Check if current path is whitelisted
+    const isWhitelisted = csrfWhitelist.some(path => 
+      request.nextUrl.pathname.startsWith(path)
+    )
+    
+    if (isWhitelisted) {
+      return false
+    }
+    
     return ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)
   }
 

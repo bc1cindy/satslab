@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/app/components/ui/button'
@@ -11,15 +12,166 @@ import { LanguageSelector } from '@/app/components/i18n/LanguageSelector'
 import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 import { RealVideoPlayer } from '@/app/components/RealVideoPlayer'
 import YouTubeVideos from '@/app/components/YouTubeVideos'
+import { SatsLabProSection } from '@/app/components/pro/SatsLabProSection'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
-  ChevronRight, Bitcoin, Trophy,
-  Target, Gamepad2, Award
+  ChevronRight, Bitcoin, Trophy, ChevronLeft, Play,
+  Target, Gamepad2, Award, LogIn, LogOut, Crown
 } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
 
 export default function HomePage() {
   const { t, language } = useLanguage()
   const isEnglish = language === 'en'
+  const { data: session, status } = useSession()
+  
+  // Carousel state
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
+  
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' })
+  }
+
+  // Course modules data
+  const courseModules = [
+    {
+      id: 1,
+      title: isEnglish ? "Bitcoin System Architecture" : "Arquitetura do Sistema Bitcoin",
+      description: isEnglish 
+        ? "Understand how Bitcoin works, its decentralized structure and the principles that ensure its security and innovation."
+        : "Entenda como o Bitcoin funciona, sua estrutura descentralizada e os princípios que garantem sua segurança e inovação."
+    },
+    {
+      id: 2,
+      title: isEnglish ? "Blockchain and Test Networks" : "Blockchain e Redes de Teste",
+      description: isEnglish
+        ? "Explore what blockchain is, how it records transactions and the role of test networks in Bitcoin application development."
+        : "Explore o que é a blockchain, como ela registra transações e o papel das redes de teste no desenvolvimento de aplicações Bitcoin."
+    },
+    {
+      id: 3,
+      title: isEnglish ? "BTC Implementations and Running a Node" : "Implementações BTC e Como Rodar um Nó",
+      description: isEnglish
+        ? "Learn to configure and manage a Bitcoin node, understanding the main implementations of the Bitcoin protocol."
+        : "Aprenda a configurar e gerenciar um nó Bitcoin, entendendo as principais implementações do protocolo Bitcoin."
+    },
+    {
+      id: 4,
+      title: isEnglish ? "Keys, Addresses and Scripts" : "Chaves, Endereços e Scripts",
+      description: isEnglish
+        ? "Discover how public and private keys, Bitcoin addresses and scripts that ensure secure transactions work."
+        : "Descubra como funcionam as chaves públicas e privadas, endereços Bitcoin e scripts que garantem transações seguras."
+    },
+    {
+      id: 5,
+      title: isEnglish ? "Wallet Management and Self-Custody Security" : "Gerenciamento de Carteiras e Segurança em Auto Custódia",
+      description: isEnglish
+        ? "Master best practices for creating, managing and protecting your Bitcoin wallets, avoiding common risks."
+        : "Domine as melhores práticas para criar, gerenciar e proteger suas carteiras Bitcoin, evitando riscos comuns."
+    },
+    {
+      id: 6,
+      title: isEnglish ? "Mining and Consensus" : "Mineração e Consenso",
+      description: isEnglish
+        ? "Learn about the Bitcoin mining process, the Proof-of-Work consensus algorithm, its importance to the network and how to mine."
+        : "Conheça o processo de mineração de Bitcoin, o algoritmo de consenso Proof-of-Work, sua importância para a rede e como minerar."
+    },
+    {
+      id: 7,
+      title: isEnglish ? "Digital Signatures" : "Assinaturas Digitais",
+      description: isEnglish
+        ? "Learn how digital signatures ensure the authenticity and integrity of Bitcoin transactions."
+        : "Saiba como as assinaturas digitais garantem a autenticidade e integridade das transações no Bitcoin."
+    },
+    {
+      id: 8,
+      title: isEnglish ? "Advanced Transactions, Fees and Lightning Network" : "Transações Avançadas, Taxas e Lightning Network",
+      description: isEnglish
+        ? "Learn about advanced transactions, how to calculate fees and use the Lightning Network for fast and cheap transactions."
+        : "Aprenda sobre transações avançadas, como calcular taxas e utilizar a Lightning Network para transações rápidas e baratas."
+    },
+    {
+      id: 9,
+      title: isEnglish ? "Scripting and Smart Contracts" : "Scripting e Contratos Inteligentes",
+      description: isEnglish
+        ? "Explore the potential of Bitcoin scripting and how to create smart contracts for advanced applications."
+        : "Explore o potencial do scripting Bitcoin e como criar contratos inteligentes para aplicações avançadas."
+    },
+    {
+      id: 10,
+      title: isEnglish ? "How to Buy or Sell Bitcoin" : "Como Comprar ou Vender Bitcoin",
+      description: isEnglish
+        ? "Understand the process of buying and selling Bitcoin safely, choosing the best platforms and strategies."
+        : "Entenda o processo de comprar e vender Bitcoin de forma segura, escolhendo as melhores plataformas e estratégias."
+    },
+    {
+      id: 11,
+      title: isEnglish ? "Risk Management" : "Gerenciamento de Risco",
+      description: isEnglish
+        ? "Learn to identify and manage risks associated with Bitcoin investment and use."
+        : "Aprenda a identificar e gerenciar riscos associados ao investimento e uso de Bitcoin."
+    },
+    {
+      id: 12,
+      title: isEnglish ? "Trust and Fiduciary" : "Fiducia",
+      description: isEnglish
+        ? "Understand the difference between needing or not trusting intermediaries. The fundamental Bitcoin principle: Don't Trust, Verify."
+        : "Compreenda a diferença entre precisar ou não confiar em intermediários. O princípio fundamental do Bitcoin: Don't Trust, Verify."
+    },
+    {
+      id: 13,
+      title: isEnglish ? "Bitcoin Open-Source and Artificial Intelligence" : "Bitcoin Open-Source e Inteligência Artificial",
+      description: isEnglish
+        ? "Contributing to Bitcoin open-source with artificial intelligence to support your learning. Explore the frontiers of innovation."
+        : "Contribuindo com Bitcoin open-source com inteligência artificial para te apoiar no aprendizado. Explore as fronteiras da inovação."
+    },
+    {
+      id: 14,
+      title: isEnglish ? "How do I create clone images with AI?" : "Como crio imagens de clones com IA?",
+      description: isEnglish
+        ? "How to create clone images using AI. Learn to use modern artificial intelligence tools to generate realistic images."
+        : "Como criar imagens de clones usando IA. Aprenda a usar ferramentas modernas de inteligência artificial para gerar imagens realistas."
+    }
+  ]
+
+  // Carousel configuration
+  const modulesPerSlide = 4
+  const totalSlides = Math.ceil(courseModules.length / modulesPerSlide)
+  
+  // Carousel navigation functions
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides)
+  }
+  
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)
+  }
+  
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+  
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+    
+    if (isLeftSwipe && currentSlide < totalSlides - 1) {
+      nextSlide()
+    }
+    if (isRightSwipe && currentSlide > 0) {
+      prevSlide()
+    }
+  }
   
   
   // Module data with translations
@@ -101,13 +253,76 @@ export default function HomePage() {
               <Bitcoin className="h-8 w-8 text-orange-500" />
               <h1 className="text-2xl font-bold text-white">SatsLab</h1>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <LanguageSelector />
-              <Link href={`${moduleBasePath}1`}>
-                <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
-                  {t('homepage.hero.startCourse')}
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="text-white hover:text-orange-500 text-xs md:text-sm"
+                onClick={() => document.getElementById('modulos-gratuitos')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {isEnglish ? 'Free Modules' : 'Módulos Gratuitos'}
+              </Button>
+              {!isEnglish && (
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-white hover:text-orange-500 text-xs md:text-sm"
+                  onClick={() => document.getElementById('bitcoin-4-all')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Bitcoin 4 All
                 </Button>
-              </Link>
+              )}
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="text-white hover:text-orange-500 text-xs md:text-sm"
+                onClick={() => document.getElementById('comprar-vender-btc')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}
+              </Button>
+              {status === 'authenticated' && (
+                <Link href="/pro">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white text-xs md:text-sm"
+                  >
+                    <Crown className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    Pro
+                  </Button>
+                </Link>
+              )}
+              
+              {status === 'authenticated' ? (
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-xs md:text-sm"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                  {isEnglish ? 'Logout' : 'Sair'}
+                </Button>
+              ) : (
+                <Link href="/auth">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs md:text-sm"
+                  >
+                    <LogIn className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    Login
+                  </Button>
+                </Link>
+              )}
+              <Button 
+                size="sm" 
+                className="bg-orange-500 hover:bg-orange-600 text-xs md:text-sm"
+                onClick={() => document.getElementById(isEnglish ? 'modulos-gratuitos' : 'satslab-pro')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {t('homepage.hero.startCourse')}
+              </Button>
             </div>
           </div>
         </div>
@@ -132,9 +347,9 @@ export default function HomePage() {
         </div>
 
         {/* Modules Grid */}
-        <section className="mb-16">
+        <section id="modulos-gratuitos" className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">
-            {isEnglish ? 'Course Modules' : 'Módulos do Curso'}
+            {isEnglish ? 'SatsLab Free Modules' : 'Módulos Gratuitos SatsLab'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((module) => (
@@ -198,7 +413,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-12">
         {/* Portuguese Video Lessons Section */}
         {!isEnglish && (
-          <section className="mb-16">
+          <section id="bitcoin-4-all" className="mb-16">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">
                 Bitcoin 4 All Classes
@@ -211,7 +426,7 @@ export default function HomePage() {
       </main>
 
       {/* Partners Section - Full Width */}
-      <section className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-12">
+      <section id="comprar-vender-btc" className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-12">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-white">
             {isEnglish ? 'Buy Bitcoin KYC-Free' : 'Compre Bitcoin sem KYC'}
@@ -278,30 +493,12 @@ export default function HomePage() {
       <section className="py-12 bg-black">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-white">
-              {isEnglish ? 'Meet SatsLab Creator' : 'Conheça a Criadora do SatsLab'}
-            </h2>
-            <p className="text-gray-300 mb-6">
+            <p className="text-gray-400 text-center mb-8 text-sm">
               {isEnglish 
-                ? 'SatsLab was built by Cindy'
-                : 'O SatsLab foi construído por Cindy'
+                ? 'Created by Cindy'
+                : 'Criado por Cindy'
               }
             </p>
-            <div className="mb-8">
-              <a 
-                href="https://www.youtube.com/@CindyBTC" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-red-600 hover:bg-red-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <svg className="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-                </svg>
-                <span className="font-bold text-white text-lg">
-                  {isEnglish ? 'Subscribe to my channel' : 'Inscreva-se no meu canal'}
-                </span>
-              </a>
-            </div>
           </div>
           
           {/* YouTube Videos Grid */}
@@ -356,6 +553,35 @@ export default function HomePage() {
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
               </svg>
             </a>
+            
+            <a 
+              href="https://discord.gg/68gGQEP6P4" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-3 bg-gray-800 hover:bg-gray-700 rounded-full transition-all transform hover:scale-110"
+              aria-label="Discord"
+            >
+              <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0002 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/>
+              </svg>
+            </a>
+          </div>
+          
+          {/* YouTube Subscribe Button - Smaller and Discrete */}
+          <div className="mt-6 flex justify-center">
+            <a 
+              href="https://www.youtube.com/@CindyBTC" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-all text-sm"
+            >
+              <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+              </svg>
+              <span className="text-white font-medium">
+                {isEnglish ? 'Subscribe' : 'Inscrever-se'}
+              </span>
+            </a>
           </div>
         </div>
       </section>
@@ -406,6 +632,109 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* SatsLab Pro Section - Only for Portuguese */}
+      {!isEnglish && (
+        <div id="satslab-pro">
+          <SatsLabProSection />
+        </div>
+      )}
+
+      {/* Course Content Section - Only for Portuguese */}
+      {!isEnglish && (
+        <section id="conteudo-curso" className="py-16 bg-gray-900/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              {isEnglish ? 'Course Content' : 'Conteúdo do Curso'}
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              {isEnglish 
+                ? 'See all modules you will have access to'
+                : 'Veja todos os módulos que você terá acesso'
+              }
+            </p>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-12">
+            {/* Carousel Container */}
+            <div 
+              className="overflow-hidden"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div 
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                  <div key={slideIndex} className="w-full flex-shrink-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+                      {courseModules.slice(slideIndex * modulesPerSlide, (slideIndex + 1) * modulesPerSlide).map((module) => (
+                        <Card key={module.id} className="bg-gray-900 border-gray-800 hover:border-orange-500/50 transition-colors">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start gap-3">
+                              <div className="text-orange-500 font-bold text-xl">{module.id}.</div>
+                              <div className="flex-1">
+                                <CardTitle className="text-lg leading-tight text-white">{module.title}</CardTitle>
+                                <p className="text-sm text-gray-400 mt-2">{module.description}</p>
+                              </div>
+                            </div>
+                          </CardHeader>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Navigation Arrows */}
+            <button 
+              onClick={prevSlide}
+              disabled={currentSlide === 0}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 rounded-full transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <button 
+              onClick={nextSlide}
+              disabled={currentSlide === totalSlides - 1}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-2 rounded-full transition-colors"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            
+            {/* Slide Indicators */}
+            <div className="flex justify-center mt-8 space-x-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === currentSlide ? 'bg-orange-500' : 'bg-gray-600'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <a href="/checkout" className="inline-block">
+              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-6">
+                <Play className="w-5 h-5 mr-2" />
+                {isEnglish ? 'Get Access Now - $249' : 'Garantir Acesso Agora - R$ 749,00'}
+              </Button>
+            </a>
+            <p className="text-gray-400 text-sm mt-4">
+              {isEnglish ? 'Bitcoin or PIX payment' : 'Pagamento via Bitcoin ou PIX (DePix)'}
+            </p>
+          </div>
+        </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-gray-800 bg-black py-12">

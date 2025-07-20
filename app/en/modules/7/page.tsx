@@ -303,9 +303,9 @@ export default function Module7EN() {
                 <div className="flex justify-center mb-4">
                   <Award className="h-16 w-16 text-yellow-500" />
                 </div>
-                <CardTitle className="text-2xl text-white">Congratulations! Course Completed</CardTitle>
+                <CardTitle className="text-2xl text-white">Congratulations! Module 7 Completed</CardTitle>
                 <CardDescription className="text-blue-200">
-                  You have successfully completed all 7 modules and mastered Bitcoin
+                  You have mastered multisig wallets and advanced Bitcoin security concepts
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center space-y-4">

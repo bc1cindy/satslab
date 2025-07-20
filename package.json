@@ -2,12 +2,19 @@
   "name": "satslab",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Free and open-source Bitcoin education platform with interactive modules",
+  "description": "SatsLab - Bitcoin Operations Platform",
   "repository": {
     "type": "git",
     "url": "https://github.com/bc1cindy/satslab.git"
   },
-  "keywords": ["bitcoin", "education", "blockchain", "cryptocurrency", "open-source", "free-software"],
+  "keywords": [
+    "bitcoin",
+    "education",
+    "blockchain",
+    "cryptocurrency",
+    "open-source",
+    "free-software"
+  ],
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
@@ -30,7 +37,10 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.1",
     "@supabase/supabase-js": "^2.50.4",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
     "autoprefixer": "^10.4.20",
+    "backblaze-b2": "^1.7.1",
     "bip32": "^5.0.0-rc.0",
     "bip39": "^3.1.0",
     "bitcoinjs-lib": "^6.1.5",
@@ -39,11 +49,13 @@
     "cmdk": "^1.1.1",
     "ecpair": "^2.1.0",
     "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.5",
     "isomorphic-dompurify": "^2.25.0",
     "lucide-react": "^0.436.0",
     "next": "^14.2.5",
     "next-auth": "^4.24.7",
     "next-themes": "^0.4.6",
+    "node-fetch": "^3.3.2",
     "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -54,16 +66,13 @@
     "tailwindcss": "^3.4.10",
     "tailwindcss-animate": "^1.0.7",
     "tiny-secp256k1": "^2.2.4",
-    "zod": "^3.23.8",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
-    "eslint-config-next": "^14.2.5",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.5.0",
     "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0"
-  },
-  "description": "SatsLab - Bitcoin Operations Platform"
+    "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^10.0.0"
+  }
 }

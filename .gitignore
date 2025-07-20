@@ -24,6 +24,13 @@ yarn-error.log*
 
 # Local env files
 .env*.local
+.env.local
+
+# Security - Never commit these
+*.key
+*.pem
+*.p12
+*.pfx
 
 # Vercel
 .vercel

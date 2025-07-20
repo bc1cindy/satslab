@@ -6,6 +6,7 @@ import { useSession } from '@/app/lib/session/session-provider'
 import { updateModuleProgress, awardBadge, getUserProgress } from '@/app/lib/supabase/queries'
 import { analyticsService } from '@/app/lib/supabase/analytics-service'
 import { Badge } from '@/app/types'
+import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 interface ModuleProgressState {
   questionsCompleted: boolean
@@ -76,7 +77,10 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
           }))
         }
       } catch (error) {
-        console.error('Error loading saved progress:', error)
+        securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to load user progress', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          moduleId
+        })
       } finally {
         setProgressLoaded(true)
       }
@@ -89,7 +93,9 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
   // Save progress to database
   const saveProgress = useCallback(async (progressData?: ModuleProgressState) => {
     if (!session?.user.id) {
-      console.log('Not logged in, skipping progress save')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Not logged in, skipping progress save')
+      }
       return false
     }
 
@@ -112,21 +118,33 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
       })
 
       if (!success) {
-        console.error('Failed to save progress to database')
+        securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to save progress to database', { moduleId })
         return false
       }
 
       // Award badge if earned
       if (dataToSave.badgeEarned && moduleBadge && dataToSave.completed) {
-        console.log('Awarding badge:', moduleBadge)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Awarding badge:', moduleBadge)
+        }
         const badgeSuccess = await awardBadge(session.user.id, moduleBadge)
-        console.log('Badge awarded:', badgeSuccess)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Badge awarded:', badgeSuccess)
+        }
+        if (badgeSuccess) {
+          securityLogger.info(SecurityEventType.ACCESS_GRANTED, 'User badge awarded', { moduleId, badgeType: moduleBadge.type })
+        }
       }
 
-      console.log('Progress saved successfully:', dataToSave)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Progress saved successfully:', dataToSave)
+      }
       return true
     } catch (error) {
-      console.error('Error saving progress:', error)
+      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Error saving user progress', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        moduleId
+      })
       return false
     }
   }, [session?.user.id, moduleId, moduleBadge, progress])
@@ -180,12 +198,14 @@ export function useModuleProgress(moduleId: number, moduleBadge?: Omit<Badge, 'i
         completed: allTasksCompleted && currentProgress.questionsCompleted
       }
       
-      console.log('Tasks completed - Progress update:', {
-        allTasksCompleted,
-        questionsCompleted: currentProgress.questionsCompleted,
-        badgeEarned: newProgress.badgeEarned,
-        completed: newProgress.completed
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Tasks completed - Progress update:', {
+          allTasksCompleted,
+          questionsCompleted: currentProgress.questionsCompleted,
+          badgeEarned: newProgress.badgeEarned,
+          completed: newProgress.completed
+        })
+      }
       
       // Track analytics using sessionId
       if (sessionId) {

@@ -3,6 +3,29 @@ import { analyticsService } from '@/app/lib/supabase/analytics-service'
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 VERIFICAR ORIGEM DO REQUEST
+    const origin = request.headers.get('origin')
+    const referer = request.headers.get('referer')
+    const allowedOrigins = [
+      process.env.NEXT_PUBLIC_BASE_URL,
+      'http://localhost:3000',
+      'https://satslabpro.com'
+    ].filter(Boolean)
+    
+    if (origin && !allowedOrigins.includes(origin)) {
+      return NextResponse.json(
+        { error: 'Origin not allowed' },
+        { status: 403 }
+      )
+    }
+    
+    if (!origin && referer && !allowedOrigins.some(allowed => referer.startsWith(allowed || ''))) {
+      return NextResponse.json(
+        { error: 'Referer not allowed' },
+        { status: 403 }
+      )
+    }
+
     const data = await request.json()
     
     // Handle session end event sent via sendBeacon

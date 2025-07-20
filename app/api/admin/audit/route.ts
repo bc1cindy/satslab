@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/app/lib/supabase/server'
+import { getServerSupabase } from '@/app/lib/supabase-server'
+import { requireAdminAccess } from '@/app/lib/auth/admin-auth'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const supabase = createServerClient()
+    // 🔒 VERIFICAR ACESSO ADMIN (Seguro - sem hardcoded emails)
+    const adminCheck = await requireAdminAccess()
+    if (adminCheck.error) {
+      return NextResponse.json(
+        adminCheck.response,
+        { status: adminCheck.status }
+      )
+    }
+    const supabase = getServerSupabase()
     
     // 1. Get all user_events for detailed analysis
     const { data: allEvents, error: eventsError } = await supabase

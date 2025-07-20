@@ -1,133 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/app/lib/supabase/server'
+import { getServerSupabase } from '@/app/lib/supabase-server'
+import { validateAdminAccess } from '@/app/lib/auth/admin-auth'
+import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
-    
-    // 1. Create get_platform_stats function
-    const platformStatsFunction = `
-      CREATE OR REPLACE FUNCTION get_platform_stats()
-      RETURNS TABLE (
-        total_users bigint,
-        active_users_24h bigint,
-        active_users_7d bigint,
-        total_sessions bigint,
-        avg_session_duration numeric,
-        total_modules_completed bigint,
-        total_badges_earned bigint,
-        total_wallets_created bigint
-      ) AS $$
-      BEGIN
-        RETURN QUERY
-        SELECT 
-          (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE user_id LIKE 'session_%') as total_users,
-          (SELECT COUNT(DISTINCT user_id) FROM user_sessions 
-           WHERE created_at >= NOW() - INTERVAL '24 hours' AND user_id LIKE 'session_%') as active_users_24h,
-          (SELECT COUNT(DISTINCT user_id) FROM user_sessions 
-           WHERE created_at >= NOW() - INTERVAL '7 days' AND user_id LIKE 'session_%') as active_users_7d,
-          (SELECT COUNT(*) FROM user_sessions WHERE user_id LIKE 'session_%') as total_sessions,
-          (SELECT COALESCE(AVG(total_duration_seconds), 0) FROM user_sessions 
-           WHERE total_duration_seconds > 0 AND user_id LIKE 'session_%') as avg_session_duration,
-          (SELECT COUNT(*) FROM user_events WHERE event_type = 'module_complete') as total_modules_completed,
-          (SELECT COUNT(*) FROM user_events WHERE event_type = 'badge_earned') as total_badges_earned,
-          (SELECT COUNT(*) FROM user_events WHERE event_type = 'wallet_created') as total_wallets_created;
-      END;
-      $$ LANGUAGE plpgsql;
-    `
-    
-    // 2. Drop and recreate module_analytics view
-    const dropModuleView = `DROP VIEW IF EXISTS module_analytics;`
-    const moduleAnalyticsView = `
-      CREATE VIEW module_analytics AS
-      WITH module_stats AS (
-        SELECT 
-          module_id,
-          COUNT(DISTINCT user_id) as unique_users,
-          COUNT(CASE WHEN event_type = 'module_start' THEN 1 END) as module_starts,
-          COUNT(CASE WHEN event_type = 'module_complete' THEN 1 END) as module_completions,
-          COUNT(CASE WHEN event_type = 'task_complete' THEN 1 END) as task_completions,
-          COUNT(CASE WHEN event_type = 'badge_earned' THEN 1 END) as badges_earned
-        FROM user_events 
-        WHERE module_id IS NOT NULL 
-          AND user_id LIKE 'session_%'
-          AND module_id BETWEEN 1 AND 7
-        GROUP BY module_id
+    // 🔒 VERIFICAÇÃO ADMIN ROBUSTA
+    const adminValidation = await validateAdminAccess()
+    if (!adminValidation.isValid) {
+      securityLogger.warn(
+        SecurityEventType.ACCESS_DENIED,
+        'Unauthorized admin setup analytics attempt',
+        { error: adminValidation.error },
+        request
       )
-      SELECT 
-        generate_series(1, 7) as module_id,
-        COALESCE(ms.unique_users, 0) as unique_users,
-        COALESCE(ms.module_starts, 0) as module_starts,
-        COALESCE(ms.module_completions, 0) as module_completions,
-        COALESCE(ms.task_completions, 0) as task_completions,
-        COALESCE(ms.badges_earned, 0) as badges_earned,
-        CASE 
-          WHEN COALESCE(ms.unique_users, 0) = 0 THEN 0.0
-          ELSE (COALESCE(ms.module_completions, 0)::numeric / ms.unique_users::numeric) * 100
-        END as completion_rate
-      FROM module_stats ms 
-      RIGHT JOIN generate_series(1, 7) s(module_id) ON ms.module_id = s.module_id
-      ORDER BY module_id;
-    `
-    
-    // 3. Drop and recreate realtime_analytics view
-    const dropRealtimeView = `DROP VIEW IF EXISTS realtime_analytics;`
-    const realtimeAnalyticsView = `
-      CREATE VIEW realtime_analytics AS
-      SELECT 
-        (SELECT COUNT(DISTINCT user_id) FROM user_sessions 
-         WHERE session_start >= NOW() - INTERVAL '1 hour' AND user_id LIKE 'session_%') as active_users,
-        (SELECT COUNT(*) FROM user_sessions 
-         WHERE session_end IS NULL AND user_id LIKE 'session_%') as active_sessions,
-        (SELECT COUNT(DISTINCT user_id) FROM user_sessions 
-         WHERE created_at >= NOW() - INTERVAL '24 hours' AND user_id LIKE 'session_%') as daily_active_users,
-        (SELECT COUNT(DISTINCT user_id) FROM user_sessions 
-         WHERE created_at >= NOW() - INTERVAL '7 days' AND user_id LIKE 'session_%') as weekly_active_users,
-        (SELECT COALESCE(AVG(total_duration_seconds), 0) FROM user_sessions 
-         WHERE total_duration_seconds > 0 AND user_id LIKE 'session_%') as avg_session_duration;
-    `
-    
-    // Execute SQL commands in order
-    const { error: functionError } = await supabase.rpc('exec_sql', { sql: platformStatsFunction })
-    if (functionError) {
-      console.error('Function creation error:', functionError)
+      return NextResponse.json(
+        { error: adminValidation.error },
+        { status: 403 }
+      )
     }
+
+    securityLogger.info(
+      SecurityEventType.ADMIN_DATA_ACCESS,
+      'Admin analytics setup initiated',
+      { adminEmail: adminValidation.user?.email },
+      request
+    )
+
+    const supabase = getServerSupabase()
     
-    // Drop existing views first
-    const { error: dropModuleError } = await supabase.rpc('exec_sql', { sql: dropModuleView })
-    if (dropModuleError) {
-      console.error('Drop module view error:', dropModuleError)
+    // ✅ SEGURO: Usar função específica em vez de exec_sql
+    const { data: setupResults, error: setupError } = await supabase
+      .rpc('setup_analytics_safely')
+
+    if (setupError) {
+      securityLogger.error(
+        SecurityEventType.SYSTEM_ERROR,
+        'Analytics setup failed',
+        { error: setupError.message }
+      )
+      throw setupError
     }
-    
-    const { error: dropRealtimeError } = await supabase.rpc('exec_sql', { sql: dropRealtimeView })
-    if (dropRealtimeError) {
-      console.error('Drop realtime view error:', dropRealtimeError)
-    }
-    
-    // Create new views
-    const { error: moduleViewError } = await supabase.rpc('exec_sql', { sql: moduleAnalyticsView })
-    if (moduleViewError) {
-      console.error('Module view creation error:', moduleViewError)
-    }
-    
-    const { error: realtimeViewError } = await supabase.rpc('exec_sql', { sql: realtimeAnalyticsView })
-    if (realtimeViewError) {
-      console.error('Realtime view creation error:', realtimeViewError)
-    }
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Analytics views and functions created successfully',
-      errors: {
-        function: functionError?.message,
-        moduleView: moduleViewError?.message,
-        realtimeView: realtimeViewError?.message
-      }
+
+    securityLogger.info(
+      SecurityEventType.CONFIGURATION_CHANGE,
+      'Analytics setup completed successfully',
+      { results: setupResults?.length || 0 }
+    )
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Analytics configurado com sucesso',
+      results: setupResults 
     })
+
   } catch (error) {
-    console.error('Setup analytics error:', error)
+    securityLogger.error(
+      SecurityEventType.SYSTEM_ERROR,
+      'Error setting up analytics',
+      { error: error instanceof Error ? error.message : 'Unknown error' }
+    )
+    
     return NextResponse.json(
-      { error: 'Failed to setup analytics' },
+      { error: 'Erro ao configurar analytics' },
+      { status: 500 }
+    )
+  }
+}
+
+// GET endpoint for checking analytics status
+export async function GET(request: NextRequest) {
+  try {
+    const adminValidation = await validateAdminAccess()
+    if (!adminValidation.isValid) {
+      return NextResponse.json(
+        { error: adminValidation.error },
+        { status: 403 }
+      )
+    }
+
+    const supabase = getServerSupabase()
+    
+    // Check if analytics tables exist
+    const { data: tables, error } = await supabase
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', 'analytics_events')
+
+    return NextResponse.json({
+      analyticsConfigured: tables && tables.length > 0,
+      tablesFound: tables?.length || 0
+    })
+
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Erro ao verificar status do analytics' },
       { status: 500 }
     )
   }

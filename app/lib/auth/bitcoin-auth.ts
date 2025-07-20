@@ -1,5 +1,6 @@
 import { keyPairFromWIF, signMessage, verifySignature, validatePrivateKey, SIGNET_NETWORK } from '@/app/lib/bitcoin/bitcoin-crypto'
 import { getUserByPublicKey, createUser } from '@/app/lib/supabase/queries'
+import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 export interface AuthSession {
   user: {
@@ -18,7 +19,11 @@ export class BitcoinAuth {
     try {
       // Validate private key format
       if (!validatePrivateKey(privateKey)) {
-        console.error('Invalid private key format:', privateKey)
+        securityLogger.error(SecurityEventType.SUSPICIOUS_ACTIVITY, 'Invalid private key format detected', {
+          validation_type: 'private_key',
+          error_type: 'invalid_format'
+        })
+        console.error('Invalid private key format')
         throw new Error('Invalid private key format')
       }
       
