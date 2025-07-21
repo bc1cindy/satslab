@@ -61,8 +61,21 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         console.log('🎬 Carregando vídeo:', filename.substring(0, 20) + '...')
       }
 
+      // Detect if mobile for debugging
+      const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      
+      if (isMobile && process.env.NODE_ENV === 'development') {
+        console.log('📱 Mobile detected, using mobile-specific video loading')
+      }
+
       // Carregar vídeo do endpoint local (com barra final para evitar redirect)
-      const response = await fetch(`/api/videos/secure/?file=${encodeURIComponent(filename)}`)
+      const response = await fetch(`/api/videos/secure/?file=${encodeURIComponent(filename)}`, {
+        ...(isMobile && {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        })
+      })
       const data = await response.json()
       
       if (response.ok && data.url) {
@@ -72,6 +85,9 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         }
       } else {
         const errorMsg = data.error || 'Erro ao carregar vídeo'
+        if (isMobile && process.env.NODE_ENV === 'development') {
+          console.error('❌ Mobile video error:', { status: response.status, error: errorMsg })
+        }
         setError(errorMsg)
         onError?.(errorMsg)
       }
@@ -226,7 +242,17 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   onDurationChange={handleLoadedMetadata}
                   onLoadedData={handleLoadedMetadata}
                   onError={(e) => {
+                    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
                     console.error('Video error:', e)
+                    if (isMobile && process.env.NODE_ENV === 'development') {
+                      const target = e.currentTarget as HTMLVideoElement
+                      console.error('Mobile video error details:', {
+                        error: target.error,
+                        networkState: target.networkState,
+                        readyState: target.readyState,
+                        src: target.src
+                      })
+                    }
                     setError('Erro ao carregar vídeo. Verifique sua conexão.')
                   }}
                   playsInline
@@ -235,6 +261,9 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   x-webkit-airplay="allow"
                   autoPlay={false}
                   muted={false}
+                  {...(/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && {
+                    crossOrigin: "anonymous"
+                  })}
                   style={{ objectFit: 'contain' }}
                 >
                   <source src={videoUrl} type="video/mp4" />
