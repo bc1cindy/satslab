@@ -772,7 +772,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-12">
+          <div className="relative max-w-7xl mx-auto px-4 md:px-12">
             {/* Carousel Container */}
             <div 
               className="overflow-hidden"
@@ -786,15 +786,15 @@ export default function HomePage() {
               >
                 {Array.from({ length: totalSlides }).map((_, slideIndex) => (
                   <div key={slideIndex} className="w-full flex-shrink-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 px-2 md:px-4">
                       {courseModules.slice(slideIndex * modulesPerSlide, (slideIndex + 1) * modulesPerSlide).map((module) => (
                         <Card key={module.id} className="bg-gray-900 border-gray-800 hover:border-orange-500/50 transition-colors">
                           <CardHeader className="pb-3">
                             <div className="flex items-start gap-3">
-                              <div className="text-orange-500 font-bold text-xl">{module.id}.</div>
+                              <div className="text-orange-500 font-bold text-lg md:text-xl">{module.id}.</div>
                               <div className="flex-1">
-                                <CardTitle className="text-lg leading-tight text-white">{module.title}</CardTitle>
-                                <p className="text-sm text-gray-400 mt-2">{module.description}</p>
+                                <CardTitle className="text-base md:text-lg leading-tight text-white">{module.title}</CardTitle>
+                                <p className="text-xs md:text-sm text-gray-400 mt-1 md:mt-2">{module.description}</p>
                               </div>
                             </div>
                           </CardHeader>

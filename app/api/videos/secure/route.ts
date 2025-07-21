@@ -57,18 +57,7 @@ export async function GET(request: NextRequest) {
       }, { status: 401 })
     }
 
-    // Detect mobile browser for debugging
-    const userAgent = request.headers.get('user-agent') || ''
-    const isMobile = request.headers.get('x-mobile-browser') === 'true' || 
-                     /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
-    const isSafari = request.headers.get('x-safari-browser') === 'true' ||
-                     (/Safari/.test(userAgent) && !/Chrome/.test(userAgent))
-
-    console.log('Generating secure video URL for:', session.user.email, {
-      isMobile,
-      isSafari,
-      userAgent: userAgent.substring(0, 100) + '...'
-    })
+    console.log('Generating secure video URL for:', session.user.email)
 
     // 🔒 VERIFICAR ACESSO PRO
     const supabase = createClient(
@@ -141,23 +130,13 @@ export async function GET(request: NextRequest) {
         const secureUrl = await generateSecureB2Url(exactMatch)
         console.log('✅ Generated secure URL successfully')
         
-        const response = NextResponse.json({
+        return NextResponse.json({
           url: secureUrl,
           filename: exactMatch,
           originalFilename: filename,
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           source: 'backblaze_b2'
         })
-
-        // Add mobile-friendly headers
-        response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
-        response.headers.set('Pragma', 'no-cache')
-        response.headers.set('Expires', '0')
-        response.headers.set('Access-Control-Allow-Origin', '*')
-        response.headers.set('Access-Control-Allow-Headers', 'Range')
-        response.headers.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range')
-        
-        return response
       }
       
       // If no exact match, find partial matches for debugging
@@ -200,22 +179,12 @@ export async function GET(request: NextRequest) {
       
       console.log('Generated secure URL successfully')
       
-      const response = NextResponse.json({
+      return NextResponse.json({
         url: secureUrl,
         filename,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         source: 'backblaze_b2'
       })
-
-      // Add mobile-friendly headers
-      response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
-      response.headers.set('Pragma', 'no-cache')
-      response.headers.set('Expires', '0')
-      response.headers.set('Access-Control-Allow-Origin', '*')
-      response.headers.set('Access-Control-Allow-Headers', 'Range')
-      response.headers.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range')
-      
-      return response
 
     } catch (error) {
       console.error('Error generating B2 URL:', error)
