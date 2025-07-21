@@ -29,19 +29,19 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'SatsLab - Bitcoin',
-  description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
+  description: 'Bitcoin',
   metadataBase: new URL('https://satslab.org'),
   openGraph: {
     title: 'SatsLab - Bitcoin',
-    description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
+    description: 'Bitcoin',
     url: 'https://satslab.org',
     siteName: 'SatsLab',
     images: [
       {
-        url: '/images/SatsLabProLogo/SatsLabProLogo.png',
+        url: '/images/SatsLabProLogo/SatsLab.photo.png',
         width: 1200,
         height: 630,
-        alt: 'SatsLab Pro Logo',
+        alt: 'SatsLab',
       }
     ],
     locale: 'pt_BR',
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SatsLab - Bitcoin',
-    description: 'Learn Bitcoin operations through interactive modules and hands-on experience with Signet',
-    images: ['/images/SatsLabProLogo/SatsLabProLogo.png'],
+    description: 'Bitcoin',
+    images: ['/images/SatsLabProLogo/SatsLab.photo.png'],
   },
 }
 
