@@ -23,6 +23,17 @@ interface ProUsersData {
   expiring_soon: number
 }
 
+interface PlatformStats {
+  total_users: number
+  active_users_24h: number
+  active_users_7d: number
+  total_sessions: number
+  avg_session_duration: number
+  total_modules_completed: number
+  total_badges_earned: number
+  total_wallets_created: number
+}
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
@@ -30,6 +41,7 @@ export default function AdminDashboard() {
   const [proUsersData, setProUsersData] = useState<ProUsersData | null>(null)
   const [newUserEmail, setNewUserEmail] = useState('')
   const [addingUser, setAddingUser] = useState(false)
+  const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
 
   const fetchProUsers = async () => {
     try {
@@ -42,6 +54,31 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch Pro users list:', error)
+    }
+  }
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch('/api/admin/analytics-data')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.platformStats) {
+          setPlatformStats(data.platformStats)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics data:', error)
+      // Set fallback data
+      setPlatformStats({
+        total_users: 0,
+        active_users_24h: 0,
+        active_users_7d: 0,
+        total_sessions: 0,
+        avg_session_duration: 0,
+        total_modules_completed: 0,
+        total_badges_earned: 0,
+        total_wallets_created: 0
+      })
     }
   }
 
@@ -99,6 +136,13 @@ export default function AdminDashboard() {
     return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    if (hours > 0) return `${hours}h ${minutes % 60}m`
+    return `${minutes}m`
+  }
+
   useEffect(() => {
     if (status === 'loading') return
 
@@ -114,9 +158,12 @@ export default function AdminDashboard() {
         const data = await response.json()
         setIsAdmin(data.isAdmin)
         
-        // If admin, fetch pro users data
+        // If admin, fetch all data
         if (data.isAdmin) {
-          await fetchProUsers()
+          await Promise.all([
+            fetchProUsers(),
+            fetchAnalytics()
+          ])
         }
       } catch (error) {
         console.error('Admin check failed:', error)
@@ -185,6 +232,68 @@ export default function AdminDashboard() {
             Bem-vindo, {session.user?.email || 'Admin'}
           </p>
         </div>
+
+        {/* Platform Statistics */}
+        {platformStats && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-blue-400">📊 Estatísticas da Plataforma</h2>
+            
+            {/* Main Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-400">{platformStats.total_users}</div>
+                  <div className="text-sm text-gray-400">👥 Total Usuários</div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-400">{platformStats.active_users_24h}</div>
+                  <div className="text-sm text-gray-400">⚡ Ativos 24h</div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-400">{formatDuration(platformStats.avg_session_duration)}</div>
+                  <div className="text-sm text-gray-400">⏱️ Sessão Média</div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-400">{platformStats.total_sessions}</div>
+                  <div className="text-sm text-gray-400">📈 Total Sessões</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Engagement Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{platformStats.total_badges_earned}</div>
+                  <div className="text-sm text-gray-400">🏆 Badges Conquistados</div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-400">{platformStats.total_wallets_created}</div>
+                  <div className="text-sm text-gray-400">💳 Carteiras Criadas</div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-400">{platformStats.total_modules_completed}</div>
+                  <div className="text-sm text-gray-400">📚 Módulos Completados</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Pro Users Management */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mb-8">
