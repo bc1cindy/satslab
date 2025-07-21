@@ -13,7 +13,7 @@ import { Button } from '@/app/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs'
 import { Crown, LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
-import { formatDateBR, calculateDaysRemaining } from '@/app/lib/utils'
+import { formatDateBR } from '@/app/lib/utils'
 import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 interface VideoMapping {
@@ -202,16 +202,7 @@ export default function ProPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 mb-2">✓ Ativo</Badge>
-                    <div className="text-sm text-gray-400">
-                      {(() => {
-                        const daysRemaining = calculateDaysRemaining(userProInfo.pro_expires_at)
-                        if (daysRemaining === null) return 'Prazo não disponível'
-                        if (daysRemaining < 0) return `Expirado há ${Math.abs(daysRemaining)} dias`
-                        if (daysRemaining === 0) return 'Expira hoje'
-                        return `${daysRemaining} dias restantes`
-                      })()}
-                    </div>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">✓ Ativo</Badge>
                   </div>
                 </div>
               </CardContent>
