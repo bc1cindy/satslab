@@ -97,11 +97,34 @@ export async function GET(request: NextRequest) {
     try {
       // Generate secure URL from B2 with different normalizations
       let secureUrl
-      try {
-        secureUrl = await generateSecureB2Url(filename)
-      } catch (error) {
-        // Try with different Unicode normalization
-        secureUrl = await generateSecureB2Url(filename.normalize('NFC'))
+      let lastError
+      
+      // Try multiple Unicode normalizations
+      const normalizations = [
+        filename, // Original
+        filename.normalize('NFC'), // Canonical composition
+        filename.normalize('NFD'), // Canonical decomposition
+        filename.normalize('NFKC'), // Compatibility composition
+        filename.normalize('NFKD'), // Compatibility decomposition
+      ]
+      
+      console.log('Trying normalizations for:', filename)
+      
+      for (const normalizedFilename of normalizations) {
+        try {
+          console.log('Attempting with normalization:', normalizedFilename === filename ? 'original' : 'normalized')
+          secureUrl = await generateSecureB2Url(normalizedFilename)
+          console.log('✅ Success with normalization!')
+          break
+        } catch (error) {
+          console.log('❌ Failed with this normalization:', error instanceof Error ? error.message : 'Unknown error')
+          lastError = error
+          continue
+        }
+      }
+      
+      if (!secureUrl) {
+        throw lastError || new Error('All normalization attempts failed')
       }
       
       console.log('Generated secure URL successfully')
