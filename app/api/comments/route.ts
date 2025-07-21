@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/lib/auth'
-import { getServerSupabase } from '@/app/lib/supabase-server'
-import { CreateCommentSchema, VideoIdSchema, validateInput } from '@/app/lib/validation/schemas'
-import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
-
 
 // GET - Listar comentários de um vídeo
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getServerSupabase()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { searchParams } = new URL(request.url)
     const videoId = searchParams.get('videoId')
     
@@ -19,22 +26,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'videoId é obrigatório' }, { status: 400 })
     }
 
-    // 🔒 VALIDAÇÃO SEGURA COM ZOD
-    const validation = validateInput(VideoIdSchema, videoId)
-    
-    if (!validation.success) {
-      securityLogger.warn(
-        SecurityEventType.SUSPICIOUS_ACTIVITY,
-        'Invalid videoId in comment request',
-        { 
-          error: validation.error,
-          providedVideoId: videoId
-        },
-        request
-      )
-      
+    console.log('Getting comments for video:', videoId)
+
+    // Basic validation
+    if (!videoId.match(/^[a-zA-Z0-9\-_]+$/)) {
       return NextResponse.json(
-        { error: `VideoId inválido: ${validation.error}` },
+        { error: 'VideoId inválido' },
         { status: 400 }
       )
     }
@@ -48,11 +45,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      securityLogger.error(
-        SecurityEventType.SYSTEM_ERROR,
-        'Database error fetching comments',
-        { error: error.message, videoId }
-      )
+      console.error('Database error fetching comments:', error.message)
       throw error
     }
 
@@ -74,11 +67,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ comments: commentsWithReplies })
   } catch (error) {
-    securityLogger.error(
-      SecurityEventType.SYSTEM_ERROR,
-      'Error fetching comments',
-      { error: error instanceof Error ? error.message : 'Unknown error' }
-    )
+    console.error('Error fetching comments:', error)
     return NextResponse.json({ error: 'Erro ao buscar comentários' }, { status: 500 })
   }
 }
@@ -92,7 +81,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const supabase = getServerSupabase()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+    
+    console.log('Creating comment for user:', session.user.email)
     
     // 🔒 VERIFICAR ACESSO PRO
     const { data: user, error: userError } = await supabase
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (userError || !user) {
+      console.log('User not found for comment:', userError?.message)
       return NextResponse.json({ 
         error: 'Usuário não encontrado' 
       }, { status: 403 })
@@ -119,60 +120,63 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     
-    // 🔒 VALIDAÇÃO SEGURA COM ZOD PARA PREVENIR XSS
-    const validation = validateInput(CreateCommentSchema, {
-      content: body.content,
-      videoId: body.videoId,
-      parentId: body.parentId,
-      userEmail: session.user.email
-    })
-
-    if (!validation.success) {
-      securityLogger.warn(
-        SecurityEventType.XSS_ATTEMPT,
-        'Invalid comment data - potential XSS attempt',
-        { 
-          error: validation.error,
-          userEmail: session.user.email,
-          providedData: {
-            contentLength: body.content?.length || 0,
-            videoId: body.videoId,
-            hasParentId: !!body.parentId
-          }
-        },
-        request
-      )
-      
+    // Basic validation against XSS
+    if (!body.content || typeof body.content !== 'string') {
       return NextResponse.json(
-        { error: `Dados inválidos: ${validation.error}` },
+        { error: 'Conteúdo é obrigatório' },
         { status: 400 }
       )
     }
 
-    if (!validation.data) {
+    if (!body.videoId || typeof body.videoId !== 'string') {
       return NextResponse.json(
-        { error: 'Erro na validação dos dados' },
+        { error: 'VideoId é obrigatório' },
         { status: 400 }
       )
     }
 
-    const { content, videoId, parentId } = validation.data
+    if (body.content.length > 1000) {
+      return NextResponse.json(
+        { error: 'Comentário muito longo (máximo 1000 caracteres)' },
+        { status: 400 }
+      )
+    }
+
+    // Basic XSS protection
+    const sanitizedContent = body.content
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]*>/g, '')
+      .trim()
+
+    if (!sanitizedContent) {
+      return NextResponse.json(
+        { error: 'Conteúdo inválido' },
+        { status: 400 }
+      )
+    }
+
+    console.log('Creating comment with content length:', sanitizedContent.length)
 
     // Criar comentário
     const { data, error } = await supabase
       .from('comments')
       .insert({
-        content,
-        video_id: videoId,
+        content: sanitizedContent,
+        video_id: body.videoId,
         user_id: session.user.email, // Usando email como ID
         user_name: session.user.name || 'Usuário',
         user_email: session.user.email,
-        parent_id: parentId || null
+        parent_id: body.parentId || null
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Error creating comment:', error)
+      throw error
+    }
+
+    console.log('Comment created successfully:', data.id)
 
     // Retornar comentário formatado
     const formattedComment = {
@@ -186,14 +190,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(formattedComment)
   } catch (error) {
-    securityLogger.error(
-      SecurityEventType.SYSTEM_ERROR,
-      'Error creating comment',
-      { 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        userEmail: session.user?.email
-      }
-    )
+    console.error('Error creating comment:', error)
     return NextResponse.json({ error: 'Erro ao criar comentário' }, { status: 500 })
   }
 }
