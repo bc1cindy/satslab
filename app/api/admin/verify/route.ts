@@ -38,21 +38,19 @@ export async function GET() {
       return NextResponse.json({ isAdmin: false })
     }
 
-    // Check admin email from environment
+    // Check admin access: either matches ADMIN_EMAIL env var OR has is_admin=true in database
     const adminEmail = process.env.ADMIN_EMAIL
     const isAdminEmail = adminEmail && session.user.email === adminEmail
     const isAdminInDB = user.is_admin === true
 
-    // Simplified: if user is cindysanford@gmail.com and has is_admin=true, grant access
-    const isCindyEmail = session.user.email === 'cindysanford@gmail.com'
-    const isAdmin = (isAdminEmail && isAdminInDB) || (isCindyEmail && isAdminInDB)
+    // Grant admin access if user has is_admin=true in database (most secure approach)
+    const isAdmin = isAdminInDB
 
     console.log('Admin check result:', {
-      email: session.user.email,
-      adminEmailFromEnv: adminEmail,
+      email: 'REDACTED',
+      hasAdminEmail: !!adminEmail,
       isAdminEmail,
       isAdminInDB,
-      isCindyEmail,
       finalResult: isAdmin
     })
 
