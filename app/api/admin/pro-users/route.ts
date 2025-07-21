@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/lib/auth'
-import { getServerSupabase } from '@/app/lib/supabase-server'
-import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
-import { BUSINESS_RULES } from '@/app/lib/config/business-rules'
+import { createClient } from '@supabase/supabase-js'
 
-// Check if user is admin
-async function isAdmin(request?: NextRequest) {
+// Check if user is admin (simplified)
+async function isAdmin() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -14,7 +12,17 @@ async function isAdmin(request?: NextRequest) {
       return false
     }
     
-    const supabase = getServerSupabase()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { data: user, error } = await supabase
       .from('users')
       .select('is_admin')
@@ -22,18 +30,13 @@ async function isAdmin(request?: NextRequest) {
       .single()
     
     if (error || !user) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Admin status check failed', { 
-        hasError: !!error,
-        hasUser: !!user 
-      }, request)
+      console.error('Admin status check failed:', error?.message)
       return false
     }
     
     return user.is_admin === true
   } catch (error) {
-    securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Admin access check exception', { 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }, request)
+    console.error('Admin access check exception:', error)
     return false
   }
 }
@@ -42,12 +45,12 @@ async function isAdmin(request?: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check admin access
-    if (!(await isAdmin(request))) {
-      securityLogger.logAccessControl(false, 'pro_user_management', undefined, request)
+    if (!(await isAdmin())) {
+      console.log('Admin access denied for pro user management')
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
 
-    securityLogger.logAccessControl(true, 'pro_user_management', undefined, request)
+    console.log('Admin access granted for pro user management')
 
     const { email } = await request.json()
 
@@ -56,18 +59,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Grant Pro access with 1 year expiration
-    const supabase = getServerSupabase()
-    const { error } = await supabase.rpc('grant_pro_access', {
-      user_email: email,
-      payment_method_used: 'manual_admin',
-      amount_paid: 0,
-      invoice_id: `manual_${Date.now()}`
-    })
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+    
+    const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+    
+    const { error } = await supabase
+      .from('users')
+      .update({
+        has_pro_access: true,
+        pro_expires_at: oneYearFromNow,
+        updated_at: new Date().toISOString()
+      })
+      .eq('email', email)
 
     if (error) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to grant Pro access', { 
-        hasEmail: !!email 
-      }, request)
+      console.error('Failed to grant Pro access:', error.message)
       return NextResponse.json({ error: 'Erro ao liberar acesso Pro' }, { status: 500 })
     }
 
@@ -75,13 +90,11 @@ export async function POST(request: NextRequest) {
       success: true, 
       message: `Acesso Pro liberado para ${email}`,
       email,
-      expires_at: new Date(Date.now() + BUSINESS_RULES.PRO_ACCESS_DURATION_MS).toISOString()
+      expires_at: oneYearFromNow
     })
 
   } catch (error) {
-    securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Pro user management operation failed', { 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }, request)
+    console.error('Pro user management operation failed:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 }
@@ -90,21 +103,32 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Check admin access
-    if (!(await isAdmin(request))) {
-      securityLogger.logAccessControl(false, 'pro_users_list', undefined, request)
+    if (!(await isAdmin())) {
+      console.log('Admin access denied for pro users list')
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
 
-    securityLogger.logAccessControl(true, 'pro_users_list', undefined, request)
-    const supabase = getServerSupabase()
+    console.log('Admin access granted for pro users list')
+    
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+    
     const { data: proUsers, error } = await supabase
       .from('users')
-      .select('email, is_pro, pro_expires_at, created_at, updated_at')
-      .eq('is_pro', true)
+      .select('email, has_pro_access, pro_expires_at, created_at, updated_at')
+      .eq('has_pro_access', true)
       .order('pro_expires_at', { ascending: false })
 
     if (error) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to fetch Pro users', {}, request)
+      console.error('Failed to fetch Pro users:', error.message)
       return NextResponse.json({ error: 'Erro ao buscar usuários Pro' }, { status: 500 })
     }
 
@@ -132,9 +156,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Pro users list operation failed', { 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }, request)
+    console.error('Pro users list operation failed:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 }
@@ -143,12 +165,12 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Check admin access
-    if (!(await isAdmin(request))) {
-      securityLogger.logAccessControl(false, 'pro_user_removal', undefined, request)
+    if (!(await isAdmin())) {
+      console.log('Admin access denied for pro user removal')
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
 
-    securityLogger.logAccessControl(true, 'pro_user_removal', undefined, request)
+    console.log('Admin access granted for pro user removal')
 
     const { email } = await request.json()
 
@@ -157,20 +179,28 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remove Pro access
-    const supabase = getServerSupabase()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+    
     const { error } = await supabase
       .from('users')
       .update({ 
-        is_pro: false, 
+        has_pro_access: false, 
         pro_expires_at: null,
         updated_at: new Date().toISOString()
       })
       .eq('email', email)
 
     if (error) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to remove Pro access', { 
-        hasEmail: !!email 
-      }, request)
+      console.error('Failed to remove Pro access:', error.message)
       return NextResponse.json({ error: 'Erro ao remover acesso Pro' }, { status: 500 })
     }
 
@@ -181,9 +211,7 @@ export async function DELETE(request: NextRequest) {
     })
 
   } catch (error) {
-    securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Pro user removal operation failed', { 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }, request)
+    console.error('Pro user removal operation failed:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 }
