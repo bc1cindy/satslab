@@ -4,15 +4,12 @@ import { getServerSupabase } from './supabase-server'
 import { securityLogger, SecurityEventType } from './security/security-logger'
 import { configManager } from './config'
 
-// Get secure authentication configuration
-const authConfig = configManager.getAuth()
-
 export const authOptions: NextAuthOptions = {
-  secret: authConfig.nextAuthSecret,
+  secret: process.env.NEXTAUTH_SECRET!,
   providers: [
     GoogleProvider({
-      clientId: authConfig.googleClientId,
-      clientSecret: authConfig.googleClientSecret,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     })
   ],
   callbacks: {
