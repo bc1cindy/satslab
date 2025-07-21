@@ -23,12 +23,32 @@ export const authOptions: NextAuthOptions = {
     },
     
     async session({ session }) {
-      // Basic session - no database calls yet
-      // We'll add Pro access logic after confirming login works
+      // Check Pro access from database
       if (session.user?.email) {
-        // Add custom properties safely
-        (session.user as any).hasProAccess = false // Default for now
-        ;(session.user as any).isAdmin = false    // Default for now
+        try {
+          const { getServerSupabase } = await import('./supabase-server')
+          const supabase = getServerSupabase()
+          
+          const { data: user } = await supabase
+            .from('users')
+            .select('id, has_pro_access, is_admin')
+            .eq('email', session.user.email)
+            .single()
+
+          if (user) {
+            (session.user as any).id = user.id
+            ;(session.user as any).hasProAccess = user.has_pro_access === true
+            ;(session.user as any).isAdmin = user.is_admin === true
+          } else {
+            // Default if user not found
+            ;(session.user as any).hasProAccess = false
+            ;(session.user as any).isAdmin = false
+          }
+        } catch (error) {
+          // Default if database error
+          ;(session.user as any).hasProAccess = false
+          ;(session.user as any).isAdmin = false
+        }
       }
       
       return session
