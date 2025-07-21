@@ -130,13 +130,27 @@ export async function GET(request: NextRequest) {
         const secureUrl = await generateSecureB2Url(exactMatch)
         console.log('✅ Generated secure URL successfully')
         
-        return NextResponse.json({
+        const userAgent = request.headers.get('user-agent') || ''
+        const isMobileUA = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+        
+        const response = NextResponse.json({
           url: secureUrl,
           filename: exactMatch,
           originalFilename: filename,
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          source: 'backblaze_b2'
+          source: 'backblaze_b2',
+          ...(isMobileUA && { mobile: true })
         })
+        
+        // Add mobile-friendly headers only for mobile
+        if (isMobileUA) {
+          response.headers.set('Access-Control-Allow-Origin', '*')
+          response.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+          response.headers.set('Access-Control-Allow-Headers', 'Range, Content-Type')
+          response.headers.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges')
+        }
+        
+        return response
       }
       
       // If no exact match, find partial matches for debugging
@@ -179,12 +193,26 @@ export async function GET(request: NextRequest) {
       
       console.log('Generated secure URL successfully')
       
-      return NextResponse.json({
+      const userAgent = request.headers.get('user-agent') || ''
+      const isMobileUA = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+      
+      const response = NextResponse.json({
         url: secureUrl,
         filename,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        source: 'backblaze_b2'
+        source: 'backblaze_b2',
+        ...(isMobileUA && { mobile: true })
       })
+      
+      // Add mobile-friendly headers only for mobile
+      if (isMobileUA) {
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+        response.headers.set('Access-Control-Allow-Headers', 'Range, Content-Type')
+        response.headers.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges')
+      }
+      
+      return response
 
     } catch (error) {
       console.error('Error generating B2 URL:', error)

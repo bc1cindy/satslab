@@ -39,6 +39,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [progress, setProgress] = useState(0)
+  const [debugInfo, setDebugInfo] = useState<string[]>([])
 
   useEffect(() => {
     if (videoId) {
@@ -55,45 +56,64 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
     setLoading(true)
     setError(null)
     setVideoUrl(null)
+    setDebugInfo([])
     
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🎬 Carregando vídeo:', filename.substring(0, 20) + '...')
-      }
-
-      // Detect if mobile for debugging
+      // Detect if mobile
       const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const debugMessages: string[] = []
       
-      if (isMobile && process.env.NODE_ENV === 'development') {
-        console.log('📱 Mobile detected, using mobile-specific video loading')
+      if (isMobile) {
+        debugMessages.push(`📱 Mobile detected: ${navigator.userAgent.substring(0, 50)}...`)
+        debugMessages.push(`Platform: ${navigator.platform}`)
+        debugMessages.push(`Screen: ${window.screen.width}x${window.screen.height}`)
       }
 
-      // Carregar vídeo do endpoint local (com barra final para evitar redirect)
-      const response = await fetch(`/api/videos/secure/?file=${encodeURIComponent(filename)}`, {
-        ...(isMobile && {
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        })
-      })
+      // Carregar vídeo do endpoint local
+      debugMessages.push('🔄 Fetching video URL from API...')
+      const response = await fetch(`/api/videos/secure/?file=${encodeURIComponent(filename)}`)
       const data = await response.json()
       
+      debugMessages.push(`📡 API Response: ${response.status} ${response.statusText}`)
+      
       if (response.ok && data.url) {
-        setVideoUrl(data.url)
-        if (process.env.NODE_ENV === 'development') {
-          console.log('✅ Vídeo carregado com sucesso')
+        debugMessages.push(`✅ URL received: ${data.url.substring(0, 100)}...`)
+        
+        // For mobile, test the URL directly
+        if (isMobile) {
+          debugMessages.push('🧪 Testing video URL accessibility...')
+          try {
+            const testResponse = await fetch(data.url, {
+              method: 'HEAD',
+              mode: 'no-cors'
+            })
+            debugMessages.push(`📊 URL test: ${testResponse.type} (no-cors mode)`)
+          } catch (testError) {
+            debugMessages.push(`❌ URL test failed: ${testError}`)
+          }
         }
+        
+        // For iOS, add a small delay before setting URL
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          debugMessages.push('⏱️ iOS detected, adding delay for video loading...')
+          setTimeout(() => {
+            setVideoUrl(data.url)
+          }, 100)
+        } else {
+          setVideoUrl(data.url)
+        }
+        setDebugInfo(debugMessages)
       } else {
         const errorMsg = data.error || 'Erro ao carregar vídeo'
-        if (isMobile && process.env.NODE_ENV === 'development') {
-          console.error('❌ Mobile video error:', { status: response.status, error: errorMsg })
-        }
+        debugMessages.push(`❌ API Error: ${errorMsg}`)
+        debugMessages.push(`Details: ${JSON.stringify(data)}`)
+        setDebugInfo(debugMessages)
         setError(errorMsg)
         onError?.(errorMsg)
       }
     } catch (error) {
-      console.error('Error loading video URL:', error)
       const errorMsg = 'Erro ao gerar URL do vídeo'
+      setDebugInfo(prev => [...prev, `💥 Exception: ${error}`])
       setError(errorMsg)
       onError?.(errorMsg)
     } finally {
@@ -210,9 +230,17 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
             
             {error && (
               <div className="flex items-center justify-center h-full">
-                <div className="text-center text-white">
+                <div className="text-center text-white max-w-lg mx-auto p-4">
                   <AlertCircle className="h-16 w-16 mx-auto mb-4 text-red-500" />
                   <p className="mb-4">{error}</p>
+                  {debugInfo.length > 0 && /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
+                    <div className="mb-4 text-left text-xs bg-gray-800 p-3 rounded">
+                      <p className="font-bold mb-2">Debug Info (Mobile):</p>
+                      {debugInfo.map((info, idx) => (
+                        <p key={idx} className="mb-1">{info}</p>
+                      ))}
+                    </div>
+                  )}
                   <Button 
                     variant="outline" 
                     onClick={() => videoId && loadVideoUrl(videoId)}
@@ -243,17 +271,40 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   onLoadedData={handleLoadedMetadata}
                   onError={(e) => {
                     const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                    console.error('Video error:', e)
-                    if (isMobile && process.env.NODE_ENV === 'development') {
-                      const target = e.currentTarget as HTMLVideoElement
-                      console.error('Mobile video error details:', {
-                        error: target.error,
-                        networkState: target.networkState,
-                        readyState: target.readyState,
-                        src: target.src
-                      })
+                    const target = e.currentTarget as HTMLVideoElement
+                    const errorDetails = {
+                      code: target.error?.code,
+                      message: target.error?.message,
+                      networkState: target.networkState,
+                      readyState: target.readyState,
+                      src: target.src?.substring(0, 100) + '...',
+                      currentSrc: target.currentSrc?.substring(0, 100) + '...'
                     }
-                    setError('Erro ao carregar vídeo. Verifique sua conexão.')
+                    
+                    console.error('Video error:', errorDetails)
+                    
+                    if (isMobile) {
+                      setDebugInfo(prev => [
+                        ...prev,
+                        '🚨 Video Element Error:',
+                        `Error Code: ${errorDetails.code}`,
+                        `Network State: ${errorDetails.networkState}`,
+                        `Ready State: ${errorDetails.readyState}`,
+                        `Video URL: ${errorDetails.src}`
+                      ])
+                    }
+                    
+                    // More specific error messages based on error code
+                    let errorMsg = 'Erro ao carregar vídeo.'
+                    if (target.error?.code === 4) {
+                      errorMsg = 'Formato de vídeo não suportado ou problema de CORS.'
+                    } else if (target.error?.code === 3) {
+                      errorMsg = 'Erro ao decodificar vídeo.'
+                    } else if (target.error?.code === 2) {
+                      errorMsg = 'Erro de rede ao carregar vídeo.'
+                    }
+                    
+                    setError(errorMsg)
                   }}
                   playsInline
                   webkit-playsinline="true"
@@ -261,9 +312,11 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   x-webkit-airplay="allow"
                   autoPlay={false}
                   muted={false}
-                  {...(/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && {
-                    crossOrigin: "anonymous"
-                  })}
+                  {...(/iPhone|iPad|iPod/i.test(navigator.userAgent) && {
+                    crossOrigin: "use-credentials",
+                    'x-webkit-airplay': 'allow',
+                    'webkit-playsinline': '',
+                  } as any)}
                   style={{ objectFit: 'contain' }}
                 >
                   <source src={videoUrl} type="video/mp4" />
