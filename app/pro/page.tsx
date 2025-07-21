@@ -93,49 +93,26 @@ export default function ProPage() {
 
   async function loadVideos() {
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📡 Carregando vídeos do B2...')
-      }
+      console.log('📡 Carregando vídeos...')
       
-      let videosData = []
+      // Use apenas o fallback que sabemos que funciona
+      const response = await fetch('/api/videos/list-b2')
+      const data = await response.json()
       
-      // Primeiro tenta carregar vídeos reais do B2
-      try {
-        const response = await fetch('/api/videos/list-b2-real')
-        const data = await response.json()
+      if (data.success && data.videos) {
+        console.log(`✅ Carregados ${data.videos.length} vídeos`)
+        setVideos(data.videos)
         
-        if (data.success && data.videos) {
-          videosData = data.videos
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`✅ Carregados ${videosData.length} vídeos do B2`)
-          }
+        // Selecionar primeiro vídeo automaticamente
+        if (data.videos.length > 0 && !selectedVideo) {
+          setSelectedVideo(data.videos[0])
+          console.log('🎯 Vídeo selecionado:', data.videos[0].title)
         }
-      } catch (b2Error) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('⚠️ Erro ao carregar do B2, usando fallback local:', b2Error)
-        }
-      }
-      
-      // Fallback para vídeos locais se B2 falhar
-      if (videosData.length === 0) {
-        const fallbackResponse = await fetch('/api/videos/list-b2')
-        const fallbackData = await fallbackResponse.json()
-        videosData = fallbackData.videos || []
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`⚠️ Usando ${videosData.length} vídeos do fallback local`)
-        }
-      }
-
-      setVideos(videosData)
-      
-      // Selecionar primeiro vídeo automaticamente
-      if (videosData.length > 0 && !selectedVideo) {
-        setSelectedVideo(videosData[0])
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🎯 Vídeo selecionado:', videosData[0].title)
-        }
+      } else {
+        console.error('❌ Erro ao carregar vídeos:', data.error)
       }
     } catch (error) {
+      console.error('❌ Erro na função loadVideos:', error)
       securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to load Pro videos', {
         error: error instanceof Error ? error.message : 'Unknown error'
       })
