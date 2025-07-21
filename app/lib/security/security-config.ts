@@ -326,7 +326,7 @@ export class SecurityConfigManager {
           'wss://*.supabase.co',
           ...(isDev ? ['http://localhost:*', 'ws://localhost:*'] : [])
         ],
-        'media-src': ["'self'", 'https://f005.backblazeb2.com'],
+        'media-src': ["'self'", 'https://f005.backblazeb2.com', 'blob:', 'data:'],
         'object-src': ["'none'"],
         'child-src': ["'none'"],
         'worker-src': ["'self'"],
