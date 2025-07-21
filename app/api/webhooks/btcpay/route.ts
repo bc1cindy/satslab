@@ -215,7 +215,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    webhookUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://satslab.org'}/api/webhooks/btcpay`,
+    webhookUrl: `https://satslab.org/api/webhooks/btcpay`, // Hardcoded for production
     events: [
       'InvoiceCreated',
       'InvoicePaymentSettled', 

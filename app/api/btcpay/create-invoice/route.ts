@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
         exchangeRate: usdToBrlRate
       },
       checkout: {
-        redirectURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/pro?payment=success`,
+        redirectURL: `https://satslab.org/pro?payment=success`, // Hardcoded for production
         paymentMethods: ['BTC', 'BTC-LightningNetwork']
       }
     }

@@ -107,7 +107,7 @@ export class ProductionConfigurationProvider implements ConfigurationProvider {
       this.validateConfiguration()
     } catch (error) {
       // Durante o build ou desenvolvimento, use valores padrão seguros
-      const isDevelopment = process.env.NODE_ENV === 'development'
+      const isDevelopment = false // Hardcoded for production
       const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
       
       if (isDevelopment || isBuildTime) {
@@ -129,7 +129,7 @@ export class ProductionConfigurationProvider implements ConfigurationProvider {
       googleClientSecret: this.env.GOOGLE_CLIENT_SECRET,
       encryptionSecret: this.env.ENCRYPTION_SECRET,
       uploadSecret: this.env.UPLOAD_SECRET,
-      baseUrl: this.env.NEXT_PUBLIC_BASE_URL || 'https://satslab.org'
+      baseUrl: 'https://satslab.org' // Hardcoded for production
     }
   }
 
@@ -185,7 +185,7 @@ export class ProductionConfigurationProvider implements ConfigurationProvider {
     
     return {
       network,
-      mempoolApiUrl: this.env.MEMPOOL_API_BASE_URL || this.getDefaultMempoolUrl(network),
+      mempoolApiUrl: 'https://mempool.space/signet/api', // Hardcoded for production
       explorerUrl: this.getDefaultExplorerUrl(network),
       faucetUrls: this.getDefaultFaucetUrls(network)
     }
@@ -196,7 +196,7 @@ export class ProductionConfigurationProvider implements ConfigurationProvider {
       enableRateLimiting: this.env.ENABLE_RATE_LIMITING === 'true',
       enableSecurityLogging: this.env.ENABLE_SECURITY_LOGGING === 'true',
       enableInjectionProtection: this.env.ENABLE_INJECTION_PROTECTION === 'true',
-      logLevel: (this.env.SECURITY_LOG_LEVEL as any) || 'info',
+      logLevel: 'info', // Hardcoded for production
       alertThreshold: parseInt(this.env.SECURITY_ALERT_THRESHOLD || '70'),
       monitoringWebhookUrl: this.env.SLACK_SECURITY_WEBHOOK_URL,
       adminEmail: this.env.ADMIN_EMAIL
@@ -204,7 +204,7 @@ export class ProductionConfigurationProvider implements ConfigurationProvider {
   }
 
   getFeatureConfig(): FeatureConfiguration {
-    const isProduction = process.env.NODE_ENV === 'production'
+    const isProduction = true // Hardcoded for production
     
     return {
       enableProAccess: true,
@@ -250,7 +250,7 @@ export class ProductionConfigurationProvider implements ConfigurationProvider {
     if (!this.validated) {
       // Durante o build ou desenvolvimento, seja mais permissivo
       const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
-      const isDevelopment = process.env.NODE_ENV === 'development'
+      const isDevelopment = false // Hardcoded for production
       
       if (isBuildTime || isDevelopment) {
         console.warn('Configuration not fully validated, but continuing for development/build')
@@ -441,7 +441,7 @@ export class ConfigurationFactory {
       return this.provider
     }
 
-    const env = environment || process.env.NODE_ENV || 'development'
+    const env = environment || 'production' // Hardcoded for production
 
     switch (env) {
       case 'production':
