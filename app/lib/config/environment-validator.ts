@@ -305,13 +305,7 @@ export class EnvironmentValidator {
         validator: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
         description: 'Administrator email address'
       },
-      {
-        name: 'NEXT_PUBLIC_ADMIN_EMAIL',
-        required: false,
-        sensitive: false,
-        validator: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-        description: 'Public administrator email'
-      },
+      // NEXT_PUBLIC_ADMIN_EMAIL removed - hardcoded for security
 
       // Network Configuration
       {

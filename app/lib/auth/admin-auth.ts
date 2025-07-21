@@ -169,5 +169,5 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
  * Never use for authentication logic
  */
 export function getAdminEmailForDisplay(): string | null {
-  return process.env.NEXT_PUBLIC_ADMIN_EMAIL || null
+  return 'admin@satslab.org' // Hardcoded for production security
 }
