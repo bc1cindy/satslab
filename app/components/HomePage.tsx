@@ -353,8 +353,15 @@ export default function HomePage() {
                   variant="ghost" 
                   className="text-white hover:text-orange-500 justify-start"
                   onClick={() => {
-                    document.getElementById('modulos-gratuitos')?.scrollIntoView({ behavior: 'smooth' })
                     setMobileMenuOpen(false)
+                    setTimeout(() => {
+                      const element = document.getElementById('modulos-gratuitos')
+                      if (element) {
+                        const offset = 80
+                        const elementPosition = element.offsetTop - offset
+                        window.scrollTo({ top: elementPosition, behavior: 'smooth' })
+                      }
+                    }, 100)
                   }}
                 >
                   {isEnglish ? 'Free Modules' : 'Módulos Gratuitos'}
@@ -364,8 +371,15 @@ export default function HomePage() {
                     variant="ghost" 
                     className="text-white hover:text-orange-500 justify-start"
                     onClick={() => {
-                      document.getElementById('bitcoin-4-all')?.scrollIntoView({ behavior: 'smooth' })
                       setMobileMenuOpen(false)
+                      setTimeout(() => {
+                        const element = document.getElementById('bitcoin-4-all')
+                        if (element) {
+                          const offset = 80
+                          const elementPosition = element.offsetTop - offset
+                          window.scrollTo({ top: elementPosition, behavior: 'smooth' })
+                        }
+                      }, 100)
                     }}
                   >
                     Bitcoin 4 All
@@ -375,8 +389,16 @@ export default function HomePage() {
                   variant="ghost" 
                   className="text-white hover:text-orange-500 justify-start"
                   onClick={() => {
-                    document.getElementById('comprar-vender-btc')?.scrollIntoView({ behavior: 'smooth' })
                     setMobileMenuOpen(false)
+                    // Add small delay to allow menu to close before scrolling
+                    setTimeout(() => {
+                      const element = document.getElementById('comprar-vender-btc')
+                      if (element) {
+                        const offset = 80 // Account for header height
+                        const elementPosition = element.offsetTop - offset
+                        window.scrollTo({ top: elementPosition, behavior: 'smooth' })
+                      }
+                    }, 100)
                   }}
                 >
                   {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}

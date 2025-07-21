@@ -85,14 +85,23 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
     }
   }
 
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     if (videoElement) {
-      if (isPlaying) {
-        videoElement.pause()
-      } else {
-        videoElement.play()
+      try {
+        if (isPlaying) {
+          videoElement.pause()
+          setIsPlaying(false)
+        } else {
+          await videoElement.play()
+          setIsPlaying(true)
+        }
+      } catch (error) {
+        console.error('Error playing video:', error)
+        // Try to handle autoplay restrictions on mobile
+        if (error instanceof Error && error.name === 'NotAllowedError') {
+          setError('Clique no botão play para iniciar o vídeo')
+        }
       }
-      setIsPlaying(!isPlaying)
     }
   }
 
@@ -175,7 +184,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
       {/* Player */}
       <Card className="bg-black border-gray-800">
         <CardContent className="p-0">
-          <div className="aspect-video bg-black rounded-lg overflow-hidden relative touch-manipulation">
+          <div className="aspect-video bg-black rounded-lg overflow-hidden relative touch-manipulation transform-gpu will-change-transform">
             {loading && (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -204,9 +213,10 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                 <video
                   ref={setVideoElement}
                   src={videoUrl}
-                  className="w-full h-full"
-                  controlsList="nodownload"
+                  className="w-full h-full cursor-pointer"
+                  controlsList="nodownload noremoteplayback"
                   onContextMenu={(e) => e.preventDefault()}
+                  onClick={togglePlayPause}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                   onEnded={() => setIsPlaying(false)}
@@ -215,10 +225,17 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   onLoadedMetadata={handleLoadedMetadata}
                   onDurationChange={handleLoadedMetadata}
                   onLoadedData={handleLoadedMetadata}
+                  onError={(e) => {
+                    console.error('Video error:', e)
+                    setError('Erro ao carregar vídeo. Verifique sua conexão.')
+                  }}
                   playsInline
                   webkit-playsinline="true"
                   preload="metadata"
                   x-webkit-airplay="allow"
+                  autoPlay={false}
+                  muted={false}
+                  style={{ objectFit: 'contain' }}
                 >
                   <source src={videoUrl} type="video/mp4" />
                   Seu navegador não suporta o elemento de vídeo.

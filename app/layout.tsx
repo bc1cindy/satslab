@@ -28,12 +28,13 @@ import { LanguageProvider } from '@/app/components/i18n/LanguageProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SatsLab - Bitcoin',
-  description: 'Bitcoin',
+  title: 'SatsLab - Educação Bitcoin Gratuita e Open Source',
+  description: 'Aprenda Bitcoin gratuitamente com módulos educativos, tutoriais práticos e conteúdo avançado sobre Lightning Network. Plataforma open source de educação Bitcoin em português.',
   metadataBase: new URL('https://satslab.org'),
+  keywords: 'Bitcoin, educação, gratuito, Lightning Network, cryptocurrency, blockchain, curso, tutorial',
   openGraph: {
-    title: 'SatsLab - Bitcoin',
-    description: 'Bitcoin',
+    title: 'SatsLab - Educação Bitcoin Gratuita e Open Source',
+    description: 'Aprenda Bitcoin gratuitamente com módulos educativos, tutoriais práticos e conteúdo avançado sobre Lightning Network. Plataforma open source de educação Bitcoin em português.',
     url: 'https://satslab.org',
     siteName: 'SatsLab',
     images: [
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
         url: '/images/SatsLabProLogo/SatsLab.photo.png',
         width: 1200,
         height: 630,
-        alt: 'SatsLab',
+        alt: 'SatsLab - Plataforma de Educação Bitcoin',
       }
     ],
     locale: 'pt_BR',
@@ -49,9 +50,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SatsLab - Bitcoin',
-    description: 'Bitcoin',
+    title: 'SatsLab - Educação Bitcoin Gratuita e Open Source',
+    description: 'Aprenda Bitcoin gratuitamente com módulos educativos, tutoriais práticos e conteúdo avançado sobre Lightning Network.',
     images: ['/images/SatsLabProLogo/SatsLab.photo.png'],
+    creator: '@bc1cindy',
   },
 }
 
