@@ -68,7 +68,7 @@ export default function AdminDashboard() {
             Apenas administradores podem acessar esta página.
           </p>
           <p className="text-gray-500 text-sm mb-4">
-            Usuário atual: {session.user.email}
+            Usuário atual: {session.user?.email || 'N/A'}
           </p>
           <Link href="/" className="text-orange-500 hover:text-orange-400">
             Voltar ao Site
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
             🔧 Admin Dashboard
           </h1>
           <p className="text-gray-300">
-            Bem-vindo, {session.user.email}
+            Bem-vindo, {session.user?.email || 'Admin'}
           </p>
         </div>
 
