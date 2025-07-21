@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
         // Check if user exists (with error handling)
         const { data: existingUser, error: fetchError } = await supabase
           .from('users')
-          .select('id, email, has_pro_access, is_admin')
+          .select('id, email, name, has_pro_access, is_admin')
           .eq('email', user.email)
           .single()
 
@@ -109,18 +109,18 @@ export const authOptions: NextAuthOptions = {
 
           if (user && !error) {
             // Explicit security checks to prevent privilege escalation
-            session.user.id = user.id
-            session.user.hasProAccess = user.has_pro_access === true
-            session.user.isAdmin = user.is_admin === true
+            (session.user as any).id = user.id
+            ;(session.user as any).hasProAccess = user.has_pro_access === true
+            ;(session.user as any).isAdmin = user.is_admin === true
           } else {
             // Security: Default to no privileges if database error
-            session.user.hasProAccess = false
-            session.user.isAdmin = false
+            ;(session.user as any).hasProAccess = false
+            ;(session.user as any).isAdmin = false
           }
         } catch (error) {
           // Security: Default to no privileges on any error
-          session.user.hasProAccess = false
-          session.user.isAdmin = false
+          ;(session.user as any).hasProAccess = false
+          ;(session.user as any).isAdmin = false
           
           securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Session callback error', {
             hasEmail: !!session.user?.email
