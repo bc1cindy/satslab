@@ -9,7 +9,7 @@ import { formatDateBR } from '@/app/lib/utils'
 import { createClient } from '@/app/lib/supabase/client'
 import Link from 'next/link'
 import { ArrowLeft, Users, Clock, Trophy, Wallet, Activity, TrendingUp, Calendar, BarChart3, Zap, Target, MapPin, Languages, Crown, Plus, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
-import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
+// Security logger removed for simplified deployment
 
 interface PlatformStats {
   total_users: number
@@ -268,6 +268,7 @@ export default function AdminDashboard() {
   const [language, setLanguage] = useState<'pt' | 'en'>('pt')
   const [newUserEmail, setNewUserEmail] = useState('')
   const [addingUser, setAddingUser] = useState(false)
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
 
   // Helper function to get translations
   const t = (key: keyof typeof translations.pt) => translations[language][key]
@@ -282,9 +283,7 @@ export default function AdminDashboard() {
         }
       }
     } catch (error) {
-      securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to fetch Pro users list', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+      console.error('Failed to fetch Pro users list:', error)
     }
   }
 
@@ -308,9 +307,7 @@ export default function AdminDashboard() {
         alert(`Erro: ${error.error}`)
       }
     } catch (error) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to add Pro user', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+      console.error('Failed to add Pro user:', error)
       alert('Erro ao adicionar usuário')
     } finally {
       setAddingUser(false)
@@ -335,9 +332,7 @@ export default function AdminDashboard() {
         alert(`Erro: ${error.error}`)
       }
     } catch (error) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Failed to remove Pro user', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+      console.error('Failed to remove Pro user:', error)
       alert('Erro ao remover usuário')
     }
   }
@@ -419,9 +414,7 @@ export default function AdminDashboard() {
         .limit(50)
 
       if (activityError) {
-        securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Activity data fetch failed', {
-          error: activityError instanceof Error ? activityError.message : 'Unknown error'
-        })
+        console.error('Activity data fetch failed:', activityError)
         setRecentActivity([])
       } else {
         setRecentActivity(activityData || [])
@@ -432,9 +425,7 @@ export default function AdminDashboard() {
 
       setLastUpdated(new Date())
     } catch (error) {
-      securityLogger.error(SecurityEventType.SYSTEM_ERROR, 'Admin dashboard data fetch failed', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+      console.error('Admin dashboard data fetch failed:', error)
       // Set fallback data even on error
       setPlatformStats({
         total_users: 0,
@@ -547,9 +538,7 @@ export default function AdminDashboard() {
     )
   }
 
-  // Check if user is admin via server endpoint
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
-  
+  // Check admin access effect
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
