@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/lib/auth'
-import { getServerSupabase } from '@/app/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,8 +18,18 @@ export async function GET() {
 
     console.log('Checking Pro access for:', session.user.email)
 
-    // Check Pro access in database
-    const supabase = getServerSupabase()
+    // Create simple Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { data: user, error } = await supabase
       .from('users')
       .select('has_pro_access, pro_expires_at, pro_started_at, created_at')
