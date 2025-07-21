@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 }
 
 // List Pro users
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check admin access
     if (!(await isAdmin())) {

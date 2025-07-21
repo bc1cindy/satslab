@@ -47,6 +47,7 @@ export async function GET() {
 
     console.log('Admin check result:', {
       email: session.user.email,
+      adminEmailFromEnv: adminEmail,
       isAdminEmail,
       isAdminInDB,
       finalResult: isAdmin
