@@ -547,17 +547,45 @@ export default function AdminDashboard() {
     )
   }
 
-  // Check if user is admin
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
-  if (!adminEmail || session.user?.email !== adminEmail) {
+  // Check if user is admin via server endpoint
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+  
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      try {
+        const response = await fetch('/api/admin/verify')
+        const data = await response.json()
+        setIsAdmin(data.isAdmin)
+      } catch (error) {
+        console.error('Error checking admin access:', error)
+        setIsAdmin(false)
+      }
+    }
+    
+    if (session) {
+      checkAdminAccess()
+    }
+  }, [session])
+  
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-white">Verificando acesso admin...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Acesso Negado</h1>
           <p className="text-gray-400 mb-4">Apenas administradores podem acessar esta página.</p>
-          <p className="text-xs text-gray-500 mb-4">Usuário atual: {session.user?.email}</p>
-          <Link href="/dashboard" className="text-orange-500 hover:text-orange-400">
-            Voltar ao Dashboard
+          <Link href="/" className="text-orange-500 hover:text-orange-400">
+            Voltar ao Site
           </Link>
         </div>
       </div>
@@ -570,9 +598,9 @@ export default function AdminDashboard() {
       <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
+            <Link href="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
               <ArrowLeft className="h-5 w-5" />
-              <span>{t('backToDashboard')}</span>
+              <span>Voltar ao Site</span>
             </Link>
             <div className="flex items-center space-x-4">
               <div className="text-right">
