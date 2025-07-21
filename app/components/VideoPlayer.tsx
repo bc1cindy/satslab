@@ -175,7 +175,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
       {/* Player */}
       <Card className="bg-black border-gray-800">
         <CardContent className="p-0">
-          <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
+          <div className="aspect-video bg-black rounded-lg overflow-hidden relative touch-manipulation">
             {loading && (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -215,13 +215,17 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   onLoadedMetadata={handleLoadedMetadata}
                   onDurationChange={handleLoadedMetadata}
                   onLoadedData={handleLoadedMetadata}
+                  playsInline
+                  webkit-playsinline="true"
+                  preload="metadata"
+                  x-webkit-airplay="allow"
                 >
                   <source src={videoUrl} type="video/mp4" />
                   Seu navegador não suporta o elemento de vídeo.
                 </video>
                 
                 {/* Custom Controls Overlay */}
-                <div className="absolute bottom-4 left-4 right-4 space-y-2">
+                <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 space-y-2">
                   {/* Progress Bar */}
                   <div 
                     className="relative h-3 bg-gray-700 rounded-full cursor-pointer group py-1"
@@ -242,47 +246,47 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   </div>
                   
                   {/* Controls */}
-                  <div className="flex items-center justify-between bg-black/70 backdrop-blur-sm rounded-lg p-2">
-                    <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-between bg-black/70 backdrop-blur-sm rounded-lg p-1 md:p-2">
+                    <div className="flex items-center space-x-1 md:space-x-2">
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={togglePlayPause}
-                        className="text-white hover:bg-white/20"
+                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
                       >
-                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        {isPlaying ? <Pause className="w-3 h-3 md:w-4 md:h-4" /> : <Play className="w-3 h-3 md:w-4 md:h-4" />}
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={restartVideo}
-                        className="text-white hover:bg-white/20"
+                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9 hidden sm:flex"
                       >
-                        <RotateCcw className="w-4 h-4" />
+                        <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
                       </Button>
                       
                       {/* Time Display */}
-                      <span className="text-white text-sm">
+                      <span className="text-white text-xs md:text-sm">
                         {formatTime(currentTime)} / {formatTime(duration)}
                       </span>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 md:space-x-2">
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={toggleMute}
-                        className="text-white hover:bg-white/20"
+                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
                       >
-                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                        {isMuted ? <VolumeX className="w-3 h-3 md:w-4 md:h-4" /> : <Volume2 className="w-3 h-3 md:w-4 md:h-4" />}
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={toggleFullscreen}
-                        className="text-white hover:bg-white/20"
+                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
                       >
-                        <Maximize className="w-4 h-4" />
+                        <Maximize className="w-3 h-3 md:w-4 md:h-4" />
                       </Button>
                     </div>
                   </div>
