@@ -72,25 +72,35 @@ export async function POST(request: NextRequest) {
     
     const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
     
-    const { error } = await supabase
+    console.log(`Granting Pro access to: ${email}`)
+    
+    // Use upsert to create user if doesn't exist, or update if exists
+    const { data, error } = await supabase
       .from('users')
-      .update({
+      .upsert({
+        email: email,
         has_pro_access: true,
         pro_expires_at: oneYearFromNow,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      }, {
+        onConflict: 'email'
       })
-      .eq('email', email)
+      .select()
 
     if (error) {
-      console.error('Failed to grant Pro access:', error.message)
+      console.error('Failed to grant Pro access:', error.message, error)
       return NextResponse.json({ error: 'Erro ao liberar acesso Pro' }, { status: 500 })
     }
+
+    console.log('Pro access granted successfully:', data)
 
     return NextResponse.json({ 
       success: true, 
       message: `Acesso Pro liberado para ${email}`,
       email,
-      expires_at: oneYearFromNow
+      expires_at: oneYearFromNow,
+      user_data: data
     })
 
   } catch (error) {
@@ -121,6 +131,8 @@ export async function GET() {
       }
     )
     
+    console.log('Fetching Pro users from database...')
+    
     const { data: proUsers, error } = await supabase
       .from('users')
       .select('email, has_pro_access, pro_expires_at, created_at, updated_at')
@@ -128,9 +140,11 @@ export async function GET() {
       .order('pro_expires_at', { ascending: false })
 
     if (error) {
-      console.error('Failed to fetch Pro users:', error.message)
+      console.error('Failed to fetch Pro users:', error.message, error)
       return NextResponse.json({ error: 'Erro ao buscar usuários Pro' }, { status: 500 })
     }
+
+    console.log(`Found ${proUsers?.length || 0} Pro users:`, proUsers)
 
     // Calculate days remaining for each user
     const usersWithDaysRemaining = proUsers.map(user => {
