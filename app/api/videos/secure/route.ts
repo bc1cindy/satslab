@@ -1,29 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/lib/auth'
-import { b2Service } from '@/app/lib/b2'
-import { getServerSupabase } from '@/app/lib/supabase-server'
-import { SecureVideoAccessSchema, validateInput } from '@/app/lib/validation/schemas'
-import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
-import { BUSINESS_RULES } from '@/app/lib/config/business-rules'
+import { createClient } from '@supabase/supabase-js'
+// @ts-ignore - No types available for backblaze-b2
+import B2 from 'backblaze-b2'
 
-// Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
 
-// Try different UTF-8 normalizations to match B2 storage
-async function tryGenerateSecureUrl(filename: string): Promise<string> {
-  // Try original filename first
-  try {
-    return await b2Service.generateSecureVideoUrl(filename, BUSINESS_RULES.VIDEO_URL_EXPIRATION_HOURS)
-  } catch (error) {
-    // Try NFD (decomposed) for files like video 8
-    try {
-      return await b2Service.generateSecureVideoUrl(filename.normalize('NFD'), BUSINESS_RULES.VIDEO_URL_EXPIRATION_HOURS)
-    } catch (error2) {
-      // Try NFC (composed) for files like video 3
-      return await b2Service.generateSecureVideoUrl(filename.normalize('NFC'), BUSINESS_RULES.VIDEO_URL_EXPIRATION_HOURS)
-    }
-  }
+// Simplified B2 client without dependencies
+async function generateSecureB2Url(filename: string): Promise<string> {
+  const b2 = new B2({
+    applicationKeyId: process.env.B2_APPLICATION_KEY_ID!,
+    applicationKey: process.env.B2_APPLICATION_KEY!,
+  })
+
+  await b2.authorize()
+  
+  const response = await b2.getDownloadAuthorization({
+    bucketId: process.env.B2_BUCKET_ID!,
+    fileNamePrefix: filename,
+    validDurationInSeconds: 24 * 3600, // 24 hours
+  })
+
+  const authToken = response.data.authorizationToken
+  const encodedFilename = encodeURIComponent(filename).replace(/%2F/g, '/')
+  const baseUrl = process.env.SATSLAB_PRO_VIDEOS_BASE_URL!
+  
+  return `${baseUrl}/${encodedFilename}?Authorization=${authToken}`
 }
 
 export async function GET(request: NextRequest) {
@@ -36,8 +39,20 @@ export async function GET(request: NextRequest) {
       }, { status: 401 })
     }
 
+    console.log('Generating secure video URL for:', session.user.email)
+
     // 🔒 VERIFICAR ACESSO PRO
-    const supabase = getServerSupabase()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { data: user, error } = await supabase
       .from('users')
       .select('has_pro_access, pro_expires_at')
@@ -69,59 +84,38 @@ export async function GET(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // 🔒 VALIDAÇÃO SEGURA CONTRA PATH TRAVERSAL
-    const validation = validateInput(SecureVideoAccessSchema, { file: filename })
-    
-    if (!validation.success) {
-      securityLogger.warn(
-        SecurityEventType.SUSPICIOUS_ACTIVITY,
-        'Potential path traversal attempt in video access',
-        { 
-          error: validation.error,
-          userEmail: session.user.email,
-          requestedFile: filename
-        },
-        request
-      )
-      
+    console.log('Generating URL for video:', filename)
+
+    // Basic security check against path traversal
+    if (filename.includes('..') || filename.includes('\\') || !filename.includes('SatsLabPro/')) {
       return NextResponse.json(
-        { error: `Acesso negado: ${validation.error}` },
+        { error: 'Acesso negado: filename inválido' },
         { status: 400 }
       )
     }
     
-    securityLogger.info(
-      SecurityEventType.SENSITIVE_DATA_ACCESS,
-      'Pro user accessing secure video',
-      { 
-        userEmail: session.user.email,
-        filePrefix: filename.substring(0, 20)
-      }
-    )
-    
     try {
-      // Generate secure URL from B2 with 24h expiration, trying different normalizations
-      const secureUrl = await tryGenerateSecureUrl(filename)
+      // Generate secure URL from B2 with different normalizations
+      let secureUrl
+      try {
+        secureUrl = await generateSecureB2Url(filename)
+      } catch (error) {
+        // Try with different Unicode normalization
+        secureUrl = await generateSecureB2Url(filename.normalize('NFC'))
+      }
+      
+      console.log('Generated secure URL successfully')
       
       return NextResponse.json({
         url: secureUrl,
         filename,
-        expires: new Date(Date.now() + BUSINESS_RULES.VIDEO_URL_EXPIRATION_MS_ALT).toISOString(),
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         source: 'backblaze_b2'
       })
 
     } catch (error) {
-      securityLogger.error(
-        SecurityEventType.SYSTEM_ERROR,
-        'Error generating secure B2 video URL',
-        { 
-          error: error instanceof Error ? error.message : 'Unknown error',
-          userEmail: session.user.email,
-          filename
-        }
-      )
+      console.error('Error generating B2 URL:', error)
       
-      // 🔒 SEGURANÇA: Nunca usar fallback público - falha segura
       return NextResponse.json({ 
         error: 'Serviço temporariamente indisponível',
         message: 'Não foi possível gerar acesso seguro ao vídeo. Tente novamente em alguns minutos.',
@@ -129,11 +123,7 @@ export async function GET(request: NextRequest) {
       }, { status: 503 })
     }
   } catch (authError) {
-    securityLogger.error(
-      SecurityEventType.SYSTEM_ERROR,
-      'Authentication error in video access',
-      { error: authError instanceof Error ? authError.message : 'Unknown error' }
-    )
+    console.error('Authentication error in video access:', authError)
     return NextResponse.json({ 
       error: 'Erro de autenticação' 
     }, { status: 500 })
