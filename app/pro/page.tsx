@@ -149,7 +149,7 @@ export default function ProPage() {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="text-orange-500 text-2xl font-bold">₿</div>
-            <h1 className="text-xl font-semibold text-orange-500">SatsLab Pro</h1>
+            <h1 className="text-xl font-semibold text-orange-500">SatsLab</h1>
           </div>
           <div className="flex items-center gap-3">
             <Button 
@@ -159,14 +159,6 @@ export default function ProPage() {
               onClick={() => router.push('/')}
             >
               SatsLab
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-purple-400 hover:text-purple-300 border border-purple-500/30"
-            >
-              <Crown className="w-4 h-4 mr-1" />
-              Pro
             </Button>
             <Button 
               variant="ghost" 

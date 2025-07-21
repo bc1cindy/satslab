@@ -16,7 +16,7 @@ import { SatsLabProSection } from '@/app/components/pro/SatsLabProSection'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
   ChevronRight, Bitcoin, Trophy, ChevronLeft, Play,
-  Target, Gamepad2, Award, LogIn, LogOut, Crown
+  Target, Gamepad2, Award, LogIn, LogOut, Crown, Menu, X
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 
@@ -28,6 +28,7 @@ export default function HomePage() {
   // Carousel state
   const [currentSlide, setCurrentSlide] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [touchEnd, setTouchEnd] = useState(0)
   
   const handleLogout = () => {
@@ -254,68 +255,84 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-white">SatsLab</h1>
             </div>
             <div className="flex items-center space-x-2 md:space-x-4">
-              <LanguageSelector />
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="text-white hover:text-orange-500 text-xs md:text-sm"
-                onClick={() => document.getElementById('modulos-gratuitos')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                {isEnglish ? 'Free Modules' : 'Módulos Gratuitos'}
-              </Button>
-              {!isEnglish && (
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center space-x-4">
+                <LanguageSelector />
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white hover:text-orange-500 text-xs md:text-sm"
-                  onClick={() => document.getElementById('bitcoin-4-all')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-white hover:text-orange-500 text-sm"
+                  onClick={() => document.getElementById('modulos-gratuitos')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  Bitcoin 4 All
+                  {isEnglish ? 'Free Modules' : 'Módulos Gratuitos'}
                 </Button>
-              )}
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="text-white hover:text-orange-500 text-xs md:text-sm"
-                onClick={() => document.getElementById('comprar-vender-btc')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}
-              </Button>
-              {status === 'authenticated' && (
-                <Link href="/pro">
+                {!isEnglish && (
                   <Button 
                     size="sm" 
-                    variant="outline" 
-                    className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white text-xs md:text-sm"
+                    variant="ghost" 
+                    className="text-white hover:text-orange-500 text-sm"
+                    onClick={() => document.getElementById('bitcoin-4-all')?.scrollIntoView({ behavior: 'smooth' })}
                   >
-                    <Crown className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                    Pro
+                    Bitcoin 4 All
                   </Button>
-                </Link>
-              )}
-              
-              {status === 'authenticated' ? (
+                )}
                 <Button 
                   size="sm" 
-                  variant="outline" 
-                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-xs md:text-sm"
-                  onClick={handleLogout}
+                  variant="ghost" 
+                  className="text-white hover:text-orange-500 text-sm"
+                  onClick={() => document.getElementById('comprar-vender-btc')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  <LogOut className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                  {isEnglish ? 'Logout' : 'Sair'}
+                  {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}
                 </Button>
-              ) : (
-                <Link href="/auth">
+                {status === 'authenticated' && (
+                  <Link href="/pro">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white text-sm"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Pro
+                    </Button>
+                  </Link>
+                )}
+                
+                {status === 'authenticated' ? (
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs md:text-sm"
+                    className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-sm"
+                    onClick={handleLogout}
                   >
-                    <LogIn className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                    Login
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {isEnglish ? 'Logout' : 'Sair'}
                   </Button>
-                </Link>
-              )}
+                ) : (
+                  <Link href="/auth">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-sm"
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Login
+                    </Button>
+                  </Link>
+                )}
+              </div>
+
+              {/* Mobile - Language Selector and Menu Button */}
+              <div className="md:hidden flex items-center space-x-2">
+                <LanguageSelector />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="text-white hover:text-orange-500"
+                >
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </Button>
+              </div>
               <Button 
                 size="sm" 
                 className="bg-orange-500 hover:bg-orange-600 text-xs md:text-sm"
@@ -326,6 +343,83 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-800 bg-black/95">
+            <div className="container mx-auto px-4 py-4">
+              <nav className="flex flex-col space-y-3">
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:text-orange-500 justify-start"
+                  onClick={() => {
+                    document.getElementById('modulos-gratuitos')?.scrollIntoView({ behavior: 'smooth' })
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  {isEnglish ? 'Free Modules' : 'Módulos Gratuitos'}
+                </Button>
+                {!isEnglish && (
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:text-orange-500 justify-start"
+                    onClick={() => {
+                      document.getElementById('bitcoin-4-all')?.scrollIntoView({ behavior: 'smooth' })
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    Bitcoin 4 All
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:text-orange-500 justify-start"
+                  onClick={() => {
+                    document.getElementById('comprar-vender-btc')?.scrollIntoView({ behavior: 'smooth' })
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}
+                </Button>
+                {status === 'authenticated' && (
+                  <Link href="/pro" onClick={() => setMobileMenuOpen(false)}>
+                    <Button 
+                      variant="outline" 
+                      className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white w-full justify-start"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Pro
+                    </Button>
+                  </Link>
+                )}
+                
+                {status === 'authenticated' ? (
+                  <Button 
+                    variant="outline" 
+                    className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white w-full justify-start"
+                    onClick={() => {
+                      handleLogout()
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {isEnglish ? 'Logout' : 'Sair'}
+                  </Button>
+                ) : (
+                  <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
+                    <Button 
+                      variant="outline" 
+                      className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white w-full justify-start"
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Login
+                    </Button>
+                  </Link>
+                )}
+              </nav>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="container mx-auto px-4 py-12">
