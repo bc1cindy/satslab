@@ -23,31 +23,46 @@ export const authOptions: NextAuthOptions = {
     },
     
     async session({ session }) {
-      // Check Pro access from database
+      // Check Pro access from database (with debug logging)
       if (session.user?.email) {
         try {
           const { getServerSupabase } = await import('./supabase-server')
           const supabase = getServerSupabase()
           
-          const { data: user } = await supabase
+          const { data: user, error } = await supabase
             .from('users')
-            .select('id, has_pro_access, is_admin')
+            .select('id, has_pro_access, is_admin, email')
             .eq('email', session.user.email)
             .single()
+
+          // Debug logging
+          console.log('Session callback - User query:', {
+            email: session.user.email,
+            found: !!user,
+            hasProAccess: user?.has_pro_access,
+            error: error?.message
+          })
 
           if (user) {
             (session.user as any).id = user.id
             ;(session.user as any).hasProAccess = user.has_pro_access === true
             ;(session.user as any).isAdmin = user.is_admin === true
+            
+            console.log('Session updated with:', {
+              hasProAccess: user.has_pro_access === true,
+              isAdmin: user.is_admin === true
+            })
           } else {
             // Default if user not found
             ;(session.user as any).hasProAccess = false
             ;(session.user as any).isAdmin = false
+            console.log('User not found in database, defaulting to no access')
           }
         } catch (error) {
           // Default if database error
           ;(session.user as any).hasProAccess = false
           ;(session.user as any).isAdmin = false
+          console.error('Database error in session callback:', error)
         }
       }
       
