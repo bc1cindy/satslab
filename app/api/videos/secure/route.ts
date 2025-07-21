@@ -8,6 +8,24 @@ import B2 from 'backblaze-b2'
 export const dynamic = 'force-dynamic'
 
 // Simplified B2 client without dependencies
+async function listB2Files(): Promise<string[]> {
+  const b2 = new B2({
+    applicationKeyId: process.env.B2_APPLICATION_KEY_ID!,
+    applicationKey: process.env.B2_APPLICATION_KEY!,
+  })
+
+  await b2.authorize()
+  
+  const response = await b2.listFileNames({
+    bucketId: process.env.B2_BUCKET_ID!,
+    maxFileCount: 100,
+  })
+
+  return response.data.files
+    .filter((file: any) => file.fileName.endsWith('.mp4'))
+    .map((file: any) => file.fileName)
+}
+
 async function generateSecureB2Url(filename: string): Promise<string> {
   const b2 = new B2({
     applicationKeyId: process.env.B2_APPLICATION_KEY_ID!,
@@ -95,11 +113,43 @@ export async function GET(request: NextRequest) {
     }
     
     try {
-      // Generate secure URL from B2 with different normalizations
+      // First, list all files to see exact filenames in B2
+      console.log('📁 Listing B2 files to find exact match...')
+      const b2Files = await listB2Files()
+      console.log('📁 B2 files found:', b2Files)
+      
+      // Find exact match
+      const exactMatch = b2Files.find(file => 
+        file === filename || 
+        file.normalize('NFC') === filename.normalize('NFC') ||
+        file.normalize('NFD') === filename.normalize('NFD')
+      )
+      
+      if (exactMatch) {
+        console.log('✅ Found exact match:', exactMatch)
+        const secureUrl = await generateSecureB2Url(exactMatch)
+        console.log('✅ Generated secure URL successfully')
+        
+        return NextResponse.json({
+          url: secureUrl,
+          filename: exactMatch,
+          originalFilename: filename,
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          source: 'backblaze_b2'
+        })
+      }
+      
+      // If no exact match, find partial matches for debugging
+      const partialMatches = b2Files.filter(file => 
+        file.toLowerCase().includes(filename.split('/')[1]?.toLowerCase().substring(0, 10) || '')
+      )
+      
+      console.log('❌ No exact match found. Partial matches:', partialMatches)
+      
+      // Try original approach with normalizations as fallback
       let secureUrl
       let lastError
       
-      // Try multiple Unicode normalizations
       const normalizations = [
         filename, // Original
         filename.normalize('NFC'), // Canonical composition
