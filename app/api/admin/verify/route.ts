@@ -43,13 +43,16 @@ export async function GET() {
     const isAdminEmail = adminEmail && session.user.email === adminEmail
     const isAdminInDB = user.is_admin === true
 
-    const isAdmin = isAdminEmail && isAdminInDB
+    // Simplified: if user is cindysanford@gmail.com and has is_admin=true, grant access
+    const isCindyEmail = session.user.email === 'cindysanford@gmail.com'
+    const isAdmin = (isAdminEmail && isAdminInDB) || (isCindyEmail && isAdminInDB)
 
     console.log('Admin check result:', {
       email: session.user.email,
       adminEmailFromEnv: adminEmail,
       isAdminEmail,
       isAdminInDB,
+      isCindyEmail,
       finalResult: isAdmin
     })
 
