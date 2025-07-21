@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/lib/auth'
 import { getServerSupabase } from '@/app/lib/supabase-server'
-import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +16,8 @@ export async function GET() {
       )
     }
 
+    console.log('Checking Pro access for:', session.user.email)
+
     // Check Pro access in database
     const supabase = getServerSupabase()
     const { data: user, error } = await supabase
@@ -25,32 +26,26 @@ export async function GET() {
       .eq('email', session.user.email)
       .single()
 
+    console.log('Database query result:', { user, error: error?.message })
+
     if (error || !user) {
-      securityLogger.warn(
-        SecurityEventType.ACCESS_DENIED,
-        'User data lookup failed',
-        { hasError: !!error, errorType: error?.code || 'unknown' }
-      )
+      console.log('User not found or error:', error?.message)
       return NextResponse.json({
         hasProAccess: false,
         reason: 'User not found'
       })
     }
 
-    // Secure logging of Pro access check
-    securityLogger.info(
-      SecurityEventType.ACCESS_GRANTED,
-      'Pro access verification completed',
-      { 
-        hasProAccess: user.has_pro_access,
-        hasExpiration: !!user.pro_expires_at
-      }
-    )
-
     // Check if Pro access is valid
     const now = new Date()
     const expiresAt = user.pro_expires_at ? new Date(user.pro_expires_at) : null
     const hasValidProAccess = user.has_pro_access && (!expiresAt || expiresAt > now)
+
+    console.log('Pro access check:', {
+      has_pro_access: user.has_pro_access,
+      expires_at: user.pro_expires_at,
+      hasValidProAccess
+    })
 
     return NextResponse.json({
       hasProAccess: hasValidProAccess,
@@ -62,11 +57,7 @@ export async function GET() {
     })
 
   } catch (error) {
-    securityLogger.error(
-      SecurityEventType.SYSTEM_ERROR,
-      'Pro access check failed',
-      { errorType: error instanceof Error ? error.constructor.name : 'unknown' }
-    )
+    console.error('Error in check-pro-access:', error)
     return NextResponse.json(
       { error: 'Erro ao verificar acesso Pro' },
       { status: 500 }
