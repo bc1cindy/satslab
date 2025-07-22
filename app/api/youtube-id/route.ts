@@ -18,22 +18,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Filename required' }, { status: 400 })
     }
 
-    // Mapeamento seguro server-side - TÍTULOS CORRETOS
+    // Mapeamento seguro server-side - FILENAMES CORRETOS DO B2
     const videoMap: Record<string, string> = {
       'SatsLabPro/01.ArquiteturadoSistemaBitcoin.mp4': process.env.VIDEO_01_YT || '',
-      'SatsLabPro/02.BlockchainRedesTeste.mp4': process.env.VIDEO_02_YT || '',
-      'SatsLabPro/03.ImplementacoesRodarNo.mp4': process.env.VIDEO_03_YT || '',
+      'SatsLabPro/02.BlockchaineRedesdeTeste.mp4': process.env.VIDEO_02_YT || '',
+      'SatsLabPro/03.ImplementaçõesBTCeRodandoum Nó.mp4': process.env.VIDEO_03_YT || '',
       'SatsLabPro/04.ChavesEnderecosScripts.mp4': process.env.VIDEO_04_YT || '',
-      'SatsLabPro/05.CarteirasSegurancaAutocustodia.mp4': process.env.VIDEO_05_YT || '',
-      'SatsLabPro/06.MineracaoConsenso.mp4': process.env.VIDEO_06_YT || '',
-      'SatsLabPro/07.AssinaturasDigitais.mp4': process.env.VIDEO_07_YT || '',
-      'SatsLabPro/08.TransacoesAvancadasTaxasLightning.mp4': process.env.VIDEO_08_YT || '',
-      'SatsLabPro/09.ScriptingContratosInteligentes.mp4': process.env.VIDEO_09_YT || '',
-      'SatsLabPro/10.ComprarVenderBitcoin.mp4': process.env.VIDEO_10_YT || '',
-      'SatsLabPro/11.GerenciamentoRisco.mp4': process.env.VIDEO_11_YT || '',
-      'SatsLabPro/12.Fiducia.mp4': process.env.VIDEO_12_YT || '',
-      'SatsLabPro/13.BitcoinOpenSourceIA.mp4': process.env.VIDEO_13_YT || '',
-      'SatsLabPro/14.CriarImagensClonesIA.mp4': process.env.VIDEO_14_YT || '',
+      'SatsLabPro/05. Gerenciamento de Carteiras e Segurança.mp4': process.env.VIDEO_05_YT || '',
+      'SatsLabPro/06. MineraçãoeConsenso.mp4': process.env.VIDEO_06_YT || '',
+      'SatsLabPro/07. Assinaturas Digitais.mp4': process.env.VIDEO_07_YT || '',
+      'SatsLabPro/08. Transações Avançadas, Taxas e Lightning.mp4': process.env.VIDEO_08_YT || '',
+      'SatsLabPro/09. Scripting e Contratos.mp4': process.env.VIDEO_09_YT || '',
+      'SatsLabPro/10. ComprarouVender.mp4': process.env.VIDEO_10_YT || '',
+      'SatsLabPro/11. GerenciamentodeRisco.mp4': process.env.VIDEO_11_YT || '',
+      'SatsLabPro/12. Fidúcia.mp4': process.env.VIDEO_12_YT || '',
+      'SatsLabPro/13. opensource+AI.mp4': process.env.VIDEO_13_YT || '',
+      'SatsLabPro/14. Replicate.mp4': process.env.VIDEO_14_YT || '',
     }
 
     const youtubeId = videoMap[filename] || null
