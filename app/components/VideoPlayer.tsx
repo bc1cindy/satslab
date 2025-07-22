@@ -85,7 +85,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         console.log('📱 Vimeo ID received:', vimeoId)
         
         if (vimeoId) {
-          const vimeoUrl = `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1`
+          const vimeoUrl = `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1&share=0&like=0&watchlater=0&embed=0&fullscreen=0`
           console.log('📱 Setting Vimeo URL:', vimeoUrl)
           setVideoUrl(vimeoUrl)
           setError(null)
