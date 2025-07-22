@@ -30,7 +30,7 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('/api/btcpay/create-invoice', {
+      const response = await fetch('/api/btcpay/create-invoice?v=2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
