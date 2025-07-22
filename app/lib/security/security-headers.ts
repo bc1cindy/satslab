@@ -18,7 +18,7 @@ export class SecurityHeaders {
       "img-src 'self' data: blob: https: http:",
       "media-src 'self' blob: https:",
       "connect-src 'self' https://api.exchangerate-api.com https://www.youtube.com https://*.supabase.co https://*.supabase.io wss://*.supabase.co wss://*.supabase.io",
-      "frame-src 'self' https://www.youtube.com https://accounts.google.com",
+      "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://accounts.google.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'"
