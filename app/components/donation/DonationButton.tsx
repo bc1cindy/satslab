@@ -37,8 +37,8 @@ export default function DonationButton({ storeId, className = '' }: DonationButt
         },
         body: JSON.stringify({
           storeId,
-          amount: parseInt(amount),
-          currency: 'SATS',
+          amount: parseInt(amount) / 100, // Converter sats para BRL (assumindo 1 BRL = 100 sats aproximadamente)
+          currency: 'BRL',
           paymentMethod
         }),
       })
