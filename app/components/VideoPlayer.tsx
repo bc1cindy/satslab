@@ -83,7 +83,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         const youtubeId = await getYouTubeId(filename)
         if (youtubeId) {
           console.log('📱 Mobile: Using YouTube embed for', filename)
-          setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1&playsinline=1`)
+          setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=1&iv_load_policy=3`)
           setError(null)
           return
         } else {
@@ -249,7 +249,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
               <>
                 {/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? (
                   // Mobile: YouTube iframe (sempre funciona)
-                  <div className="relative w-full h-full">
+                  <div className="relative w-full h-full overflow-hidden">
                     <iframe
                       src={videoUrl}
                       className="w-full h-full"
@@ -259,16 +259,77 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                       style={{ border: 'none' }}
                       referrerPolicy="strict-origin-when-cross-origin"
                     />
-                    {/* Bloquear botões de compartilhamento */}
+                    {/* Bloquear TODOS os botões de compartilhamento e links externos */}
                     <div 
-                      className="absolute top-0 right-0 w-16 h-16 z-10"
-                      style={{ pointerEvents: 'auto', backgroundColor: 'transparent' }}
-                      onClick={(e) => e.preventDefault()}
+                      className="absolute top-0 right-0 w-20 h-20 z-50"
+                      style={{ 
+                        pointerEvents: 'auto', 
+                        backgroundColor: 'rgba(0,0,0,0.01)',
+                        cursor: 'default'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        return false
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
                     />
+                    {/* Bloquear área dos controles de compartilhamento */}
                     <div 
-                      className="absolute bottom-12 right-2 w-12 h-8 z-10"
-                      style={{ pointerEvents: 'auto', backgroundColor: 'transparent' }}
-                      onClick={(e) => e.preventDefault()}
+                      className="absolute bottom-0 right-0 w-24 h-16 z-50"
+                      style={{ 
+                        pointerEvents: 'auto', 
+                        backgroundColor: 'rgba(0,0,0,0.01)',
+                        cursor: 'default'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        return false
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                    />
+                    {/* Bloquear título/logo do YouTube */}
+                    <div 
+                      className="absolute bottom-0 left-0 w-32 h-12 z-50"
+                      style={{ 
+                        pointerEvents: 'auto', 
+                        backgroundColor: 'rgba(0,0,0,0.01)',
+                        cursor: 'default'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        return false
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                    />
+                    {/* Bloquear centro quando pausado (pode ter botões de share) */}
+                    <div 
+                      className="absolute top-1/2 right-4 w-16 h-16 z-40 transform -translate-y-1/2"
+                      style={{ 
+                        pointerEvents: 'auto', 
+                        backgroundColor: 'rgba(0,0,0,0.01)',
+                        cursor: 'default'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        return false
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
                     />
                   </div>
                 ) : (
