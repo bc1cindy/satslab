@@ -52,16 +52,20 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
     }
   }, [videoId])
 
-  // Mapeamento filename -> YouTube ID (em produção, usar env vars)
-  const getYouTubeId = (filename: string): string | null => {
-    const videoMap: Record<string, string> = {
-      'SatsLabPro/01.ArquiteturadoSistemaBitcoin.mp4': process.env.NEXT_PUBLIC_VIDEO_01_YT || '',
-      'SatsLabPro/02.ConsensoeMinera\u00e7\u00e3o.mp4': process.env.NEXT_PUBLIC_VIDEO_02_YT || '',
-      'SatsLabPro/03.TransacoeseTaxas.mp4': process.env.NEXT_PUBLIC_VIDEO_03_YT || '',
-      // Adicionar mais vídeos conforme upload no YouTube
+  // Usar API para buscar YouTube IDs (mais seguro)
+  const getYouTubeId = async (filename: string): Promise<string | null> => {
+    try {
+      const response = await fetch('/api/youtube-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename })
+      })
+      const data = await response.json()
+      return data.youtubeId || null
+    } catch (error) {
+      console.error('Error getting YouTube ID:', error)
+      return null
     }
-    
-    return videoMap[filename] || null
   }
 
   async function loadVideoUrl(filename: string) {
@@ -76,7 +80,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
       
       // Mobile: Use YouTube embed (sempre funciona)
       if (isMobile) {
-        const youtubeId = getYouTubeId(filename)
+        const youtubeId = await getYouTubeId(filename)
         if (youtubeId) {
           console.log('📱 Mobile: Using YouTube embed for', filename)
           setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1`)
