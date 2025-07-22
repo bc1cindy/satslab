@@ -52,6 +52,18 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
     }
   }, [videoId])
 
+  // Mapeamento filename -> YouTube ID (em produção, usar env vars)
+  const getYouTubeId = (filename: string): string | null => {
+    const videoMap: Record<string, string> = {
+      'SatsLabPro/01.ArquiteturadoSistemaBitcoin.mp4': process.env.NEXT_PUBLIC_VIDEO_01_YT || '',
+      'SatsLabPro/02.ConsensoeMinera\u00e7\u00e3o.mp4': process.env.NEXT_PUBLIC_VIDEO_02_YT || '',
+      'SatsLabPro/03.TransacoeseTaxas.mp4': process.env.NEXT_PUBLIC_VIDEO_03_YT || '',
+      // Adicionar mais vídeos conforme upload no YouTube
+    }
+    
+    return videoMap[filename] || null
+  }
+
   async function loadVideoUrl(filename: string) {
     setLoading(true)
     setError(null)
@@ -61,59 +73,36 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
     try {
       // Detect if mobile
       const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      const debugMessages: string[] = []
       
+      // Mobile: Use YouTube embed (sempre funciona)
       if (isMobile) {
-        debugMessages.push(`📱 Mobile detected: ${navigator.userAgent.substring(0, 50)}...`)
-        debugMessages.push(`Platform: ${navigator.platform}`)
-        debugMessages.push(`Screen: ${window.screen.width}x${window.screen.height}`)
+        const youtubeId = getYouTubeId(filename)
+        if (youtubeId) {
+          console.log('📱 Mobile: Using YouTube embed for', filename)
+          setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1`)
+          setError(null)
+          return
+        } else {
+          setError('Vídeo ainda não disponível para mobile. Aguarde...')
+          return
+        }
       }
 
-      // Carregar vídeo do endpoint local
-      debugMessages.push('🔄 Fetching video URL from API...')
+      // Desktop: Use B2 (funciona perfeitamente)
+      console.log('🖥️ Desktop: Using B2 for', filename)
       const response = await fetch(`/api/videos/secure/?file=${encodeURIComponent(filename)}`)
       const data = await response.json()
       
-      debugMessages.push(`📡 API Response: ${response.status} ${response.statusText}`)
-      
       if (response.ok && data.url) {
-        debugMessages.push(`✅ URL received: ${data.url.substring(0, 100)}...`)
-        
-        // For mobile, test the URL directly
-        if (isMobile) {
-          debugMessages.push('🧪 Testing video URL accessibility...')
-          try {
-            const testResponse = await fetch(data.url, {
-              method: 'HEAD',
-              mode: 'no-cors'
-            })
-            debugMessages.push(`📊 URL test: ${testResponse.type} (no-cors mode)`)
-          } catch (testError) {
-            debugMessages.push(`❌ URL test failed: ${testError}`)
-          }
-        }
-        
-        // For iOS, add a small delay before setting URL
-        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          debugMessages.push('⏱️ iOS detected, adding delay for video loading...')
-          setTimeout(() => {
-            setVideoUrl(data.url)
-          }, 100)
-        } else {
-          setVideoUrl(data.url)
-        }
-        setDebugInfo(debugMessages)
+        setVideoUrl(data.url)
+        setError(null)
       } else {
         const errorMsg = data.error || 'Erro ao carregar vídeo'
-        debugMessages.push(`❌ API Error: ${errorMsg}`)
-        debugMessages.push(`Details: ${JSON.stringify(data)}`)
-        setDebugInfo(debugMessages)
         setError(errorMsg)
         onError?.(errorMsg)
       }
     } catch (error) {
       const errorMsg = 'Erro ao gerar URL do vídeo'
-      setDebugInfo(prev => [...prev, `💥 Exception: ${error}`])
       setError(errorMsg)
       onError?.(errorMsg)
     } finally {
@@ -254,142 +243,117 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
             
             {videoUrl && !loading && !error && (
               <>
-                <video
-                  ref={setVideoElement}
-                  src={videoUrl}
-                  className="w-full h-full cursor-pointer"
-                  controlsList="nodownload noremoteplayback"
-                  onContextMenu={(e) => e.preventDefault()}
-                  onClick={togglePlayPause}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                  onEnded={() => setIsPlaying(false)}
-                  onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onDurationChange={handleLoadedMetadata}
-                  onLoadedData={handleLoadedMetadata}
-                  onError={(e) => {
-                    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                    const target = e.currentTarget as HTMLVideoElement
-                    const errorDetails = {
-                      code: target.error?.code,
-                      message: target.error?.message,
-                      networkState: target.networkState,
-                      readyState: target.readyState,
-                      src: target.src?.substring(0, 100) + '...',
-                      currentSrc: target.currentSrc?.substring(0, 100) + '...'
-                    }
+                {/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? (
+                  // Mobile: YouTube iframe (sempre funciona)
+                  <iframe
+                    src={videoUrl}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="Video Player"
+                    style={{ border: 'none' }}
+                  />
+                ) : (
+                  // Desktop: B2 video element (funciona perfeitamente)
+                  <>
+                    <video
+                      ref={setVideoElement}
+                      src={videoUrl}
+                      className="w-full h-full cursor-pointer"
+                      controlsList="nodownload noremoteplayback"
+                      onContextMenu={(e) => e.preventDefault()}
+                      onClick={togglePlayPause}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      onEnded={() => setIsPlaying(false)}
+                      onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
+                      onTimeUpdate={handleTimeUpdate}
+                      onLoadedMetadata={handleLoadedMetadata}
+                      onDurationChange={handleLoadedMetadata}
+                      onLoadedData={handleLoadedMetadata}
+                      onError={(e) => {
+                        console.error('Desktop video error:', e.currentTarget.error)
+                        setError('Erro ao carregar vídeo desktop.')
+                      }}
+                      playsInline
+                      preload="metadata"
+                      autoPlay={false}
+                      muted={false}
+                      style={{ objectFit: 'contain' }}
+                    >
+                      <source src={videoUrl} type="video/mp4" />
+                      Seu navegador não suporta o elemento de vídeo.
+                    </video>
                     
-                    console.error('Video error:', errorDetails)
-                    
-                    if (isMobile) {
-                      setDebugInfo(prev => [
-                        ...prev,
-                        '🚨 Video Element Error:',
-                        `Error Code: ${errorDetails.code}`,
-                        `Network State: ${errorDetails.networkState}`,
-                        `Ready State: ${errorDetails.readyState}`,
-                        `Video URL: ${errorDetails.src}`
-                      ])
-                    }
-                    
-                    // More specific error messages based on error code
-                    let errorMsg = 'Erro ao carregar vídeo.'
-                    if (target.error?.code === 4) {
-                      errorMsg = 'Formato de vídeo não suportado ou problema de CORS.'
-                    } else if (target.error?.code === 3) {
-                      errorMsg = 'Erro ao decodificar vídeo.'
-                    } else if (target.error?.code === 2) {
-                      errorMsg = 'Erro de rede ao carregar vídeo.'
-                    }
-                    
-                    setError(errorMsg)
-                  }}
-                  playsInline
-                  webkit-playsinline="true"
-                  preload="metadata"
-                  x-webkit-airplay="allow"
-                  autoPlay={false}
-                  muted={false}
-                  {...(/iPhone|iPad|iPod/i.test(navigator.userAgent) && {
-                    crossOrigin: "use-credentials",
-                    'x-webkit-airplay': 'allow',
-                    'webkit-playsinline': '',
-                  } as any)}
-                  style={{ objectFit: 'contain' }}
-                >
-                  <source src={videoUrl} type="video/mp4" />
-                  Seu navegador não suporta o elemento de vídeo.
-                </video>
-                
-                {/* Custom Controls Overlay */}
-                <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 space-y-2">
-                  {/* Progress Bar */}
-                  <div 
-                    className="relative h-3 bg-gray-700 rounded-full cursor-pointer group py-1"
-                    onClick={handleProgressClick}
-                  >
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="relative h-2 w-full bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                          className="absolute h-full bg-orange-500 transition-all duration-100"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
+                    {/* Custom Controls Overlay - Only for desktop */}
+                    <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4 space-y-2">
+                      {/* Progress Bar */}
                       <div 
-                        className="absolute h-4 w-4 bg-white rounded-full shadow-lg transition-all duration-100"
-                        style={{ left: `calc(${progress}% - 8px)` }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Controls */}
-                  <div className="flex items-center justify-between bg-black/70 backdrop-blur-sm rounded-lg p-1 md:p-2">
-                    <div className="flex items-center space-x-1 md:space-x-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={togglePlayPause}
-                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
+                        className="relative h-3 bg-gray-700 rounded-full cursor-pointer group py-1"
+                        onClick={handleProgressClick}
                       >
-                        {isPlaying ? <Pause className="w-3 h-3 md:w-4 md:h-4" /> : <Play className="w-3 h-3 md:w-4 md:h-4" />}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={restartVideo}
-                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9 hidden sm:flex"
-                      >
-                        <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
-                      </Button>
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="relative h-2 w-full bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className="absolute h-full bg-orange-500 transition-all duration-100"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <div 
+                            className="absolute h-4 w-4 bg-white rounded-full shadow-lg transition-all duration-100"
+                            style={{ left: `calc(${progress}% - 8px)` }}
+                          />
+                        </div>
+                      </div>
                       
-                      {/* Time Display */}
-                      <span className="text-white text-xs md:text-sm">
-                        {formatTime(currentTime)} / {formatTime(duration)}
-                      </span>
+                      {/* Controls */}
+                      <div className="flex items-center justify-between bg-black/70 backdrop-blur-sm rounded-lg p-1 md:p-2">
+                        <div className="flex items-center space-x-1 md:space-x-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={togglePlayPause}
+                            className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
+                          >
+                            {isPlaying ? <Pause className="w-3 h-3 md:w-4 md:h-4" /> : <Play className="w-3 h-3 md:w-4 md:h-4" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={restartVideo}
+                            className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9 hidden sm:flex"
+                          >
+                            <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
+                          </Button>
+                          
+                          {/* Time Display */}
+                          <span className="text-white text-xs md:text-sm">
+                            {formatTime(currentTime)} / {formatTime(duration)}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-1 md:space-x-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={toggleMute}
+                            className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
+                          >
+                            {isMuted ? <VolumeX className="w-3 h-3 md:w-4 md:h-4" /> : <Volume2 className="w-3 h-3 md:w-4 md:h-4" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={toggleFullscreen}
+                            className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
+                          >
+                            <Maximize className="w-3 h-3 md:w-4 md:h-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-1 md:space-x-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleMute}
-                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
-                      >
-                        {isMuted ? <VolumeX className="w-3 h-3 md:w-4 md:h-4" /> : <Volume2 className="w-3 h-3 md:w-4 md:h-4" />}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleFullscreen}
-                        className="text-white hover:bg-white/20 h-8 w-8 md:h-9 md:w-9"
-                      >
-                        <Maximize className="w-3 h-3 md:w-4 md:h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </>
             )}
           </div>
