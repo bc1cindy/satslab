@@ -83,7 +83,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         const youtubeId = await getYouTubeId(filename)
         if (youtubeId) {
           console.log('📱 Mobile: Using YouTube embed for', filename)
-          setVideoUrl(`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1&playsinline=1`)
+          setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1&playsinline=1`)
           setError(null)
           return
         } else {
