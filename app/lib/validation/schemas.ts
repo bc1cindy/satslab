@@ -28,9 +28,33 @@ export const VideoIdSchema = z.string()
   )
 
 // Payment schemas - Critical security validation
-export const CreateInvoiceSchema = z.object({
+// Separate schemas for donations vs Pro payments
+export const CreateDonationInvoiceSchema = z.object({
   amount: z.number()
-    .min(10, 'Valor mínimo é R$ 10')
+    .positive('Valor deve ser positivo')
+    .finite('Valor deve ser finito')
+    .max(10000, 'Valor máximo é R$ 10.000'),
+  
+  currency: z.literal('BRL', {
+    errorMap: () => ({ message: 'Apenas BRL é aceito' })
+  }),
+  
+  userEmail: z.string().optional(), // Completamente opcional para doações
+  
+  // Donation-specific fields
+  storeId: z.string().optional(),
+  type: z.literal('donation').optional(),
+  
+  // Optional metadata validation
+  metadata: z.object({
+    source: z.string().max(50).optional(),
+    referrer: z.string().url().optional()
+  }).optional()
+})
+
+export const CreateProPaymentInvoiceSchema = z.object({
+  amount: z.number()
+    .min(1, 'Valor mínimo é R$ 1')
     .max(10000, 'Valor máximo é R$ 10.000')
     .positive('Valor deve ser positivo')
     .finite('Valor deve ser finito'),
@@ -39,7 +63,7 @@ export const CreateInvoiceSchema = z.object({
     errorMap: () => ({ message: 'Apenas BRL é aceito' })
   }),
   
-  userEmail: EmailSchema,
+  userEmail: EmailSchema, // Obrigatório para pagamentos Pro
   
   // Optional metadata validation
   metadata: z.object({
@@ -47,6 +71,12 @@ export const CreateInvoiceSchema = z.object({
     referrer: z.string().url().optional()
   }).optional()
 })
+
+// Backward compatibility - dynamic schema based on donation detection
+export const CreateInvoiceSchema = z.union([
+  CreateDonationInvoiceSchema,
+  CreateProPaymentInvoiceSchema
+])
 
 export const WebhookPayloadSchema = z.object({
   type: z.enum([
@@ -200,6 +230,8 @@ export const EnvironmentSchema = z.object({
 
 // Utility types for TypeScript
 export type CreateInvoiceInput = z.infer<typeof CreateInvoiceSchema>
+export type CreateDonationInvoiceInput = z.infer<typeof CreateDonationInvoiceSchema>
+export type CreateProPaymentInvoiceInput = z.infer<typeof CreateProPaymentInvoiceSchema>
 export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>
 export type CreateCommentInput = z.infer<typeof CreateCommentSchema>
 export type SecureVideoAccess = z.infer<typeof SecureVideoAccessSchema>

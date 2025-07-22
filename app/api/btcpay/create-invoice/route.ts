@@ -2,32 +2,65 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/lib/auth'
 import { exchangeRateCache } from '@/app/lib/exchange-rate-cache'
-import { CreateInvoiceSchema, validateInput } from '@/app/lib/validation/schemas'
+import { 
+  CreateInvoiceSchema, 
+  CreateDonationInvoiceSchema, 
+  CreateProPaymentInvoiceSchema, 
+  validateInput 
+} from '@/app/lib/validation/schemas'
 import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    // 🔒 VERIFICAR AUTENTICAÇÃO
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Não autorizado - Login necessário' },
-        { status: 401 }
+    // 🔒 PARSING INICIAL PARA VERIFICAR TIPO
+    const requestBody = await request.json()
+    const isDonation = requestBody.storeId || requestBody.type === 'donation' // Doações têm storeId
+    
+    let session = null
+    let userEmail = null
+    
+    if (!isDonation) {
+      // 🔒 VERIFICAR AUTENTICAÇÃO APENAS PARA PAGAMENTOS PRO
+      session = await getServerSession(authOptions)
+      if (!session?.user?.email) {
+        return NextResponse.json(
+          { error: 'Não autorizado - Login necessário para pagamentos Pro' },
+          { status: 401 }
+        )
+      }
+      userEmail = session.user.email
+    } else {
+      // Para doações, usar email genérico ou opcional
+      userEmail = requestBody.donorEmail || 'anonymous@satslab.org'
+      
+      securityLogger.info(
+        SecurityEventType.PAYMENT_INITIATED,
+        'Anonymous donation invoice creation',
+        { 
+          amount: requestBody.amount,
+          currency: requestBody.currency || 'BRL',
+          storeId: requestBody.storeId
+        },
+        request
       )
     }
-
-    // 🔒 VALIDAÇÃO SEGURA COM ZOD
-    const requestBody = await request.json()
     
-    // Validar dados de entrada
-    const validation = validateInput(CreateInvoiceSchema, {
+    // 🔒 VALIDAÇÃO SEGURA COM ZOD - Esquema específico por tipo
+    const schema = isDonation ? CreateDonationInvoiceSchema : CreateProPaymentInvoiceSchema
+    const validationData = {
       amount: requestBody.amount,
       currency: requestBody.currency || 'BRL',
-      userEmail: session.user.email, // Usar email da sessão (seguro)
-      metadata: requestBody.metadata
-    })
+      userEmail: userEmail,
+      metadata: requestBody.metadata,
+      ...(isDonation && { 
+        storeId: requestBody.storeId,
+        type: requestBody.type 
+      })
+    }
+    
+    const validation = validateInput(schema, validationData)
 
     if (!validation.success) {
       securityLogger.warn(
@@ -35,7 +68,8 @@ export async function POST(request: NextRequest) {
         'Invalid invoice creation attempt',
         { 
           error: validation.error,
-          userEmail: session.user.email,
+          userEmail: userEmail,
+          isDonation: isDonation,
           requestData: {
             amount: requestBody.amount,
             currency: requestBody.currency
@@ -57,13 +91,18 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const { amount, currency, userEmail } = validation.data
+    const { amount, currency, userEmail: validatedEmail } = validation.data
 
     // Log seguro da operação
     securityLogger.info(
       SecurityEventType.PAYMENT_INITIATED,
-      'BTCPay invoice creation requested',
-      { amount, currency },
+      isDonation ? 'BTCPay donation invoice requested' : 'BTCPay Pro payment invoice requested',
+      { 
+        amount, 
+        currency, 
+        type: isDonation ? 'donation' : 'pro_payment',
+        requiresAuth: !isDonation
+      },
       request
     )
 
@@ -109,13 +148,17 @@ export async function POST(request: NextRequest) {
       amount: amountUSD.toFixed(2),
       currency: 'USD',
       metadata: {
-        buyerEmail: userEmail,
-        itemDesc: 'SatsLab Pro - Curso Completo de Bitcoin',
+        buyerEmail: validatedEmail || userEmail || (isDonation ? 'anonymous@satslab.org' : undefined),
+        itemDesc: isDonation ? 'Doação para SatsLab' : 'SatsLab Pro - Curso Completo de Bitcoin',
         finalAmountBRL: amount,
-        exchangeRate: usdToBrlRate
+        exchangeRate: usdToBrlRate,
+        type: isDonation ? 'donation' : 'pro_payment',
+        storeId: isDonation ? requestBody.storeId : undefined
       },
       checkout: {
-        redirectURL: `https://satslab.org/pro?payment=success`, // Hardcoded for production
+        redirectURL: isDonation 
+          ? `https://satslab.org/donation?status=success` 
+          : `https://satslab.org/pro?payment=success`,
         paymentMethods: ['BTC', 'BTC-LightningNetwork']
       }
     }
@@ -158,8 +201,12 @@ export async function POST(request: NextRequest) {
 
     securityLogger.info(
       SecurityEventType.PAYMENT_COMPLETED,
-      'BTCPay invoice created successfully',
-      { invoiceId: invoice.id, amount: invoice.amount }
+      isDonation ? 'BTCPay donation invoice created successfully' : 'BTCPay Pro payment invoice created successfully',
+      { 
+        invoiceId: invoice.id, 
+        amount: invoice.amount, 
+        type: isDonation ? 'donation' : 'pro_payment' 
+      }
     )
 
     const result = {
