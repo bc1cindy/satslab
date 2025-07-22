@@ -85,7 +85,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         console.log('📱 Vimeo ID received:', vimeoId)
         
         if (vimeoId) {
-          const vimeoUrl = `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1&share=0&like=0&watchlater=0&embed=0&fullscreen=0`
+          const vimeoUrl = `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1`
           console.log('📱 Setting Vimeo URL:', vimeoUrl)
           setVideoUrl(vimeoUrl)
           setError(null)
@@ -254,18 +254,32 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
               <>
                 {/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? (
                   // Mobile: Vimeo iframe (privado e seguro)
-                  <iframe
-                    src={videoUrl}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                    allowFullScreen
-                    title="Video Player"
-                    style={{ border: 'none' }}
-                    onError={(e) => {
-                      console.error('Iframe error:', e)
-                      setError('Erro ao carregar vídeo do Vimeo')
-                    }}
-                  />
+                  <div className="relative w-full h-full">
+                    <iframe
+                      src={videoUrl}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      title="Video Player"
+                      style={{ border: 'none' }}
+                      onError={(e) => {
+                        console.error('Iframe error:', e)
+                        setError('Erro ao carregar vídeo do Vimeo')
+                      }}
+                    />
+                    {/* Overlay para bloquear menu de 3 pontos */}
+                    <div 
+                      className="absolute top-2 right-2 w-12 h-12 z-50"
+                      style={{ 
+                        pointerEvents: 'auto',
+                        backgroundColor: 'transparent'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                    />
+                  </div>
                 ) : (
                   // Desktop: B2 video element (funciona perfeitamente)
                   <>
