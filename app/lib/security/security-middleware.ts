@@ -40,7 +40,7 @@ class SecurityMiddleware {
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://mempool.space https://*.supabase.co wss://*.supabase.co https://api.exchangerate-api.com https://api.frankfurter.app https://accounts.google.com https://apis.google.com",
       "media-src 'self' https://f005.backblazeb2.com https://*.backblazeb2.com blob:", // Permitir todas as URLs do B2 com parâmetros
-      "frame-src 'self' https://www.youtube.com https://youtube.com https://accounts.google.com",
+      "frame-src 'self' https://www.youtube.com https://youtube.com https://player.vimeo.com https://accounts.google.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
