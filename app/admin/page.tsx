@@ -41,6 +41,8 @@ export default function AdminDashboard() {
   const [proUsersData, setProUsersData] = useState<ProUsersData | null>(null)
   const [newUserEmail, setNewUserEmail] = useState('')
   const [addingUser, setAddingUser] = useState(false)
+  const [newLifetimeEmail, setNewLifetimeEmail] = useState('')
+  const [addingLifetimeUser, setAddingLifetimeUser] = useState(false)
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
 
   const fetchProUsers = async () => {
@@ -106,6 +108,33 @@ export default function AdminDashboard() {
       alert('Erro ao adicionar usuário')
     } finally {
       setAddingUser(false)
+    }
+  }
+
+  const addLifetimeUser = async () => {
+    if (!newLifetimeEmail || addingLifetimeUser) return
+    
+    setAddingLifetimeUser(true)
+    try {
+      const response = await fetch('/api/admin/lifetime-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newLifetimeEmail })
+      })
+      
+      if (response.ok) {
+        setNewLifetimeEmail('')
+        await fetchProUsers()
+        alert('Usuário com acesso vitalício adicionado com sucesso!')
+      } else {
+        const error = await response.json()
+        alert(`Erro: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Failed to add lifetime user:', error)
+      alert('Erro ao adicionar usuário vitalício')
+    } finally {
+      setAddingLifetimeUser(false)
     }
   }
 
@@ -301,7 +330,7 @@ export default function AdminDashboard() {
           
           {/* Add User Form */}
           <div className="mb-6 p-4 bg-gray-800 rounded-lg">
-            <h3 className="text-lg font-semibold mb-3">Adicionar Usuário Pro</h3>
+            <h3 className="text-lg font-semibold mb-3">Adicionar Usuário Pro (1 ano)</h3>
             <div className="flex gap-2">
               <input
                 type="email"
@@ -317,6 +346,31 @@ export default function AdminDashboard() {
                 className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
               >
                 {addingUser ? 'Adicionando...' : 'Adicionar'}
+              </button>
+            </div>
+          </div>
+
+          {/* Add Lifetime User Form */}
+          <div className="mb-6 p-4 bg-gray-800 rounded-lg border-2 border-purple-600">
+            <h3 className="text-lg font-semibold mb-3 text-purple-400">🌟 Adicionar Acesso Vitalício</h3>
+            <p className="text-sm text-gray-400 mb-3">
+              Usuários com acesso vitalício terão acesso Pro permanente, sem data de expiração.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={newLifetimeEmail}
+                onChange={(e) => setNewLifetimeEmail(e.target.value)}
+                placeholder="email@exemplo.com"
+                className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onKeyDown={(e) => e.key === 'Enter' && addLifetimeUser()}
+              />
+              <button 
+                onClick={addLifetimeUser}
+                disabled={!newLifetimeEmail || addingLifetimeUser}
+                className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                {addingLifetimeUser ? 'Adicionando...' : 'Adicionar Vitalício'}
               </button>
             </div>
           </div>
@@ -359,9 +413,19 @@ export default function AdminDashboard() {
                   {proUsersData.users.map((user) => (
                     <tr key={user.email} className="border-b border-gray-800 hover:bg-gray-800/50">
                       <td className="py-2 px-3 font-medium">{user.email}</td>
-                      <td className="py-2 px-3">{formatDate(user.pro_expires_at)}</td>
                       <td className="py-2 px-3">
-                        {user.is_expired ? (
+                        {user.days_remaining > 36500 ? (
+                          <span className="text-purple-400 font-semibold">Vitalício</span>
+                        ) : (
+                          formatDate(user.pro_expires_at)
+                        )}
+                      </td>
+                      <td className="py-2 px-3">
+                        {user.days_remaining > 36500 ? (
+                          <span className="px-2 py-1 bg-purple-900 text-purple-300 rounded text-xs">
+                            ⭐ Acesso Vitalício
+                          </span>
+                        ) : user.is_expired ? (
                           <span className="px-2 py-1 bg-red-900 text-red-300 rounded text-xs">
                             Expirado ({Math.abs(user.days_remaining)} dias)
                           </span>
