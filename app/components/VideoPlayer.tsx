@@ -84,7 +84,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         if (vimeoId) {
           console.log('📱 Mobile: Using Vimeo embed for', filename)
           // Parâmetros para remover botões de compartilhamento e deixar limpo
-          setVideoUrl(`https://player.vimeo.com/video/${vimeoId}`)
+          setVideoUrl(`https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1`)
           setError(null)
           return
         } else {
