@@ -80,14 +80,18 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
       
       // Mobile: Use Vimeo embed (privado e sem compartilhamento)
       if (isMobile) {
+        console.log('📱 Mobile detected, fetching Vimeo ID for:', filename)
         const vimeoId = await getVimeoId(filename)
+        console.log('📱 Vimeo ID received:', vimeoId)
+        
         if (vimeoId) {
-          console.log('📱 Mobile: Using Vimeo embed for', filename)
-          // Parâmetros para remover botões de compartilhamento e deixar limpo
-          setVideoUrl(`https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1`)
+          const vimeoUrl = `https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0&transparent=0&autoplay=0&controls=1`
+          console.log('📱 Setting Vimeo URL:', vimeoUrl)
+          setVideoUrl(vimeoUrl)
           setError(null)
           return
         } else {
+          console.error('📱 No Vimeo ID found for:', filename)
           setError('Vídeo ainda não disponível para mobile. Aguarde...')
           return
         }
@@ -253,11 +257,14 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
                   <iframe
                     src={videoUrl}
                     className="w-full h-full"
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                     allowFullScreen
                     title="Video Player"
                     style={{ border: 'none' }}
-                    referrerPolicy="strict-origin-when-cross-origin"
+                    onError={(e) => {
+                      console.error('Iframe error:', e)
+                      setError('Erro ao carregar vídeo do Vimeo')
+                    }}
                   />
                 ) : (
                   // Desktop: B2 video element (funciona perfeitamente)
