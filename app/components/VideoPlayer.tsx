@@ -52,18 +52,18 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
     }
   }, [videoId])
 
-  // Usar API para buscar YouTube IDs (mais seguro)
-  const getYouTubeId = async (filename: string): Promise<string | null> => {
+  // Usar API para buscar Vimeo IDs (mais seguro e privado)
+  const getVimeoId = async (filename: string): Promise<string | null> => {
     try {
-      const response = await fetch('/api/youtube-id', {
+      const response = await fetch('/api/vimeo-id', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename })
       })
       const data = await response.json()
-      return data.youtubeId || null
+      return data.vimeoId || null
     } catch (error) {
-      console.error('Error getting YouTube ID:', error)
+      console.error('Error getting Vimeo ID:', error)
       return null
     }
   }
@@ -78,12 +78,13 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
       // Detect if mobile
       const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       
-      // Mobile: Use YouTube embed (sempre funciona)
+      // Mobile: Use Vimeo embed (privado e sem compartilhamento)
       if (isMobile) {
-        const youtubeId = await getYouTubeId(filename)
-        if (youtubeId) {
-          console.log('📱 Mobile: Using YouTube embed for', filename)
-          setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=1&iv_load_policy=3`)
+        const vimeoId = await getVimeoId(filename)
+        if (vimeoId) {
+          console.log('📱 Mobile: Using Vimeo embed for', filename)
+          // Parâmetros para remover botões de compartilhamento e deixar limpo
+          setVideoUrl(`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&sharing=0&sidedock=0&controls=1&autoplay=0&loop=0&muted=0`)
           setError(null)
           return
         } else {
@@ -248,90 +249,16 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
             {videoUrl && !loading && !error && (
               <>
                 {/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? (
-                  // Mobile: YouTube iframe (sempre funciona)
-                  <div className="relative w-full h-full overflow-hidden">
-                    <iframe
-                      src={videoUrl}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title="Video Player"
-                      style={{ border: 'none' }}
-                      referrerPolicy="strict-origin-when-cross-origin"
-                    />
-                    {/* Bloquear TODOS os botões de compartilhamento e links externos */}
-                    <div 
-                      className="absolute top-0 right-0 w-20 h-20 z-50"
-                      style={{ 
-                        pointerEvents: 'auto', 
-                        backgroundColor: 'rgba(0,0,0,0.01)',
-                        cursor: 'default'
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        return false
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
-                    />
-                    {/* Bloquear área dos controles de compartilhamento */}
-                    <div 
-                      className="absolute bottom-0 right-0 w-24 h-16 z-50"
-                      style={{ 
-                        pointerEvents: 'auto', 
-                        backgroundColor: 'rgba(0,0,0,0.01)',
-                        cursor: 'default'
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        return false
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
-                    />
-                    {/* Bloquear título/logo do YouTube */}
-                    <div 
-                      className="absolute bottom-0 left-0 w-32 h-12 z-50"
-                      style={{ 
-                        pointerEvents: 'auto', 
-                        backgroundColor: 'rgba(0,0,0,0.01)',
-                        cursor: 'default'
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        return false
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
-                    />
-                    {/* Bloquear centro quando pausado (pode ter botões de share) */}
-                    <div 
-                      className="absolute top-1/2 right-4 w-16 h-16 z-40 transform -translate-y-1/2"
-                      style={{ 
-                        pointerEvents: 'auto', 
-                        backgroundColor: 'rgba(0,0,0,0.01)',
-                        cursor: 'default'
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        return false
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                      }}
-                    />
-                  </div>
+                  // Mobile: Vimeo iframe (privado e seguro)
+                  <iframe
+                    src={videoUrl}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="Video Player"
+                    style={{ border: 'none' }}
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
                 ) : (
                   // Desktop: B2 video element (funciona perfeitamente)
                   <>
