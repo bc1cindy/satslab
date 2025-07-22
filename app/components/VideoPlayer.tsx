@@ -83,7 +83,7 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
         const youtubeId = await getYouTubeId(filename)
         if (youtubeId) {
           console.log('📱 Mobile: Using YouTube embed for', filename)
-          setVideoUrl(`https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1`)
+          setVideoUrl(`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0&modestbranding=1&showinfo=0&disablekb=1&iv_load_policy=3&cc_load_policy=0&fs=0&playsinline=1&enablejsapi=0`)
           setError(null)
           return
         } else {
@@ -249,14 +249,34 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
               <>
                 {/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? (
                   // Mobile: YouTube iframe (sempre funciona)
-                  <iframe
-                    src={videoUrl}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="Video Player"
-                    style={{ border: 'none' }}
-                  />
+                  <div className="relative w-full h-full">
+                    <iframe
+                      src={videoUrl}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen={false}
+                      title="Video Player"
+                      style={{ border: 'none' }}
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      sandbox="allow-scripts allow-same-origin allow-presentation"
+                    />
+                    <style jsx>{`
+                      iframe {
+                        pointer-events: all;
+                      }
+                      /* Hide YouTube share and other buttons */
+                      iframe::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        width: 60px;
+                        height: 60px;
+                        background: transparent;
+                        pointer-events: none;
+                      }
+                    `}</style>
+                  </div>
                 ) : (
                   // Desktop: B2 video element (funciona perfeitamente)
                   <>
