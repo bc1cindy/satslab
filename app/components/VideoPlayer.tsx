@@ -249,15 +249,28 @@ export function VideoPlayer({ videoId, title, description, onError }: VideoPlaye
               <>
                 {/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? (
                   // Mobile: YouTube iframe (sempre funciona)
-                  <iframe
-                    src={videoUrl}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="Video Player"
-                    style={{ border: 'none' }}
-                    referrerPolicy="strict-origin-when-cross-origin"
-                  />
+                  <div className="relative w-full h-full">
+                    <iframe
+                      src={videoUrl}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="Video Player"
+                      style={{ border: 'none' }}
+                      referrerPolicy="strict-origin-when-cross-origin"
+                    />
+                    {/* Bloquear botões de compartilhamento */}
+                    <div 
+                      className="absolute top-0 right-0 w-16 h-16 z-10"
+                      style={{ pointerEvents: 'auto', backgroundColor: 'transparent' }}
+                      onClick={(e) => e.preventDefault()}
+                    />
+                    <div 
+                      className="absolute bottom-12 right-2 w-12 h-8 z-10"
+                      style={{ pointerEvents: 'auto', backgroundColor: 'transparent' }}
+                      onClick={(e) => e.preventDefault()}
+                    />
+                  </div>
                 ) : (
                   // Desktop: B2 video element (funciona perfeitamente)
                   <>
