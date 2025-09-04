@@ -4,27 +4,30 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // 🔒 VERIFICAR ORIGEM DO REQUEST 
+    // Skip origin validation if running locally or if no origin/referer
     const origin = request.headers.get('origin')
     const referer = request.headers.get('referer')
-    const allowedOrigins = [
-      process.env.NEXT_PUBLIC_BASE_URL,
-      'http://localhost:3000',
-      'https://satslabpro.com'
-    ].filter(Boolean)
     
-    if (origin && !allowedOrigins.includes(origin)) {
-      return NextResponse.json(
-        { error: 'Origin not allowed' },
-        { status: 403 }
-      )
-    }
-    
-    if (!origin && referer && !allowedOrigins.some(allowed => referer.startsWith(allowed || ''))) {
-      return NextResponse.json(
-        { error: 'Referer not allowed' },
-        { status: 403 }
-      )
+    if (origin || referer) {
+      const allowedOrigins = [
+        process.env.NEXT_PUBLIC_BASE_URL,
+        'http://localhost:3000',
+        'https://satslabpro.com'
+      ].filter(Boolean)
+      
+      const isValidOrigin = origin && allowedOrigins.includes(origin)
+      const isValidReferer = referer && allowedOrigins.some(allowed => referer.startsWith(allowed || ''))
+      
+      if (!isValidOrigin && !isValidReferer) {
+        // Return fallback IP instead of blocking completely
+        return NextResponse.json({
+          ip: '127.0.0.1',
+          userAgent: 'unknown',
+          country: null,
+          city: null,
+          timestamp: new Date().toISOString()
+        })
+      }
     }
     // Get client IP from various headers
     const forwarded = request.headers.get('x-forwarded-for')

@@ -81,7 +81,6 @@ class AnalyticsService {
       
       return data.id
     } catch (error) {
-      console.error('Error starting session:', error)
       return null
     }
   }
@@ -126,7 +125,7 @@ class AnalyticsService {
         this.currentSessionId = null
       }
     } catch (error) {
-      console.error('Error ending session:', error)
+      // Silently handle session end errors
     }
   }
 
@@ -151,7 +150,7 @@ class AnalyticsService {
           .eq('id', sessionId)
       }
     } catch (error) {
-      console.error('Error updating page visited:', error)
+      // Silently handle page update errors
     }
   }
 
@@ -171,9 +170,9 @@ class AnalyticsService {
         .insert(event)
 
       // Update relevant analytics summary
-      await this.handleEventAnalytics(userId, eventType, eventData)
+      await this.handleEventAnalytics(userId, eventType)
     } catch (error) {
-      console.error('Error tracking event:', error)
+      // Silently handle event tracking errors
     }
   }
 
@@ -192,14 +191,13 @@ class AnalyticsService {
       if (!existingStart || existingStart.length === 0) {
         // Create retroactive module_start event
         await this.trackEvent(userId, 'module_start', { moduleId }, moduleId)
-        console.log(`Created retroactive module_start event for user ${userId}, module ${moduleId}`)
       }
     } catch (error) {
-      console.error('Error ensuring module start event:', error)
+      // Silently handle module start event errors
     }
   }
 
-  private async handleEventAnalytics(userId: string, eventType: EventType, eventData?: any): Promise<void> {
+  private async handleEventAnalytics(userId: string, eventType: EventType): Promise<void> {
     const updates: Partial<AnalyticsSummary> = {
       last_active_at: new Date().toISOString()
     }
@@ -283,7 +281,7 @@ class AnalyticsService {
           .insert(newData)
       }
     } catch (error) {
-      console.error('Error updating analytics summary:', error)
+      // Silently handle analytics summary errors
     }
   }
 
@@ -299,7 +297,6 @@ class AnalyticsService {
       if (error && error.code !== 'PGRST116') throw error
       return data || null
     } catch (error) {
-      console.error('Error fetching user analytics:', error)
       return null
     }
   }
@@ -320,7 +317,6 @@ class AnalyticsService {
       if (error) throw error
       return data
     } catch (error) {
-      console.error('Error fetching realtime analytics:', error)
       return null
     }
   }
@@ -335,7 +331,6 @@ class AnalyticsService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching all users analytics:', error)
       return []
     }
   }
@@ -352,7 +347,6 @@ class AnalyticsService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching user events:', error)
       return []
     }
   }
@@ -367,7 +361,7 @@ class AnalyticsService {
       viewport_width: window.innerWidth || null,
       viewport_height: window.innerHeight || null,
       language: navigator.language || null,
-      platform: navigator.platform || null,
+      platform: (navigator as any).userAgentData?.platform || navigator.platform || null,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null
     }
   }
@@ -388,7 +382,6 @@ class AnalyticsService {
     if (!ipAddress) return null
     
     // Simple IP-based location detection for Brazilian IPs
-    // This is a fallback solution since external APIs are rate-limited
     const brazilianIPRanges = [
       '177.', '186.', '187.', '189.', '179.', '201.', '200.', '191.', '170.'
     ]
@@ -396,7 +389,6 @@ class AnalyticsService {
     const isBrazilianIP = brazilianIPRanges.some(range => ipAddress.startsWith(range))
     
     if (isBrazilianIP) {
-      // Return Brazilian location for likely Brazilian IPs
       return {
         country: 'Brasil',
         region: 'São Paulo',
@@ -407,39 +399,10 @@ class AnalyticsService {
       }
     }
     
-    // For non-Brazilian IPs, try to use a free API with fallback
-    try {
-      // Try free tier API with timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
-      
-      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`, {
-        signal: controller.signal
-      })
-      clearTimeout(timeoutId)
-      
-      if (response.ok) {
-        const data = await response.json()
-        
-        if (!data.error) {
-          return {
-            country: data.country_name === 'Brazil' ? 'Brasil' : data.country_name || null,
-            region: data.region || null,
-            city: data.city || null,
-            latitude: data.latitude || null,
-            longitude: data.longitude || null,
-            timezone: data.timezone || null
-          }
-        }
-      }
-    } catch (error) {
-      console.warn('Geolocation API failed, using fallback')
-    }
-    
-    // Default fallback to Brazil (since most users are likely Brazilian)
+    // Default fallback for non-Brazilian IPs
     return {
       country: 'Brasil',
-      region: 'São Paulo',
+      region: 'São Paulo', 
       city: 'São Paulo',
       latitude: -23.5505,
       longitude: -46.6333,

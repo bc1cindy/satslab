@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useSession } from '@/app/lib/session/session-provider'
 import { analyticsService, EventType } from '@/app/lib/supabase/analytics-service'
-import { securityLogger, SecurityEventType } from '@/app/lib/security/security-logger'
 
 export function useAnalytics() {
   const { sessionId: cookieSessionId, isLoading } = useSession()
@@ -25,9 +24,7 @@ export function useAnalytics() {
           return data.ip || '127.0.0.1'
         }
       } catch (error) {
-        securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to get client IP for analytics', {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        })
+        // Silently handle IP fetch failures
       }
       return '127.0.0.1'
     }
@@ -41,9 +38,7 @@ export function useAnalytics() {
         startTimeRef.current = Date.now()
         lastActivityRef.current = Date.now()
       } catch (error) {
-        securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to start analytics session', {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        })
+        // Silently handle session start failures
       }
     }
 
@@ -54,9 +49,7 @@ export function useAnalytics() {
           await analyticsService.endSession(sessionId, userId)
           sessionIdRef.current = null
         } catch (error) {
-          securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to end analytics session', {
-            error: error instanceof Error ? error.message : 'Unknown error'
-          })
+          // Silently handle session end failures
         }
       }
     }
@@ -141,10 +134,8 @@ export function useAnalytics() {
               sessionId: sessionId,
               duration: currentDuration
             })
-          }).catch(error => {
-            securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Analytics heartbeat failed', {
-              error: error instanceof Error ? error.message : 'Unknown error'
-            })
+          }).catch(() => {
+            // Silently handle heartbeat failures to reduce console noise
           })
         }
       }, 30000) // Every 30 seconds
@@ -175,10 +166,7 @@ export function useAnalytics() {
         moduleId
       )
     } catch (error) {
-      securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to track analytics event', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        eventType
-      })
+      // Silently handle event tracking failures
     }
   }
 
@@ -196,10 +184,7 @@ export function useAnalytics() {
         await analyticsService.updatePageVisited(sessionIdRef.current, page)
       }
     } catch (error) {
-      securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to track page view', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        page
-      })
+      // Silently handle page view tracking failures
     }
   }
 
@@ -292,11 +277,7 @@ export function useModuleAnalytics(moduleId: number) {
           await trackModuleStart(moduleId)
           hasTracked.current = true
         } catch (error) {
-          securityLogger.warn(SecurityEventType.SYSTEM_ERROR, 'Failed to track module start', {
-            error: error instanceof Error ? error.message : 'Unknown error',
-            moduleId
-          })
-          // Still mark as tracked to prevent infinite retries
+          // Silently handle module tracking failures and prevent retries
           hasTracked.current = true
         }
       }

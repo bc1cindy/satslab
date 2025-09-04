@@ -85,7 +85,7 @@ export function RealVideoPlayer() {
   const [selectedVideo, setSelectedVideo] = useState(videos[0])
 
   const getYouTubeEmbedUrl = (youtubeId: string) => {
-    return `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&showinfo=0&controls=1&fs=1&disablekb=1&cc_load_policy=0&iv_load_policy=3&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+    return `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&showinfo=0&controls=1&fs=1&disablekb=1&cc_load_policy=0&iv_load_policy=3`
   }
 
   return (

@@ -26,7 +26,7 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.mempool.space https://ipapi.co https://*.supabase.co"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://mempool.space https://*.supabase.co wss://*.supabase.co https://api.exchangerate-api.com https://api.frankfurter.app https://accounts.google.com https://apis.google.com"
 
 # Cache para assets estáticos
 [[headers]]
