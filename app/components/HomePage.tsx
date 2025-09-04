@@ -16,7 +16,7 @@ import { SatsLabProSection } from '@/app/components/pro/SatsLabProSection'
 import { 
   BookOpen, Shield, Send, Pickaxe, Zap, Layers, Users, 
   ChevronRight, Bitcoin, Trophy, ChevronLeft, Play,
-  Target, Gamepad2, Award, LogIn, LogOut, Crown, Menu, X
+  LogIn, LogOut, Crown, Menu, X
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 
@@ -543,11 +543,11 @@ export default function HomePage() {
 
       {/* Partners Section - Full Width */}
       <section id="comprar-vender-btc" className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-12">
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-white">
             {isEnglish ? 'Buy Bitcoin KYC-Free' : 'Compre Bitcoin sem KYC'}
           </h2>
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+          <div className="flex flex-col lg:flex-row gap-8 justify-center items-center flex-wrap">
             <a 
               href="https://spiketospike.com/?referral=CINDY" 
               target="_blank" 
@@ -596,6 +596,33 @@ export default function HomePage() {
                     <>
                       15% de desconto na taxa<br className="sm:hidden" />
                       <span className="hidden sm:inline"> </span>com o cupom: Cindy
+                    </>
+                  )}
+                </div>
+              </div>
+            </a>
+            
+            <a 
+              href="https://www.satsconf.com.br/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 hover:scale-105 transition-transform"
+            >
+              <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-lg">
+                <Image 
+                  src="/images/partners/satsconf.jpg"
+                  alt="Satsconf Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-white text-lg">Satsconf</div>
+                <div className="text-sm text-orange-400 font-semibold">
+                  {isEnglish ? '10% discount with code: SATSLAB10' : (
+                    <>
+                      10% de desconto no ingresso<br className="sm:hidden" />
+                      <span className="hidden sm:inline"> </span>com o cupom: SATSLAB10
                     </>
                   )}
                 </div>
@@ -702,52 +729,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <main className="container mx-auto px-4 py-12">
-      </main>
-
-      {/* Features Section - Full Width */}
-      <section className="bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            {t('homepage.features.title')}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
-                <Target className="h-8 w-8 text-blue-500" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">
-                {t('homepage.features.practical.title')}
-              </h3>
-              <p className="text-gray-400">
-                {t('homepage.features.practical.description')}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
-                <Award className="h-8 w-8 text-purple-500" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">
-                {t('homepage.features.badges.title')}
-              </h3>
-              <p className="text-gray-400">
-                {t('homepage.features.badges.description')}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-                <Gamepad2 className="h-8 w-8 text-green-500" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">
-                {t('homepage.features.gradual.title')}
-              </h3>
-              <p className="text-gray-400">
-                {t('homepage.features.gradual.description')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* SatsLab Pro Section - Only for Portuguese */}
       {!isEnglish && (
@@ -865,12 +846,8 @@ export default function HomePage() {
               : 'Um projeto para democratizar a educação sobre Bitcoin através de experiência prática e módulos estruturados.'
             }
           </p>
-          <div className="flex justify-center space-x-6 text-sm text-gray-500">
-            <span>© 2024 SatsLab</span>
-            <span>•</span>
-            <span>
-              {isEnglish ? 'Built with' : 'Construído com'} ⚡ Lightning
-            </span>
+          <div className="flex justify-center text-sm text-gray-500">
+            <span>© 2025 SatsLab</span>
           </div>
         </div>
       </footer>
