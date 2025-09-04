@@ -17,8 +17,41 @@ export const authOptions: NextAuthOptions = {
         return false
       }
       
-      // For now, just allow all Google users
-      // We'll add Supabase integration after confirming this works
+      // Save/update Google user in database
+      if (user.email && user.name) {
+        try {
+          const { getServerSupabase } = await import('./supabase-server')
+          const supabase = getServerSupabase()
+          
+          // Upsert user (insert if new, update if exists)
+          const { error } = await supabase
+            .from('users')
+            .upsert({
+              email: user.email,
+              name: user.name,
+              avatar_url: user.image || null,
+              provider: 'google',
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'email',
+              ignoreDuplicates: false
+            })
+          
+          if (error) {
+            console.error('Error saving Google user to database:', error)
+            // Still allow login even if database save fails
+          } else {
+            console.log('Google user saved/updated successfully:', { 
+              email: user.email,
+              name: user.name 
+            })
+          }
+        } catch (error) {
+          console.error('Database connection error during Google login:', error)
+          // Still allow login even if database error
+        }
+      }
+      
       return true
     },
     
