@@ -282,7 +282,7 @@ export default function HomePage() {
                   className="text-white hover:text-orange-500 text-sm"
                   onClick={() => document.getElementById('comprar-vender-btc')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}
+                  {isEnglish ? 'Partners' : 'Parceiros'}
                 </Button>
                 {status === 'authenticated' && (
                   <Link href="/pro">
@@ -401,7 +401,7 @@ export default function HomePage() {
                     }, 100)
                   }}
                 >
-                  {isEnglish ? 'Buy/Sell BTC' : 'Comprar/Vender BTC'}
+                  {isEnglish ? 'Partners' : 'Parceiros'}
                 </Button>
                 {status === 'authenticated' && (
                   <Link href="/pro" onClick={() => setMobileMenuOpen(false)}>
@@ -545,16 +545,16 @@ export default function HomePage() {
       <section id="comprar-vender-btc" className="text-center bg-gradient-to-b from-orange-900/20 to-orange-950/20 py-12">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-white">
-            {isEnglish ? 'Buy Bitcoin KYC-Free' : 'Compre Bitcoin sem KYC'}
+            {isEnglish ? 'Partners' : 'Parceiros'}
           </h2>
           <div className="flex flex-col lg:flex-row gap-8 justify-center items-center flex-wrap">
             <a 
               href="https://spiketospike.com/?referral=CINDY" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-4 hover:scale-105 transition-transform"
+              className="flex items-center gap-4 hover:scale-105 transition-transform w-full sm:w-auto max-w-xs"
             >
-              <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white shadow-lg">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white shadow-lg flex-shrink-0">
                 <Image 
                   src="/images/partners/SpiketoSpike.jpg"
                   alt="Spike to Spike Logo"
@@ -562,7 +562,7 @@ export default function HomePage() {
                   className="object-cover"
                 />
               </div>
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <div className="font-bold text-white text-lg">Spike to Spike</div>
                 <div className="text-sm text-orange-400 font-semibold">
                   {isEnglish ? '20% discount on fee with this link' : (
@@ -579,9 +579,9 @@ export default function HomePage() {
               href="https://mooze.app/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-4 hover:scale-105 transition-transform"
+              className="flex items-center gap-4 hover:scale-105 transition-transform w-full sm:w-auto max-w-xs"
             >
-              <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white shadow-lg">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white shadow-lg flex-shrink-0">
                 <Image 
                   src="/images/partners/Mooze.jpg"
                   alt="Mooze Logo"
@@ -589,7 +589,7 @@ export default function HomePage() {
                   className="object-cover"
                 />
               </div>
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <div className="font-bold text-white text-lg">Mooze</div>
                 <div className="text-sm text-orange-400 font-semibold">
                   {isEnglish ? '15% discount on fee with code: Cindy' : (
@@ -606,9 +606,9 @@ export default function HomePage() {
               href="https://www.satsconf.com.br/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-4 hover:scale-105 transition-transform"
+              className="flex items-center gap-4 hover:scale-105 transition-transform w-full sm:w-auto max-w-xs"
             >
-              <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-lg">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-lg flex-shrink-0">
                 <Image 
                   src="/images/partners/satsconf.jpg"
                   alt="Satsconf Logo"
@@ -616,7 +616,7 @@ export default function HomePage() {
                   className="object-cover"
                 />
               </div>
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <div className="font-bold text-white text-lg">Satsconf</div>
                 <div className="text-sm text-orange-400 font-semibold">
                   {isEnglish ? '10% discount with code: SATSLAB10' : (
