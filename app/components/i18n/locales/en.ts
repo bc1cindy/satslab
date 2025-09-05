@@ -2,8 +2,8 @@ export const en = {
   // Homepage
   homepage: {
     hero: {
-      title: 'Learn Bitcoin in Practice',
-      description: 'Experience Bitcoin through interactive modules, practice on the Signet network, and build your understanding step by step.',
+      title: 'Bitcoin. Practical. Direct.',
+      description: 'Learn Bitcoin the practical way with direct content and no fluff.',
       startCourse: 'Start Course',
       startJourney: 'Start Journey',
       start: 'Start'

@@ -2,8 +2,8 @@ export const pt = {
   // Homepage
   homepage: {
     hero: {
-      title: 'Aprenda Bitcoin na Prática',
-      description: 'Experimente Bitcoin através de módulos interativos, tarefas práticas e experiência hands-on com a rede Signet',
+      title: 'Bitcoin. Prático. Direto.',
+      description: 'Aprenda Bitcoin de forma prática com conteúdo direto e sem enrolação.',
       startCourse: 'SatsLab Pro',
       startJourney: 'Começar Jornada',
       start: 'Começar'
